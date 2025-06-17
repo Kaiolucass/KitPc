@@ -5,7 +5,7 @@ app = Flask(__name__)
 CORS(app)
 
 @app.route("/montar-setup", methods=["POST"])
-def montar_setup():
+def montar_setup(): 
     dados = request.json
     preco = dados.get("preco")
     uso = dados.get("uso")
