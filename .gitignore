@@ -1,0 +1,13 @@
+# Ignorar chave secreta
+.env
+
+# Ignorar ambiente virtual
+venv/
+
+# Arquivos temporários
+__pycache__/
+*.pyc
+
+# Editor configs (opcional)
+.vscode/
+*.code-workspace
