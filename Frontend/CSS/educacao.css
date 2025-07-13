@@ -1,0 +1,105 @@
+body {
+      background-color: #05001C;
+      height: 80px;
+      font-family: 'Orbitron', sans-serif;
+      border-bottom: 2px solid #3CC9E4;
+}
+/* logo da marca kitpc */
+.logo-kitpc {
+    width: 150px;
+    height: auto;
+    max-width: 100px;
+    margin-right: 0px;
+}
+
+/* titulos principais */
+h1{
+  color: transparent;                    
+  -webkit-text-stroke: 1px #3CC9E4;      
+}
+
+h2{
+  color: #3CC9E4;
+}
+h5{
+    color: #3CC9E4;
+}
+header {
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+/* css da barra de navegaçao  */
+.navbarNav{
+  color: #9216FD;
+}
+a.nav-link {
+  color: #9216FD;
+}
+a.nav-link:hover{
+  color:#3CC9E4;
+;
+}
+/* cards das peças da página princial */
+
+.card {
+            background-color: transparent !important;
+            border: none !important;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .card-body {
+            border: 2px solid #3CC9E4;
+            border-radius: 10px;
+            padding: 20px;
+            color: #3CC9E4;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            text-align: center;
+            margin-top: 50px;
+  margin-bottom: 50px;
+        }
+
+        .card-img-top {
+            max-height: 180px;
+            object-fit: contain;
+            padding: 10px;
+        }
+
+ .modal-header{
+    background-color: #05001C;
+    border-color: #3CC9E4;
+ }       
+.modal-body{
+    background-color: #05001C;
+    color:#9216FD;
+
+}
+.modal-footer{
+    background-color: #05001C;
+    border-color: #3CC9E4;
+}
+p{
+    color: #9216FD;
+}
+.paragrafo2{
+  color: #3CC9E4;
+}
+.section-title{
+  margin-top: 100px;
+  margin-bottom: 10px;
+}
+
+
+/* Rodapé */
+footer {
+    border-top: 2px solid #3CC9E4;
+    padding: 20px;
+}
+
+
+

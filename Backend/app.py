@@ -71,6 +71,8 @@ def definir_pecas_basicas(processador, quer_gpu, total):
         "gabinete": gabinete
     }
 
+# --- Buscas em lojas ---
+
 def buscar_na_amazon(termo, preco_max):
     url = "https://amazon-data.p.rapidapi.com/search"
     querystring = {"country": "BR", "query": termo}
@@ -79,33 +81,65 @@ def buscar_na_amazon(termo, preco_max):
         "X-RapidAPI-Host": os.getenv("RAPIDAPI_HOST")
     }
 
-    if not headers["X-RapidAPI-Key"]:
-        return {"nome": termo, "erro": "❌ Chave da API não encontrada no .env"}
-
     try:
         r = requests.get(url, headers=headers, params=querystring)
-        if r.status_code != 200:
-            return {"nome": termo, "erro": f"Erro na API (status {r.status_code})"}
-
         for item in r.json().get("search_results", []):
             preco_str = item.get("price_str", "").replace("R$", "").replace(".", "").replace(",", ".")
-            try:
-                preco_float = float(preco_str)
-                if preco_float <= preco_max:
-                    return {
-                        "nome": item.get("title"),
-                        "imagem": item.get("image"),
-                        "preco": item.get("price_str"),
-                        "link": item.get("url") + "?tag=SEU_ID_AFILIADO"
-                    }
-            except:
-                continue
+            preco = float(preco_str)
+            if preco <= preco_max:
+                return {
+                    "nome": item.get("title"),
+                    "imagem": item.get("image"),
+                    "preco": item.get("price_str"),
+                    "link": item.get("url"),
+                    "loja": "Amazon"
+                }
+    except:
+        pass
+    return None
 
-        return {"nome": termo, "erro": f"Nenhum produto até R${preco_max:.2f}"}
+def buscar_no_mercado_livre(termo, preco_max):
+    try:
+        res = requests.get(f"https://api.mercadolibre.com/sites/MLB/search?q={termo}&limit=10")
+        for item in res.json().get("results", []):
+            preco = item.get("price")
+            if preco <= preco_max:
+                return {
+                    "nome": item.get("title"),
+                    "imagem": item.get("thumbnail"),
+                    "preco": f"R$ {preco:.2f}",
+                    "link": item.get("permalink"),
+                    "loja": "Mercado Livre"
+                }
+    except:
+        pass
+    return None
 
-    except Exception as e:
-        return {"nome": termo, "erro": f"Erro: {str(e)}"}
+def buscar_na_kabum(termo):
+    termo_formatado = termo.replace(" ", "+")
+    return {
+        "nome": f"Buscar {termo} na Kabum",
+        "imagem": "https://upload.wikimedia.org/wikipedia/commons/8/89/Logo_Kabum_2021.png",
+        "preco": "Ver site",
+        "link": f"https://www.kabum.com.br/busca/{termo_formatado}",
+        "loja": "Kabum"
+    }
 
+def comparar_precos(termo, preco_max):
+    resultados = []
+
+    for func in [buscar_na_amazon, buscar_no_mercado_livre]:
+        resultado = func(termo, preco_max)
+        if resultado:
+            resultados.append(resultado)
+
+    if resultados:
+        melhores = sorted(resultados, key=lambda x: float(x["preco"].replace("R$", "").replace(",", ".")))
+        return melhores[0]
+
+    return buscar_na_kabum(termo)
+
+# --- Endpoint principal ---
 @app.route("/montar-setup", methods=["POST"])
 def montar_setup():
     dados = request.json
@@ -122,20 +156,18 @@ def montar_setup():
     total = get_total(preco)
 
     if quer_laptop:
-        # 👇 Apenas notebook sugerido
         termo_busca = "Notebook gamer Ryzen 5" if processador == "AMD" else "Notebook Intel i5"
-        produto = buscar_na_amazon(termo_busca, total)
+        produto = comparar_precos(termo_busca, total)
         produto["componente"] = "LAPTOP"
         return jsonify([produto])
 
-    # Monta setup com peças
     orcamento = distribuir_orcamento(total, quer_gpu)
     termos = definir_pecas_basicas(processador, quer_gpu, total)
 
     resultado = []
     for componente, termo in termos.items():
         preco_max = orcamento.get(componente, 0)
-        produto = buscar_na_amazon(termo, preco_max)
+        produto = comparar_precos(termo, preco_max)
         produto["componente"] = componente.upper()
         resultado.append(produto)
 
