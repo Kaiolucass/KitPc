@@ -3,11 +3,39 @@ from flask_cors import CORS
 import requests
 from dotenv import load_dotenv
 import os
+import logging
+from flask import render_template
+
+
+# Configuração do logger
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
+
+# Página inicial
+@app.route("/")
+def home():
+    return render_template("index.html")
+
+# Página de montagem
+@app.route("/seuPc")
+def montagem():
+    return render_template("seuPc.html")
+
+# Página de educação
+@app.route("/educacao")
+def educacao():
+    return render_template("educacao.html")
+
+
+# Página sobre nós
+@app.route("/sobre")
+def sobre_nos():
+    return render_template("SobreNos.html")
 
 def get_total(preco_label):
     return {
@@ -71,8 +99,6 @@ def definir_pecas_basicas(processador, quer_gpu, total):
         "gabinete": gabinete
     }
 
-# --- Buscas em lojas ---
-
 def buscar_na_amazon(termo, preco_max):
     url = "https://amazon-data.p.rapidapi.com/search"
     querystring = {"country": "BR", "query": termo}
@@ -81,11 +107,17 @@ def buscar_na_amazon(termo, preco_max):
         "X-RapidAPI-Host": os.getenv("RAPIDAPI_HOST")
     }
 
+    if not headers["X-RapidAPI-Key"]:
+        logger.warning("❗ RAPIDAPI_KEY não encontrada no .env!")
+
     try:
         r = requests.get(url, headers=headers, params=querystring)
         for item in r.json().get("search_results", []):
             preco_str = item.get("price_str", "").replace("R$", "").replace(".", "").replace(",", ".")
-            preco = float(preco_str)
+            try:
+                preco = float(preco_str)
+            except ValueError:
+                continue
             if preco <= preco_max:
                 return {
                     "nome": item.get("title"),
@@ -94,8 +126,8 @@ def buscar_na_amazon(termo, preco_max):
                     "link": item.get("url"),
                     "loja": "Amazon"
                 }
-    except:
-        pass
+    except Exception as e:
+        logger.error(f"Erro na API Amazon: {e}")
     return None
 
 def buscar_no_mercado_livre(termo, preco_max):
@@ -111,8 +143,8 @@ def buscar_no_mercado_livre(termo, preco_max):
                     "link": item.get("permalink"),
                     "loja": "Mercado Livre"
                 }
-    except:
-        pass
+    except Exception as e:
+        logger.error(f"Erro na API Mercado Livre: {e}")
     return None
 
 def buscar_na_kabum(termo):
@@ -127,7 +159,6 @@ def buscar_na_kabum(termo):
 
 def comparar_precos(termo, preco_max):
     resultados = []
-
     for func in [buscar_na_amazon, buscar_no_mercado_livre]:
         resultado = func(termo, preco_max)
         if resultado:
@@ -139,17 +170,21 @@ def comparar_precos(termo, preco_max):
 
     return buscar_na_kabum(termo)
 
-# --- Endpoint principal ---
 @app.route("/montar-setup", methods=["POST"])
 def montar_setup():
-    dados = request.json
+    try:
+        dados = request.get_json(force=True)
+    except Exception as e:
+        logger.error(f"Erro ao ler JSON da requisição: {e}")
+        return jsonify({"erro": "Requisição inválida."}), 400
+
     preco = dados.get("preco")
     processador = dados.get("processador")
     gpu = dados.get("gpu")
     laptop = dados.get("laptop")
 
     if not preco or not processador or not gpu or not laptop:
-        return jsonify({"erro": "Faltam dados obrigatórios"}), 400
+        return jsonify({"erro": "Faltam dados obrigatórios."}), 400
 
     quer_gpu = gpu == "Sim"
     quer_laptop = "sim" in laptop.lower()
@@ -158,6 +193,15 @@ def montar_setup():
     if quer_laptop:
         termo_busca = "Notebook gamer Ryzen 5" if processador == "AMD" else "Notebook Intel i5"
         produto = comparar_precos(termo_busca, total)
+        if produto is None:
+            produto = {
+                "nome": termo_busca,
+                "imagem": None,
+                "preco": None,
+                "link": None,
+                "loja": None,
+                "erro": "Produto não encontrado"
+            }
         produto["componente"] = "LAPTOP"
         return jsonify([produto])
 
@@ -168,10 +212,19 @@ def montar_setup():
     for componente, termo in termos.items():
         preco_max = orcamento.get(componente, 0)
         produto = comparar_precos(termo, preco_max)
+        if produto is None:
+            produto = {
+                "nome": termo,
+                "imagem": None,
+                "preco": None,
+                "link": None,
+                "loja": None,
+                "erro": "Produto não encontrado dentro do orçamento"
+            }
         produto["componente"] = componente.upper()
         resultado.append(produto)
 
     return jsonify(resultado)
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=False)

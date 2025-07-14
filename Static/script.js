@@ -21,7 +21,6 @@ function finalizar() {
     return;
   }
 
-  // Exibe loading animado enquanto monta
   document.getElementById("resultado").innerHTML = `
     <div class="text-center p-4">
       <div class="spinner-border text-primary" role="status">
@@ -31,8 +30,7 @@ function finalizar() {
     </div>
   `;
 
-  // Envia requisição para o Flask
-  fetch("http://localhost:5000/montar-setup", {
+  fetch("/montar-setup", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(respostas)
@@ -52,7 +50,7 @@ function finalizar() {
         <div class="card mb-3 shadow-sm" style="max-width: 100%;">
           <div class="row g-0">
             <div class="col-md-2 d-flex align-items-center">
-              <img src="${produto.imagem || '/Frontend/imagens/placeholder.jpg'}" 
+              <img src="${produto.imagem || '/static/Imagens/placeholder.jpg'}" 
                    class="img-fluid rounded-start" 
                    alt="Imagem da peça">
             </div>
