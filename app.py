@@ -24,7 +24,7 @@ def home():
 # Página de montagem
 @app.route("/seuPc")
 def montagem():
-    return render_template("seuPc.html")
+    return render_template("seupc.html")
 
 # Página de educação
 @app.route("/educacao")
