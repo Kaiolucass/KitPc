@@ -35,7 +35,7 @@ def educacao():
 # Página sobre nós
 @app.route("/sobre")
 def sobre_nos():
-    return render_template("SobreNos.html")
+    return render_template("Sobre.html")
 
 def get_total(preco_label):
     return {
