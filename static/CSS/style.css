@@ -36,6 +36,20 @@ a.nav-link:hover{
   color:#3CC9E4;
 ;
 }
+
+.navbar-toggler {
+  border: none;
+  background: transparent;
+  width: 30px;
+  height: 25px;
+  position: relative;
+}
+
+.navbar-toggler-icon {
+  filter: invert(54%) sepia(86%) saturate(497%) hue-rotate(163deg) brightness(92%) contrast(89%);
+}
+
+
 /* cards das peças da página princial */
 .card-peca {
   min-height: 260px;
