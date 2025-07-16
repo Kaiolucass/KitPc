@@ -1,13 +1,12 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 import requests
 from dotenv import load_dotenv
 import os
 import logging
-from flask import render_template
+import re  # novo
 
-
-# Configuração do logger
+# Logger
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -16,23 +15,18 @@ load_dotenv()
 app = Flask(__name__)
 CORS(app)
 
-# Página inicial
 @app.route("/")
 def home():
     return render_template("index.html")
 
-# Página de montagem
 @app.route("/seuPc")
 def montagem():
     return render_template("seupc.html")
 
-# Página de educação
 @app.route("/educacao")
 def educacao():
     return render_template("educacao.html")
 
-
-# Página sobre nós
 @app.route("/sobre")
 def sobre_nos():
     return render_template("sobre.html")
@@ -99,6 +93,16 @@ def definir_pecas_basicas(processador, quer_gpu, total):
         "gabinete": gabinete
     }
 
+def extrair_preco(texto):
+    try:
+        match = re.search(r"[\d.,]+", texto)
+        if not match:
+            return None
+        preco_str = match.group(0).replace(".", "").replace(",", ".")
+        return float(preco_str)
+    except:
+        return None
+
 def buscar_na_amazon(termo, preco_max):
     url = "https://amazon-data.p.rapidapi.com/search"
     querystring = {"country": "BR", "query": termo}
@@ -109,30 +113,28 @@ def buscar_na_amazon(termo, preco_max):
 
     if not headers["X-RapidAPI-Key"]:
         logger.warning("❗ RAPIDAPI_KEY não encontrada no .env!")
+        return None
 
     try:
-        r = requests.get(url, headers=headers, params=querystring)
-        for item in r.json().get("search_results", []):
-            preco_str = item.get("price_str", "").replace("R$", "").replace(".", "").replace(",", ".")
-            try:
-                preco = float(preco_str)
-            except ValueError:
-                continue
-            if preco <= preco_max:
+        r = requests.get(url, headers=headers, params=querystring, timeout=10)
+        data = r.json().get("search_results", [])
+        for item in data:
+            preco = extrair_preco(item.get("price_str", ""))
+            if preco and preco <= preco_max:
                 return {
                     "nome": item.get("title"),
                     "imagem": item.get("image"),
-                    "preco": item.get("price_str"),
+                    "preco": f"R$ {preco:.2f}",
                     "link": item.get("url"),
                     "loja": "Amazon"
                 }
     except Exception as e:
-        logger.error(f"Erro na API Amazon: {e}")
+        logger.error(f"Erro na Amazon: {e}")
     return None
 
 def buscar_no_mercado_livre(termo, preco_max):
     try:
-        res = requests.get(f"https://api.mercadolibre.com/sites/MLB/search?q={termo}&limit=10")
+        res = requests.get(f"https://api.mercadolibre.com/sites/MLB/search?q={termo}&limit=10", timeout=10)
         for item in res.json().get("results", []):
             preco = item.get("price")
             if preco <= preco_max:
@@ -144,7 +146,7 @@ def buscar_no_mercado_livre(termo, preco_max):
                     "loja": "Mercado Livre"
                 }
     except Exception as e:
-        logger.error(f"Erro na API Mercado Livre: {e}")
+        logger.error(f"Erro no Mercado Livre: {e}")
     return None
 
 def buscar_na_kabum(termo):
@@ -159,13 +161,18 @@ def buscar_na_kabum(termo):
 
 def comparar_precos(termo, preco_max):
     resultados = []
-    for func in [buscar_na_amazon, buscar_no_mercado_livre]:
-        resultado = func(termo, preco_max)
-        if resultado:
-            resultados.append(resultado)
+
+    for busca in [buscar_na_amazon, buscar_no_mercado_livre]:
+        try:
+            item = busca(termo, preco_max)
+            if item:
+                logger.info(f"✅ {item['loja']} retornou: {item['nome']} ({item['preco']})")
+                resultados.append(item)
+        except Exception as e:
+            logger.warning(f"Erro ao buscar {termo} em {busca.__name__}: {e}")
 
     if resultados:
-        melhores = sorted(resultados, key=lambda x: float(x["preco"].replace("R$", "").replace(",", ".")))
+        melhores = sorted(resultados, key=lambda x: extrair_preco(x["preco"]) or 99999)
         return melhores[0]
 
     return buscar_na_kabum(termo)
@@ -175,7 +182,7 @@ def montar_setup():
     try:
         dados = request.get_json(force=True)
     except Exception as e:
-        logger.error(f"Erro ao ler JSON da requisição: {e}")
+        logger.error(f"Erro ao ler JSON: {e}")
         return jsonify({"erro": "Requisição inválida."}), 400
 
     preco = dados.get("preco")

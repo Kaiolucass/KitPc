@@ -23,10 +23,10 @@ function finalizar() {
 
   document.getElementById("resultado").innerHTML = `
     <div class="text-center p-4">
-      <div class="spinner-border text-primary" role="status">
+      <div class="spinner-border text-info" role="status">
         <span class="visually-hidden">Carregando...</span>
       </div>
-      <p class="mt-3 fs-5 text-primary">🔧 Montando seu setup... Aguarde...</p>
+      <p class="mt-3 fs-5 text-info">🔧 Montando seu setup... Aguarde...</p>
     </div>
   `;
 
@@ -44,7 +44,7 @@ function finalizar() {
         return;
       }
 
-      let html = "<h3 class='mb-4 text-primary'><i class='fas fa-wrench'></i> Setup Recomendado:</h3>";
+      let html = "<h3 class='mb-4 text-info'><i class='fas fa-wrench'></i> Setup Recomendado:</h3>";
       data.forEach(produto => {
         html += `
         <div class="card mb-3 shadow-sm" style="max-width: 100%;">
