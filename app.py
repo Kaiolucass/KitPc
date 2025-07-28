@@ -25,17 +25,16 @@ def get_env_var(key):
         logger.warning(f"Variável de ambiente {key} não encontrada!")
         return ""
 
-DB_USER = get_env_var("DB_USER")
-DB_PASSWORD = get_env_var("DB_PASSWORD")
-DB_HOST = get_env_var("DB_HOST")
-DB_PORT = get_env_var("DB_PORT")
-DB_NAME = get_env_var("DB_NAME")
+db_uri = os.getenv("DATABASE_URL")
 
-# Montar a URI com segurança, escapando se precisar (para casos especiais)
-# Aqui assumo que as variáveis não têm caracteres que precisem escapar, mas poderia usar urllib.parse.quote_plus para garantir
+db_uri = os.getenv("DATABASE_URL")
 
-db_uri = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-logger.info(f"DB URI montada: {db_uri}")
+if not db_uri:
+    logger.error("DATABASE_URL não está definida!")
+    raise RuntimeError("DATABASE_URL ausente.")
+
+logger.info(f"DB URI usada: {db_uri}")
+
 
 app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
