@@ -1,19 +1,48 @@
 from flask import Flask, request, jsonify, render_template
+from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
-import requests
 from dotenv import load_dotenv
 import os
 import logging
-import re  # novo
 
-# Logger
+# Logger configurado
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Carregar variáveis do .env
 load_dotenv()
 
+# Inicializa o app
 app = Flask(__name__)
 CORS(app)
+
+# Verificar e limpar variáveis de ambiente para garantir que não tenham espaços ou caracteres estranhos
+def get_env_var(key):
+    value = os.getenv(key)
+    if value:
+        return value.strip()
+    else:
+        logger.warning(f"Variável de ambiente {key} não encontrada!")
+        return ""
+
+DB_USER = get_env_var("DB_USER")
+DB_PASSWORD = get_env_var("DB_PASSWORD")
+DB_HOST = get_env_var("DB_HOST")
+DB_PORT = get_env_var("DB_PORT")
+DB_NAME = get_env_var("DB_NAME")
+
+# Montar a URI com segurança, escapando se precisar (para casos especiais)
+# Aqui assumo que as variáveis não têm caracteres que precisem escapar, mas poderia usar urllib.parse.quote_plus para garantir
+
+db_uri = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+logger.info(f"DB URI montada: {db_uri}")
+
+app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# Importa os modelos e inicializa o SQLAlchemy
+from models import db, Processador, PlacaMae, MemoriaRAM, PlacaVideo, Armazenamento, Fonte, Gabinete
+db.init_app(app)
 
 @app.route("/")
 def home():
@@ -36,7 +65,7 @@ def get_total(preco_label):
         "Um PC OK": 2000,
         "Um PC BOM": 3000,
         "Um PC MUITO BOM": 5000,
-        "Até a NASA quer": 10000
+        "Até a NASA quer": 99999
     }.get(preco_label, 2000)
 
 def distribuir_orcamento(total, quer_gpu):
@@ -93,89 +122,27 @@ def definir_pecas_basicas(processador, quer_gpu, total):
         "gabinete": gabinete
     }
 
-def extrair_preco(texto):
-    try:
-        match = re.search(r"[\d.,]+", texto)
-        if not match:
-            return None
-        preco_str = match.group(0).replace(".", "").replace(",", ".")
-        return float(preco_str)
-    except:
-        return None
-
-def buscar_na_amazon(termo, preco_max):
-    url = "https://amazon-data.p.rapidapi.com/search"
-    querystring = {"country": "BR", "query": termo}
-    headers = {
-        "X-RapidAPI-Key": os.getenv("RAPIDAPI_KEY"),
-        "X-RapidAPI-Host": os.getenv("RAPIDAPI_HOST")
-    }
-
-    if not headers["X-RapidAPI-Key"]:
-        logger.warning("❗ RAPIDAPI_KEY não encontrada no .env!")
-        return None
-
-    try:
-        r = requests.get(url, headers=headers, params=querystring, timeout=10)
-        data = r.json().get("search_results", [])
-        for item in data:
-            preco = extrair_preco(item.get("price_str", ""))
-            if preco and preco <= preco_max:
-                return {
-                    "nome": item.get("title"),
-                    "imagem": item.get("image"),
-                    "preco": f"R$ {preco:.2f}",
-                    "link": item.get("url"),
-                    "loja": "Amazon"
-                }
-    except Exception as e:
-        logger.error(f"Erro na Amazon: {e}")
-    return None
-
-def buscar_no_mercado_livre(termo, preco_max):
-    try:
-        res = requests.get(f"https://api.mercadolibre.com/sites/MLB/search?q={termo}&limit=10", timeout=10)
-        for item in res.json().get("results", []):
-            preco = item.get("price")
-            if preco <= preco_max:
-                return {
-                    "nome": item.get("title"),
-                    "imagem": item.get("thumbnail"),
-                    "preco": f"R$ {preco:.2f}",
-                    "link": item.get("permalink"),
-                    "loja": "Mercado Livre"
-                }
-    except Exception as e:
-        logger.error(f"Erro no Mercado Livre: {e}")
-    return None
-
-def buscar_na_kabum(termo):
-    termo_formatado = termo.replace(" ", "+")
-    return {
-        "nome": f"Buscar {termo} na Kabum",
-        "imagem": "https://upload.wikimedia.org/wikipedia/commons/8/89/Logo_Kabum_2021.png",
-        "preco": "Ver site",
-        "link": f"https://www.kabum.com.br/busca/{termo_formatado}",
-        "loja": "Kabum"
-    }
-
 def comparar_precos(termo, preco_max):
-    resultados = []
+    tabelas = [Processador, PlacaMae, MemoriaRAM, PlacaVideo, Armazenamento, Fonte, Gabinete]
 
-    for busca in [buscar_na_amazon, buscar_no_mercado_livre]:
-        try:
-            item = busca(termo, preco_max)
-            if item:
-                logger.info(f"✅ {item['loja']} retornou: {item['nome']} ({item['preco']})")
-                resultados.append(item)
-        except Exception as e:
-            logger.warning(f"Erro ao buscar {termo} em {busca.__name__}: {e}")
+    for tabela in tabelas:
+        resultado = (
+            tabela.query
+            .filter(tabela.nome.ilike(f"%{termo}%"))
+            .filter(tabela.preco <= preco_max)
+            .order_by(tabela.preco.asc())
+            .first()
+        )
+        if resultado:
+            return {
+                "nome": resultado.nome,
+                "imagem": resultado.imagem_url,
+                "preco": float(resultado.preco),
+                "link": resultado.link_loja,
+                "componente": tabela.__tablename__
+            }
 
-    if resultados:
-        melhores = sorted(resultados, key=lambda x: extrair_preco(x["preco"]) or 99999)
-        return melhores[0]
-
-    return buscar_na_kabum(termo)
+    return None
 
 @app.route("/montar-setup", methods=["POST"])
 def montar_setup():
@@ -233,5 +200,12 @@ def montar_setup():
 
     return jsonify(resultado)
 
+
 if __name__ == "__main__":
+    with app.app_context():
+        try:
+            db.create_all()
+            logger.info("Tabelas criadas com sucesso.")
+        except Exception as e:
+            logger.error(f"Erro ao criar tabelas: {e}")
     app.run(host="0.0.0.0", port=5000, debug=False)

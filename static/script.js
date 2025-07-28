@@ -50,7 +50,7 @@ function finalizar() {
         <div class="card mb-3 shadow-sm" style="max-width: 100%;">
           <div class="row g-0">
             <div class="col-md-2 d-flex align-items-center">
-              <img src="${produto.imagem || '/static/Imagens/placeholder.jpg'}" 
+              <img src="${produto.imagem || '/static/Imagens/placeholder.png'}" 
                    class="img-fluid rounded-start" 
                    alt="Imagem da peça">
             </div>
