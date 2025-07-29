@@ -11,3 +11,6 @@ __pycache__/
 # Editor configs (opcional)
 .vscode/
 *.code-workspace
+
+# arquivos do banco 
+seed.sql
