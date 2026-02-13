@@ -5,43 +5,55 @@ from dotenv import load_dotenv
 import os
 import logging
 
-# Logger configurado
-logging.basicConfig(level=logging.INFO)
+# 1. Configuração de Logging (Melhorado para produção)
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 logger = logging.getLogger(__name__)
 
-# Carregar variáveis do .env
 load_dotenv()
 
-# Inicializa o app
 app = Flask(__name__)
 CORS(app)
 
-# Verificar e limpar variáveis de ambiente para garantir que não tenham espaços ou caracteres estranhos
-def get_env_var(key):
-    value = os.getenv(key)
-    if value:
-        return value.strip()
-    else:
-        logger.warning(f"Variável de ambiente {key} não encontrada!")
-        return ""
+# 2. Tratamento Robusto da DATABASE_URL
+def get_cleaned_db_uri():
+    uri = os.getenv("DATABASE_URL")
+    if not uri:
+        logger.error("DATABASE_URL não está definida nas variáveis de ambiente!")
+        return None
+    
+    # O Aiven fornece 'mysql://', mas o SQLAlchemy precisa de 'mysql+pymysql://'
+    if uri.startswith("mysql://"):
+        uri = uri.replace("mysql://", "mysql+pymysql://", 1)
+    
+    return uri.strip()
 
-db_uri = os.getenv("DATABASE_URL")
-
-db_uri = os.getenv("DATABASE_URL")
+db_uri = get_cleaned_db_uri()
 
 if not db_uri:
-    logger.error("DATABASE_URL não está definida!")
-    raise RuntimeError("DATABASE_URL ausente.")
-
-logger.info(f"DB URI usada: {db_uri}")
-
+    # Se estiver local e sem .env, ele tenta um sqlite básico para não crashar o VS Code
+    db_uri = "sqlite:///local_test.db"
+    logger.warning("Usando SQLite local porque DATABASE_URL não foi encontrada.")
 
 app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Importa os modelos e inicializa o SQLAlchemy
+# 3. Inicialização do Banco
+# Importante: Importar os modelos ANTES do db.create_all()
 from models import db, Processador, PlacaMae, MemoriaRAM, PlacaVideo, Armazenamento, Fonte, Gabinete
 db.init_app(app)
+
+# Criar tabelas automaticamente (Funciona no Render com Gunicorn)
+with app.app_context():
+    try:
+        db.create_all()
+        logger.info("Banco de dados verificado/criado com sucesso.")
+    except Exception as e:
+        logger.error(f"Erro ao inicializar o banco: {e}")
+
+# --- ROTAS ---
 
 @app.route("/")
 def home():
@@ -59,77 +71,67 @@ def educacao():
 def sobre_nos():
     return render_template("sobre.html")
 
+# --- LÓGICA DE NEGÓCIO ---
+
 def get_total(preco_label):
-    return {
+    precos = {
         "Um PC OK": 2000,
         "Um PC BOM": 3000,
         "Um PC MUITO BOM": 5000,
-        "Até a NASA quer": 99999
-    }.get(preco_label, 2000)
+        "Até a NASA quer": 10000
+    }
+    return precos.get(preco_label, 2000)
 
 def distribuir_orcamento(total, quer_gpu):
+    if quer_gpu:
+        return {
+            "cpu": total * 0.22,
+            "placa_mae": total * 0.12,
+            "ram": total * 0.12,
+            "gpu": total * 0.30,
+            "ssd": total * 0.10,
+            "fonte": total * 0.08,
+            "gabinete": total * 0.06
+        }
     return {
-        "cpu": total * 0.25,
+        "cpu": total * 0.40,
         "placa_mae": total * 0.15,
         "ram": total * 0.15,
-        "gpu": total * 0.25 if quer_gpu else 0,
-        "ssd": total * 0.10,
-        "fonte": total * 0.07,
-        "gabinete": total * 0.03
+        "gpu": 0,
+        "ssd": total * 0.15,
+        "fonte": total * 0.10,
+        "gabinete": total * 0.05
     }
 
 def definir_pecas_basicas(processador, quer_gpu, total):
+    # Lógica simplificada para busca
     if processador == "AMD":
         cpu_busca = "Ryzen 5 5600G" if not quer_gpu else "Ryzen 5 5600"
-        placa_mae_busca = "Placa mãe B450"
+        placa_mae_busca = "B450"
     else:
-        cpu_busca = "Intel i5 10400" if not quer_gpu else "Intel i5 11400F"
-        placa_mae_busca = "Placa mãe B460"
-
-    ram_busca = (
-        "Memória RAM DDR4 32GB" if total >= 5000 else
-        "Memória RAM DDR4 16GB" if total >= 3000 else
-        "Memória RAM DDR4 8GB"
-    )
-
-    ssd_busca = (
-        "SSD 1TB" if total >= 5000 else
-        "SSD 480GB" if total >= 2500 else
-        "SSD 240GB"
-    )
-
-    if quer_gpu:
-        if total >= 6000:
-            gpu_busca = "RTX 3060"
-        elif total >= 4000:
-            gpu_busca = "RX 6600"
-        else:
-            gpu_busca = "RX 580"
-    else:
-        gpu_busca = "Processador com vídeo integrado"
-
-    fonte_busca = "Fonte 600W" if quer_gpu else "Fonte 450W"
-    gabinete = "Gabinete gamer ATX"
+        cpu_busca = "i5 10400" if not quer_gpu else "i5 11400F"
+        placa_mae_busca = "B460"
 
     return {
         "cpu": cpu_busca,
         "placa_mae": placa_mae_busca,
-        "ram": ram_busca,
-        "gpu": gpu_busca,
-        "ssd": ssd_busca,
-        "fonte": fonte_busca,
-        "gabinete": gabinete
+        "ram": "DDR4",
+        "gpu": "RTX" if quer_gpu else "Vídeo Integrado",
+        "ssd": "SSD",
+        "fonte": "600W" if quer_gpu else "450W",
+        "gabinete": "Gabinete"
     }
 
 def comparar_precos(termo, preco_max):
     tabelas = [Processador, PlacaMae, MemoriaRAM, PlacaVideo, Armazenamento, Fonte, Gabinete]
-
+    
     for tabela in tabelas:
+        # Busca case-insensitive no MySQL do Aiven
         resultado = (
             tabela.query
             .filter(tabela.nome.ilike(f"%{termo}%"))
             .filter(tabela.preco <= preco_max)
-            .order_by(tabela.preco.asc())
+            .order_by(tabela.preco.desc()) # Pega o melhor dentro do orçamento
             .first()
         )
         if resultado:
@@ -138,73 +140,53 @@ def comparar_precos(termo, preco_max):
                 "imagem": resultado.imagem_url,
                 "preco": float(resultado.preco),
                 "link": resultado.link_loja,
-                "componente": tabela.__tablename__
+                "componente": tabela.__tablename__.upper()
             }
-
     return None
 
 @app.route("/montar-setup", methods=["POST"])
 def montar_setup():
     try:
         dados = request.get_json(force=True)
+        
+        preco_label = dados.get("preco")
+        processador = dados.get("processador")
+        gpu = dados.get("gpu") == "Sim"
+        
+        total = get_total(preco_label)
+        orcamento = distribuir_orcamento(total, gpu)
+        termos = definir_pecas_basicas(processador, gpu, total)
+
+        resultado = []
+        for componente, termo in termos.items():
+            if componente == "gpu" and not gpu: continue
+            
+            preco_max = orcamento.get(componente, 0)
+            produto = comparar_precos(termo, preco_max)
+            
+            if produto:
+                resultado.append(produto)
+            else:
+                resultado.append({
+                    "nome": f"{termo} (Não encontrado no orçamento)",
+                    "imagem": None,
+                    "preco": preco_max,
+                    "link": "#",
+                    "componente": componente.upper(),
+                    "aviso": "Tente aumentar o orçamento"
+                })
+
+        return jsonify(resultado)
+
     except Exception as e:
-        logger.error(f"Erro ao ler JSON: {e}")
-        return jsonify({"erro": "Requisição inválida."}), 400
+        logger.error(f"Erro no processamento: {e}")
+        return jsonify({"erro": str(e)}), 500
 
-    preco = dados.get("preco")
-    processador = dados.get("processador")
-    gpu = dados.get("gpu")
-    laptop = dados.get("laptop")
-
-    if not preco or not processador or not gpu or not laptop:
-        return jsonify({"erro": "Faltam dados obrigatórios."}), 400
-
-    quer_gpu = gpu == "Sim"
-    quer_laptop = "sim" in laptop.lower()
-    total = get_total(preco)
-
-    if quer_laptop:
-        termo_busca = "Notebook gamer Ryzen 5" if processador == "AMD" else "Notebook Intel i5"
-        produto = comparar_precos(termo_busca, total)
-        if produto is None:
-            produto = {
-                "nome": termo_busca,
-                "imagem": None,
-                "preco": None,
-                "link": None,
-                "loja": None,
-                "erro": "Produto não encontrado"
-            }
-        produto["componente"] = "LAPTOP"
-        return jsonify([produto])
-
-    orcamento = distribuir_orcamento(total, quer_gpu)
-    termos = definir_pecas_basicas(processador, quer_gpu, total)
-
-    resultado = []
-    for componente, termo in termos.items():
-        preco_max = orcamento.get(componente, 0)
-        produto = comparar_precos(termo, preco_max)
-        if produto is None:
-            produto = {
-                "nome": termo,
-                "imagem": None,
-                "preco": None,
-                "link": None,
-                "loja": None,
-                "erro": "Produto não encontrado dentro do orçamento"
-            }
-        produto["componente"] = componente.upper()
-        resultado.append(produto)
-
-    return jsonify(resultado)
-
+# Rota de Saúde para o Render/Cloudflare
+@app.route("/health")
+def health():
+    return "OK", 200
 
 if __name__ == "__main__":
-    with app.app_context():
-        try:
-            db.create_all()
-            logger.info("Tabelas criadas com sucesso.")
-        except Exception as e:
-            logger.error(f"Erro ao criar tabelas: {e}")
-    app.run(host="0.0.0.0", port=5000, debug=False)
+    # Localmente rodamos com debug
+    app.run(host="0.0.0.0", port=5000, debug=True)
