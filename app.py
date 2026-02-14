@@ -182,6 +182,54 @@ def montar_setup():
         logger.error(f"Erro no processamento: {e}")
         return jsonify({"erro": str(e)}), 500
 
+@app.route("/setup-db-kaio")
+def setup_db_kaio():
+    try:
+        # 1. Garantir que as tabelas existam
+        db.create_all()
+
+        # 2. Verificar se já existem dados (evita duplicar no Aiven)
+        if Processador.query.first():
+            return jsonify({"status": "Aviso", "mensagem": "O banco já possui dados."}), 200
+
+        # 3. Criar uma lista de peças iniciais (O recheio do site!)
+        pecas = [
+            # PROCESSADORES
+            Processador(nome="AMD Ryzen 5 5600", preco=850.00, imagem_url="https://m.media-amazon.com/images/I/51uU8pIeLGL._AC_SX679_.jpg", link_loja="https://amzn.to/exemplo1"),
+            Processador(nome="AMD Ryzen i5 10400", preco=600.00, imagem_url="https://m.media-amazon.com/images/I/41-i2N8lYkL._AC_SX679_.jpg", link_loja="https://amzn.to/exemplo2"),
+            
+            # PLACAS MÃE
+            PlacaMae(nome="Placa Mãe B450M", preco=450.00, imagem_url="https://m.media-amazon.com/images/I/71R2oI8pGLL._AC_SX679_.jpg", link_loja="https://amzn.to/exemplo3"),
+            PlacaMae(nome="Placa Mãe B460M", preco=550.00, imagem_url="https://m.media-amazon.com/images/I/71R2oI8pGLL._AC_SX679_.jpg", link_loja="https://amzn.to/exemplo4"),
+
+            # MEMÓRIA RAM (DDR4)
+            MemoriaRAM(nome="Memória RAM DDR4 8GB 3200MHz", preco=150.00, imagem_url="https://m.media-amazon.com/images/I/61k47n558xL._AC_SX679_.jpg", link_loja="https://amzn.to/exemplo5"),
+
+            # PLACA DE VÍDEO
+            PlacaVideo(nome="Placa de Vídeo RTX 3060", preco=1800.00, imagem_url="https://m.media-amazon.com/images/I/71f-n0pP0FL._AC_SX679_.jpg", link_loja="https://amzn.to/exemplo6"),
+
+            # ARMAZENAMENTO (SSD)
+            Armazenamento(nome="SSD Kingston 480GB", preco=200.00, imagem_url="https://m.media-amazon.com/images/I/51IUn6L-fVL._AC_SX679_.jpg", link_loja="https://amzn.to/exemplo7"),
+
+            # FONTE
+            Fonte(nome="Fonte 600W 80 Plus", preco=300.00, imagem_url="https://m.media-amazon.com/images/I/61k47n558xL._AC_SX679_.jpg", link_loja="https://amzn.to/exemplo8"),
+
+            # GABINETE
+            Gabinete(nome="Gabinete Gamer RGB", preco=250.00, imagem_url="https://m.media-amazon.com/images/I/61k47n558xL._AC_SX679_.jpg", link_loja="https://amzn.to/exemplo9"),
+        ]
+
+        # 4. Adicionar tudo ao banco Aiven
+        db.session.add_all(pecas)
+        db.session.commit()
+
+        logger.info("Setup concluído: Banco de dados populado com sucesso!")
+        return jsonify({"status": "Sucesso", "mensagem": "Banco Aiven populado para o 8º semestre!"}), 201
+
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Erro no setup: {e}")
+        return jsonify({"status": "Erro", "detalhes": str(e)}), 500
+
 # Rota de Saúde para o Render/Cloudflare
 @app.route("/health")
 def health():
