@@ -1,0 +1,72 @@
+/* static/CSS/admin.css */
+
+body {
+    background-color: #05001C;
+    font-family: 'Orbitron', sans-serif;
+    color: #3CC9E4;
+}
+
+/* Container do Painel */
+.admin-container {
+    margin-top: 50px;
+    margin-bottom: 50px;
+}
+
+/* Card Estilo Cyberpunk */
+.card-admin {
+    background-color: #0b052d;
+    border: 2px solid #3CC9E4;
+    border-radius: 15px;
+    box-shadow: 0 0 15px rgba(60, 201, 228, 0.2);
+    color: white;
+}
+
+.card-header-admin {
+    border-bottom: 2px solid #9216FD;
+    padding: 20px;
+}
+
+/* Labels e Inputs */
+label {
+    color: #9216FD;
+    font-weight: bold;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+}
+
+.form-control {
+    background-color: #05001C;
+    border: 1px solid #3CC9E4;
+    color: white;
+    border-radius: 8px;
+}
+
+.form-control:focus {
+    background-color: #0e083a;
+    border-color: #9216FD;
+    color: white;
+    box-shadow: 0 0 10px rgba(146, 22, 253, 0.5);
+}
+
+/* Botão Neon */
+.btn-cyber {
+    background-color: transparent;
+    border: 2px solid #3CC9E4;
+    color: #3CC9E4;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    padding: 12px;
+    text-transform: uppercase;
+}
+
+.btn-cyber:hover {
+    background-color: #3CC9E4;
+    color: #05001C;
+    box-shadow: 0 0 20px #3CC9E4;
+}
+
+h2, h3 {
+    color: transparent;
+    -webkit-text-stroke: 1px #3CC9E4;
+}

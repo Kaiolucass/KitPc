@@ -1,9 +1,10 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from dotenv import load_dotenv
 import os
 import logging
+import re # Para limpar o slug
 
 # 1. Configuração de Logging
 logging.basicConfig(
@@ -31,7 +32,7 @@ db_uri = get_cleaned_db_uri() or "sqlite:///local_test.db"
 app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# 3. Inicialização do Banco (Importando Post)
+# 3. Inicialização do Banco
 from models import db, Processador, PlacaMae, MemoriaRAM, PlacaVideo, Armazenamento, Fonte, Gabinete, Post
 db.init_app(app)
 
@@ -47,11 +48,55 @@ with app.app_context():
 @app.route("/")
 def home():
     try:
-        # Pega os 3 posts mais recentes para mostrar na Home
-        posts = Post.query.order_by(Post.data_postagem.desc()).limit(3).all()
-    except:
+        # Buscamos 4 posts: 1 para o destaque e 3 para a grade inferior
+        posts = Post.query.order_by(Post.data_postagem.desc()).limit(4).all()
+    except Exception as e:
+        logger.error(f"Erro na home: {e}")
         posts = []
     return render_template("index.html", posts=posts)
+
+# Rota para abrir o post completo
+@app.route("/blog/<slug>")
+def exibir_post(slug):
+    try:
+        post = Post.query.filter_by(slug=slug).first_or_404()
+        return render_template("blog_post.html", post=post)
+    except Exception as e:
+        logger.error(f"Erro ao carregar post {slug}: {e}")
+        return redirect(url_for('home'))
+
+@app.route("/admin")
+def pagina_admin():
+    return render_template("admin.html")
+
+@app.route("/admin/salvar-post", methods=["POST"])
+def salvar_post():
+    try:
+        titulo = request.form.get("titulo")
+        subtitulo = request.form.get("subtitulo")
+        conteudo = request.form.get("conteudo")
+        imagem_url = request.form.get("imagem_url")
+        
+        # Gerador de Slug mais robusto (remove acentos e símbolos)
+        slug = titulo.lower()
+        slug = re.sub(r'[^\w\s-]', '', slug)
+        slug = re.sub(r'[\s_-]+', '-', slug).strip('-')
+
+        novo_post = Post(
+            titulo=titulo,
+            subtitulo=subtitulo,
+            conteudo=conteudo,
+            imagem_url=imagem_url,
+            slug=slug
+        )
+
+        db.session.add(novo_post)
+        db.session.commit()
+        return "✅ Post publicado com sucesso! <a href='/'>Voltar para Home</a>"
+    
+    except Exception as e:
+        db.session.rollback()
+        return f"❌ Erro ao salvar: {e}"
 
 @app.route("/seuPc")
 def montagem():
@@ -64,14 +109,6 @@ def educacao():
 @app.route("/sobre")
 def sobre_nos():
     return render_template("sobre.html")
-
-@app.route("/blog")
-def blog_lista():
-    try:
-        posts = Post.query.order_by(Post.data_postagem.desc()).all()
-    except:
-        posts = []
-    return render_template("blog.html", posts=posts)
 
 # --- LÓGICA DO MONTADOR ---
 
@@ -99,49 +136,32 @@ def montar_setup():
         total = get_total(dados.get("preco"))
         gpu = dados.get("gpu") == "Sim"
         orcamento = distribuir_orcamento(total, gpu)
-        # Busca simplificada
         resultado = []
         for comp, valor in orcamento.items():
             if valor > 0:
-                p = comparar_precos("", valor) # Busca o melhor que couber
+                p = comparar_precos("", valor)
                 if p: resultado.append(p)
         return jsonify(resultado)
     except Exception as e:
         return jsonify({"erro": str(e)}), 500
 
-# --- SETUP DO BANCO (AIVEN) ---
+# --- SETUP DO BANCO ---
 
 @app.route("/setup-db-kaio")
 def setup_db_kaio():
     try:
         db.create_all()
-        
-        # 1. Criar Post de Teste se não existir
         if not Post.query.first():
             post = Post(
                 titulo="Como escolher as peças do seu PC em 2026",
                 subtitulo="Um guia prático para não errar na montagem.",
-                conteudo="Escreva aqui o seu artigo completo sobre hardware...",
+                conteudo="Montar um PC exige atenção aos detalhes...",
                 imagem_url="https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?q=80&w=1000&auto=format&fit=crop",
                 slug="guia-montagem-2026"
             )
             db.session.add(post)
-
-        # 2. Criar Peças se não existir
-        if not Processador.query.first():
-            pecas = [
-                Processador(nome="AMD Ryzen 5 5600", preco=850.00, imagem_url="https://m.media-amazon.com/images/I/51uU8pIeLGL._AC_SX679_.jpg", link_loja="#"),
-                PlacaMae(nome="Placa Mãe B450M", preco=450.00, imagem_url="https://m.media-amazon.com/images/I/71R2oI8pGLL._AC_SX679_.jpg", link_loja="#"),
-                MemoriaRAM(nome="RAM DDR4 8GB", preco=150.00, imagem_url="https://m.media-amazon.com/images/I/61k47n558xL._AC_SX679_.jpg", link_loja="#"),
-                PlacaVideo(nome="RTX 3060", preco=1800.00, imagem_url="https://m.media-amazon.com/images/I/71f-n0pP0FL._AC_SX679_.jpg", link_loja="#"),
-                Armazenamento(nome="SSD 480GB", preco=200.00, imagem_url="https://m.media-amazon.com/images/I/51IUn6L-fVL._AC_SX679_.jpg", link_loja="#"),
-                Fonte(nome="Fonte 600W", preco=300.00, imagem_url="https://m.media-amazon.com/images/I/61k47n558xL._AC_SX679_.jpg", link_loja="#"),
-                Gabinete(nome="Gabinete RGB", preco=250.00, imagem_url="https://m.media-amazon.com/images/I/61k47n558xL._AC_SX679_.jpg", link_loja="#")
-            ]
-            db.session.add_all(pecas)
-        
         db.session.commit()
-        return jsonify({"status": "Sucesso", "mensagem": "Blog e Peças configurados!"}), 201
+        return jsonify({"status": "Sucesso", "mensagem": "Sistema de Blog pronto!"}), 201
     except Exception as e:
         db.session.rollback()
         return jsonify({"erro": str(e)}), 500
