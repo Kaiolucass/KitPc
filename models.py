@@ -124,3 +124,14 @@ class Cadeira(db.Model):
     preco = db.Column(db.Numeric(10, 2))
     imagem_url = db.Column(db.Text)
     link_loja = db.Column(db.Text)
+
+class Post(db.Model):
+    __tablename__ = 'posts'
+    id = db.Column(db.Integer, primary_key=True)
+    titulo = db.Column(db.String(200), nullable=False)
+    subtitulo = db.Column(db.String(300))
+    conteudo = db.Column(db.Text, nullable=False)
+    imagem_url = db.Column(db.Text)
+    # Slug é a URL amigável, ex: kitpc.com.br/blog/melhor-pc-gamer
+    slug = db.Column(db.String(200), unique=True, nullable=False)
+    data_postagem = db.Column(db.DateTime, default=db.func.current_timestamp())
