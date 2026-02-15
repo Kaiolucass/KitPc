@@ -1,7 +1,33 @@
 from flask_sqlalchemy import SQLAlchemy
-
+from datetime import datetime
 
 db = SQLAlchemy()
+
+# --- TABELAS DE USUÁRIOS E SEGURANÇA ---
+
+class Usuario(db.Model):
+    __tablename__ = 'usuarios'
+    id = db.Column(db.Integer, primary_key=True)
+    nome = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(100), unique=True, nullable=False)
+    senha = db.Column(db.String(255), nullable=False)
+    is_admin = db.Column(db.Boolean, default=False)
+    # Relacionamento para puxar as montagens do usuário facilmente
+    montagens = db.relationship('MontagemSalva', backref='dono', lazy=True)
+
+# --- TABELAS DO BLOG ---
+
+class Post(db.Model):
+    __tablename__ = 'posts'
+    id = db.Column(db.Integer, primary_key=True)
+    titulo = db.Column(db.String(200), nullable=False)
+    subtitulo = db.Column(db.String(300))
+    conteudo = db.Column(db.Text, nullable=False)
+    imagem_url = db.Column(db.Text)
+    slug = db.Column(db.String(200), unique=True, nullable=False)
+    data_postagem = db.Column(db.DateTime, default=datetime.utcnow)
+
+# --- TABELAS DO MONTADOR (HARDWARE) ---
 
 class SocketCPU(db.Model):
     __tablename__ = 'sockets_cpu'
@@ -125,13 +151,22 @@ class Cadeira(db.Model):
     imagem_url = db.Column(db.Text)
     link_loja = db.Column(db.Text)
 
-class Post(db.Model):
-    __tablename__ = 'posts'
+# --- TABELA DE MONTAGENS SALVAS ---
+
+class MontagemSalva(db.Model):
+    __tablename__ = 'montagens_salvas'
     id = db.Column(db.Integer, primary_key=True)
-    titulo = db.Column(db.String(200), nullable=False)
-    subtitulo = db.Column(db.String(300))
-    conteudo = db.Column(db.Text, nullable=False)
-    imagem_url = db.Column(db.Text)
-    # Slug é a URL amigável, ex: kitpc.com.br/blog/melhor-pc-gamer
-    slug = db.Column(db.String(200), unique=True, nullable=False)
-    data_postagem = db.Column(db.DateTime, default=db.func.current_timestamp())
+    usuario_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False)
+    
+    # Detalhes do PC salvo
+    nome_setup = db.Column(db.String(100), default="Meu Setup Gamer")
+    processador = db.Column(db.String(100))
+    placa_mae = db.Column(db.String(100))
+    ram = db.Column(db.String(100))
+    gpu = db.Column(db.String(100))
+    armazenamento = db.Column(db.String(100))
+    fonte = db.Column(db.String(100))
+    gabinete = db.Column(db.String(100))
+    preco_total = db.Column(db.Numeric(10, 2))
+    
+    data_criacao = db.Column(db.DateTime, default=datetime.utcnow)

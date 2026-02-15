@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cadastro - KitPC</title>
+  <link rel="icon" href="{{ url_for('static', filename='Imagens/favicon.png') }}" type="image/png">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='CSS/register.css') }}">
+  <style>
+  
+  </style>
+</head>
+<body class="auth-body">
+  <div class="auth-box">
+    <h2>Criar Conta</h2>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        {% for message in messages %}
+          <div class="flash">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="/register">
+      <input type="text" name="nome" placeholder="Nome Completo" required>
+      <input type="email" name="email" placeholder="E-mail" required>
+      <input type="password" name="senha" placeholder="Senha" required>
+      <input type="password" name="confirmar_senha" placeholder="Confirme a Senha" required>
+      
+      <button type="submit" class="auth-btn">Finalizar Cadastro</button>
+    </form>
+
+    <p class="auth-text">
+      Já tem uma conta? <a href="{{ url_for('login') }}">Faça Login</a>
+    </p>
+  </div>
+</body>
+</html>

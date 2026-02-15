@@ -1,12 +1,9 @@
 body {
       background-color: #05001C;
-      /* Removi o height: 80px para o site crescer conforme o conteúdo */
-      min-height: 100vh; 
+      height: 80px;
       font-family: 'Orbitron', sans-serif;
-      /* O border-bottom aqui pode parecer um traço solto no fim da página, 
-         se quiser manter, ok, mas o footer já tem borda! */
+      border-bottom: 2px solid #3CC9E4;
 }
-
 /* logo da marca kitpc */
 .logo-kitpc {
     width: 150px;
@@ -16,41 +13,30 @@ body {
 }
 
 /* titulos principais */
-h1 {
+h1{
   color: transparent;                    
   -webkit-text-stroke: 1px #3CC9E4;      
 }
 
-h2 {
+h2{
   color: #3CC9E4;
 }
-
 header {
   margin-bottom: 0;
   padding-bottom: 0;
 }
 
 /* css da barra de navegaçao  */
-.navbarNav {
+.navbarNav{
   color: #9216FD;
 }
-
 a.nav-link {
   color: #9216FD;
 }
-
-a.nav-link:hover {
-  color: #3CC9E4;
+a.nav-link:hover{
+  color:#3CC9E4;
+;
 }
-
-.navbar-toggler {
-  border: none;
-  background: transparent;
-  width: 30px;
-  height: 25px;
-  position: relative;
-}
-
 .navbar-toggler-icon {
   filter: invert(54%) sepia(86%) saturate(497%) hue-rotate(163deg) brightness(92%) contrast(89%);
 }
@@ -65,41 +51,47 @@ a.nav-link:hover {
   padding: 20px;
   border: 2px solid #3CC9E4;
   border-radius: 10px;
-  background: rgba(60, 201, 228, 0.05); /* Um toque de cor no fundo do card */
 }
 
-p {
+
+
+p{
     color: #9216FD;
 }
-
-.paragrafo2 {
+.paragrafo2{
   color: #3CC9E4;
 }
-
-.section-title {
+.section-title{
   margin-top: 100px;
   margin-bottom: 10px;
 }
+
 
 /* Efeito de brilho na imagem de destaque */
 .border-neon {
     border: 2px solid #3CC9E4;
     box-shadow: 0 0 20px rgba(60, 201, 228, 0.4);
     transition: 0.3s;
-    max-width: 100%;
 }
 
 .destaque-container {
-    background: rgba(146, 22, 253, 0.1); 
+    background: rgba(146, 22, 253, 0.1); /* Um roxo bem transparente */
     border-left: 4px solid #9216FD;
     border-radius: 0 15px 15px 0;
 }
 
-/* Efeito Hover na imagem principal */
 .image-glow:hover .border-neon {
     box-shadow: 0 0 40px rgba(60, 201, 228, 0.7);
     transform: scale(1.02);
 }
+
+/* Rodapé */
+footer {
+    border-top: 2px solid #3CC9E4;
+    padding: 20px;
+}
+
+
 
 /* Cards menores de notícias */
 .card-blog-menor {
@@ -109,32 +101,21 @@ p {
     border-radius: 10px;
     height: 100%;
     transition: 0.3s;
-    display: flex;
-    flex-direction: column;
 }
 
 .card-blog-menor:hover {
     border-color: #9216FD;
     transform: translateY(-5px);
-    background: rgba(146, 22, 253, 0.15);
+    background: rgba(146, 22, 253, 0.1);
 }
 
 .border-neon-sm {
     border: 1px solid #3CC9E4;
     box-shadow: 0 0 10px rgba(60, 201, 228, 0.2);
-    width: 100%;
-    object-fit: cover;
 }
 
+/* Ajuste para os títulos menores não terem o stroke muito grosso */
 .card-blog-menor h3 {
     color: #3CC9E4;
-    -webkit-text-stroke: 0px; 
-    margin-top: 10px;
-}
-
-/* Rodapé */
-footer {
-    border-top: 2px solid #3CC9E4;
-    padding: 20px;
-    margin-top: 50px;
+    -webkit-text-stroke: 0px; /* Remove o contorno nos títulos pequenos para ler melhor */
 }
