@@ -1,0 +1,142 @@
+  /* Reaproveitando o estilo da tela de login para consistência */
+    .auth-body {
+        background-color: #05001C;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0;
+        padding: 20px;
+    }
+
+    .auth-box {
+        background: rgba(11, 5, 45, 0.8);
+        border: 2px solid #9216FD; /* Roxo para diferenciar do Login */
+        box-shadow: 0 0 20px rgba(146, 22, 253, 0.2);
+        padding: 40px;
+        border-radius: 15px;
+        width: 100%;
+        max-width: 450px;
+        text-align: center;
+    }
+
+    .auth-box h2 {
+        color: transparent;
+        -webkit-text-stroke: 1px #9216FD;
+        font-family: 'Orbitron', sans-serif;
+        margin-bottom: 30px;
+        text-transform: uppercase;
+    }
+
+    .auth-box input {
+        width: 100%;
+        padding: 12px;
+        margin-bottom: 15px;
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid #3CC9E4;
+        border-radius: 5px;
+        color: white;
+        outline: none;
+    }
+
+    .auth-box input:focus {
+        border-color: #9216FD;
+        box-shadow: 0 0 10px rgba(146, 22, 253, 0.3);
+    }
+
+    .auth-btn {
+        width: 100%;
+        padding: 12px;
+        background: transparent;
+        border: 2px solid #9216FD;
+        color: #9216FD;
+        font-weight: bold;
+        font-family: 'Orbitron', sans-serif;
+        cursor: pointer;
+        transition: 0.3s;
+        text-transform: uppercase;
+        margin-top: 10px;
+    }
+
+    .auth-btn:hover {
+        background: #9216FD;
+        color: white;
+        box-shadow: 0 0 20px #9216FD;
+    }
+
+    .auth-text {
+        margin-top: 20px;
+        color: #3CC9E4;
+        font-size: 14px;
+    }
+
+    .auth-text a {
+        color: #9216FD;
+        text-decoration: none;
+        font-weight: bold;
+    }
+
+    .flash {
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        font-size: 13px;
+        background: rgba(255, 77, 77, 0.1);
+        color: #ff4d4d;
+        border: 1px solid #ff4d4d;
+    }
+    /* Ajustando a posição do ícone do VLibras se necessário */
+.vw-access-button {
+   
+    bottom: 20px !important;
+}
+/* Botão Google Customizado - SEM fundo branco no hover */
+.btn-google-custom {
+    display: flex;
+    align-items: center;
+    background-color: #ffffff; /* Fundo branco como na imagem */
+    border: 2px solid #9216FD; /* Borda roxa neon */
+    border-radius: 8px;
+    padding: 1px; /* Espaço para a borda aparecer */
+    text-decoration: none;
+    transition: all 0.3s ease;
+    width: 100%;
+    height: 50px;
+    margin-top: 15px;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-google-custom:hover {
+    box-shadow: 0 0 15px rgba(146, 22, 253, 0.6);
+    transform: scale(1.02);
+}
+
+/* Container do Ícone */
+.google-icon-wrapper {
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.google-icon-wrapper img {
+    width: 20px;  
+    height: 20px; 
+    object-fit: contain; 
+}
+
+/* Texto do Botão */
+.google-text {
+    flex-grow: 1;
+    text-align: center;
+    color: #444; /* Cor do texto cinza escuro */
+    font-weight: 600;
+    font-family: 'Segoe UI', Roboto, sans-serif; /* Fonte mais limpa para o botão */
+    margin-right: 42px; /* Compensa o tamanho do ícone para centralizar o texto */
+}
+
+/* Ajuste para o botão não ficar estranho no hover (tirar o efeito branco do Bootstrap) */
+.btn-google-custom:hover .google-text {
+    color: #000;
+}

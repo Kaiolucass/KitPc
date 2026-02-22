@@ -1,0 +1,145 @@
+/* Estilos específicos para a tela de Login */
+    .auth-body {
+        background-color: #05001C;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0;
+    }
+
+    .auth-box {
+        background: rgba(11, 5, 45, 0.8);
+        border: 2px solid #3CC9E4;
+        box-shadow: 0 0 20px rgba(60, 201, 228, 0.2);
+        padding: 40px;
+        border-radius: 15px;
+        width: 100%;
+        max-width: 400px;
+        text-align: center;
+    }
+
+    .auth-logo {
+        width: 120px;
+        margin-bottom: 20px;
+    }
+
+    .auth-box h2 {
+        color: transparent;
+        -webkit-text-stroke: 1px #3CC9E4;
+        font-family: 'Orbitron', sans-serif;
+        margin-bottom: 30px;
+        text-transform: uppercase;
+    }
+
+    .auth-box input {
+        width: 100%;
+        padding: 12px;
+        margin-bottom: 20px;
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid #9216FD;
+        border-radius: 5px;
+        color: white;
+        outline: none;
+    }
+
+    .auth-box input:focus {
+        border-color: #3CC9E4;
+        box-shadow: 0 0 10px rgba(60, 201, 228, 0.3);
+    }
+
+    .auth-btn {
+        width: 100%;
+        padding: 12px;
+        background: transparent;
+        border: 2px solid #3CC9E4;
+        color: #3CC9E4;
+        font-weight: bold;
+        font-family: 'Orbitron', sans-serif;
+        cursor: pointer;
+        transition: 0.3s;
+        text-transform: uppercase;
+    }
+
+    .auth-btn:hover {
+        background: #3CC9E4;
+        color: #05001C;
+        box-shadow: 0 0 20px #3CC9E4;
+    }
+
+    .auth-text {
+        margin-top: 20px;
+        color: #9216FD;
+        font-size: 14px;
+    }
+
+    .auth-text a {
+        color: #3CC9E4;
+        text-decoration: none;
+    }
+
+    /* Mensagens de Feedback */
+    .flash {
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        font-size: 14px;
+        border-left: 4px solid;
+    }
+    .error { background: rgba(255, 0, 0, 0.1); color: #ff4d4d; border-color: #ff4d4d; }
+    .success { background: rgba(0, 255, 0, 0.1); color: #00ff00; border-color: #00ff00; }
+    /* Ajustando a posição do ícone do VLibras se necessário */
+.vw-access-button {
+    bottom: 20px !important;
+}
+
+/* Botão Google Customizado - SEM fundo branco no hover */
+.btn-google-custom {
+    display: flex;
+    align-items: center;
+    background-color: #ffffff; /* Fundo branco como na imagem */
+    border: 2px solid #9216FD; /* Borda roxa neon */
+    border-radius: 8px;
+    padding: 1px; /* Espaço para a borda aparecer */
+    text-decoration: none;
+    transition: all 0.3s ease;
+    width: 100%;
+    height: 50px;
+    margin-top: 15px;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-google-custom:hover {
+    box-shadow: 0 0 15px rgba(146, 22, 253, 0.6);
+    transform: scale(1.02);
+}
+
+/* Container do Ícone */
+.google-icon-wrapper {
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.google-icon-wrapper img {
+    width: 20px;  
+    height: 20px; 
+    object-fit: contain; 
+}
+
+/* Texto do Botão */
+.google-text {
+    flex-grow: 1;
+    text-align: center;
+    color: #444; /* Cor do texto cinza escuro */
+    font-weight: 600;
+    font-family: 'Segoe UI', Roboto, sans-serif; /* Fonte mais limpa para o botão */
+    margin-right: 42px; /* Compensa o tamanho do ícone para centralizar o texto */
+}
+
+/* Ajuste para o botão não ficar estranho no hover (tirar o efeito branco do Bootstrap) */
+.btn-google-custom:hover .google-text {
+    color: #000;
+}

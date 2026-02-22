@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cadastro - KitPC</title>
+  <link rel="icon" href="{{ url_for('static', filename='Imagens/favicon.png') }}" type="image/png">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='CSS/register.css') }}">
+</head>
+
+<body class="auth-body">
+  <div class="auth-box">
+    <h2>Criar Conta</h2>
+
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    {% for message in messages %}
+    <div class="flash" style="color: #ff4d4d; margin-bottom: 15px; font-size: 0.9em;">{{ message }}</div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="/register">
+      <input type="text" name="nome" placeholder="Nome Completo" required>
+
+      <input type="email" name="email" placeholder="E-mail" required>
+
+      <input type="password" name="senha" id="senha" placeholder="Senha (8+ caracteres, A-Z, #)" required
+        pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*]).{8,}"
+        title="A senha deve conter pelo menos 8 caracteres, incluindo uma letra maiúscula, um número e um caractere especial.">
+
+      <input type="password" name="confirmar_senha" id="confirmar_senha" placeholder="Confirme a Senha" required>
+
+      <button type="submit" class="auth-btn">Finalizar Cadastro</button>
+    </form>
+
+    <p class="auth-text">
+      Já tem uma conta? <a href="{{ url_for('login') }}">Faça Login</a>
+    </p>
+  </div>
+  <a href="{{ url_for('login_google') }}" class="btn-google-custom">
+    <div class="google-icon-wrapper">
+      <img src="{{ url_for('static', filename='Imagens/Logo-google-icon-PNG.png') }}" alt="Google">
+    </div>
+    <span class="google-text">Continuar com Google</span>
+  </a>
+
+  <script>
+    const senha = document.getElementById("senha");
+    const confirmar = document.getElementById("confirmar_senha");
+
+    function validarSenha() {
+      if (senha.value != confirmar.value) {
+        confirmar.setCustomValidity("As senhas não coincidem!");
+      } else {
+        confirmar.setCustomValidity("");
+      }
+    }
+
+    senha.onchange = validarSenha;
+    confirmar.onkeyup = validarSenha;
+  </script>
+</body>
+
+</html>

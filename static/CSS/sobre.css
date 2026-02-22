@@ -1,0 +1,225 @@
+/* Configurações Globais da Página Sobre */
+body { 
+    background-color: #05001C;
+    min-height: 100vh;
+    font-family: 'Orbitron', sans-serif;
+    color: #ffffff;
+    margin: 0;
+    padding: 0;
+}
+
+/* --- FIX: EXTERMINADOR DE FUNDO BRANCO (MODAL E LOGIN) --- */
+
+.modal-content {
+    background-color: #0d1117 !important;
+    border: 1px solid #3CC9E4 !important;
+    box-shadow: 0 0 25px rgba(60, 201, 228, 0.2);
+}
+
+/* Botão Google Customizado - SEM fundo branco no hover */
+.btn-google-custom {
+    display: flex;
+    align-items: center;
+    background-color: #ffffff; /* Fundo branco como na imagem */
+    border: 2px solid #9216FD; /* Borda roxa neon */
+    border-radius: 8px;
+    padding: 1px; /* Espaço para a borda aparecer */
+    text-decoration: none;
+    transition: all 0.3s ease;
+    width: 100%;
+    height: 50px;
+    margin-top: 15px;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-google-custom:hover {
+    box-shadow: 0 0 15px rgba(146, 22, 253, 0.6);
+    transform: scale(1.02);
+}
+
+/* Container do Ícone */
+.google-icon-wrapper {
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.google-icon-wrapper img {
+    width: 20px;  
+    height: 20px; 
+    object-fit: contain; 
+}
+
+/* Texto do Botão */
+.google-text {
+    flex-grow: 1;
+    text-align: center;
+    color: #444; /* Cor do texto cinza escuro */
+    font-weight: 600;
+    font-family: 'Segoe UI', Roboto, sans-serif; /* Fonte mais limpa para o botão */
+    margin-right: 42px; /* Compensa o tamanho do ícone para centralizar o texto */
+}
+
+/* Ajuste para o botão não ficar estranho no hover (tirar o efeito branco do Bootstrap) */
+.btn-google-custom:hover .google-text {
+    color: #000;
+}
+/* Abas de Login/Cadastrar */
+.nav-tabs .nav-link {
+    border: none !important;
+    color: #666 !important;
+    background: transparent !important;
+    transition: 0.3s;
+}
+
+.nav-tabs .nav-link:hover {
+    color: #3CC9E4 !important;
+    background-color: rgba(60, 201, 228, 0.05) !important;
+}
+
+.nav-tabs .nav-link.active {
+    background-color: transparent !important;
+    color: #3CC9E4 !important;
+    border-bottom: 3px solid #3CC9E4 !important;
+}
+
+/* --- LOGO E TIPOGRAFIA --- */
+
+.logo-kitpc {
+    width: 80px;
+    height: auto;
+}
+
+h1 {
+    color: transparent;                    
+    -webkit-text-stroke: 1px #3CC9E4;
+    text-shadow: 0 0 10px rgba(60, 201, 228, 0.2);
+}
+
+h2 {
+    color: #3CC9E4;
+    text-transform: uppercase;
+}
+
+h5 {
+    color: #3CC9E4;
+    font-weight: bold;
+    margin-top: 15px;
+}
+
+/* --- NAVBAR --- */
+
+.navbar {
+    border-bottom: 2px solid #3CC9E4;
+    padding: 10px 0;
+    background-color: rgba(5, 0, 28, 0.95);
+}
+
+.nav-link {
+    color: #9216FD !important;
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+.nav-link:hover {
+    color: #3CC9E4 !important;
+    text-shadow: 0 0 8px #3CC9E4;
+}
+
+.navbar-toggler {
+    border: 1px solid #3CC9E4;
+}
+
+.navbar-toggler-icon {
+    filter: invert(54%) sepia(86%) saturate(497%) hue-rotate(163deg) brightness(92%) contrast(89%);
+}
+
+/* --- TEXTOS --- */
+
+p {
+    color: #9216FD;
+}
+
+.paragrafo2 {
+    color: #3CC9E4;
+    font-size: 0.9rem;
+}
+
+/* --- SEÇÃO DE VALORES (CARDS) --- */
+
+.card-nos {
+    min-height: 280px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 25px;
+    border: 2px solid #3CC9E4;
+    border-radius: 15px;
+    background: rgba(60, 201, 228, 0.03);
+    transition: 0.3s;
+    margin-bottom: 20px;
+}
+
+.card-nos:hover {
+    transform: scale(1.03);
+    box-shadow: 0 0 15px rgba(60, 201, 228, 0.3);
+    background: rgba(60, 201, 228, 0.08);
+}
+
+.card-nos i {
+    color: #9216FD;
+    font-size: 2.5rem;
+    margin-bottom: 15px;
+    text-shadow: 0 0 10px rgba(146, 22, 253, 0.5);
+}
+
+/* --- EQUIPE --- */
+
+.team-container {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 30px;
+    margin-top: 40px;
+}
+
+.team-member {
+    text-align: center;
+}
+
+.team-member p {
+    color: #3CC9E4;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+.profile-pic {
+    width: 150px;     
+    height: 150px;        
+    border-radius: 50%;
+    border: 4px solid #3CC9E4; 
+    object-fit: cover;
+    box-shadow: 0 0 20px rgba(60, 201, 228, 0.4);
+    transition: 0.3s;
+}
+
+.profile-pic:hover {
+    box-shadow: 0 0 30px #9216FD;
+    border-color: #9216FD;
+}
+
+/* --- RODAPÉ E EXTRAS --- */
+
+footer {
+    border-top: 2px solid #3CC9E4;
+    padding: 30px;
+    background-color: #05001C;
+    margin-top: 50px;
+}
+
+.vw-access-button {
+    bottom: 20px !important;
+}

@@ -1,0 +1,659 @@
+from flask import Flask, request, jsonify, render_template, redirect, url_for, session
+from flask_sqlalchemy import SQLAlchemy
+from flask_cors import CORS
+from dotenv import load_dotenv
+import os
+import logging
+import re 
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask import flash
+from flask_mail import Mail, Message
+from itsdangerous import URLSafeTimedSerializer, SignatureExpired
+import cloudinary
+import cloudinary.uploader
+from cloudinary.utils import cloudinary_url
+from flask import send_from_directory
+import google.generativeai as genai
+import json
+import unicodedata
+from flask import make_response
+from datetime import datetime
+from authlib.integrations.flask_client import OAuth
+
+
+# 1. Configuração de Logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+load_dotenv()
+
+
+
+app = Flask(__name__)
+
+import google.generativeai as genai
+
+# Força o uso da API v1 (Estável) em vez da v1beta
+from google.generativeai.types import RequestOptions
+
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+genai.configure(api_key=GOOGLE_API_KEY)
+
+# Configuramos o modelo
+model = genai.GenerativeModel(
+    model_name='gemini-1.5-flash',
+    generation_config={"response_mime_type": "application/json"}
+)
+
+
+# Secret Key para sessões (Login) - Tente definir SECRET_KEY no seu .env ou Render
+app.secret_key = os.getenv("SECRET_KEY", "cyber-kit-pc-token-2026")
+CORS(app)
+
+# --- CONFIGURAÇÕES DE E-MAIL---
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = 'seu-email@gmail.com'
+app.config['MAIL_PASSWORD'] = 'sua-senha-de-app-aqui' # 16 caracteres
+mail = Mail(app)
+s = URLSafeTimedSerializer(app.secret_key)
+
+def enviar_confirmacao(usuario_email, token):
+    link = f"https://kitpc.com.br/confirmar-email/{token}"
+    msg = Message('Confirme sua conta no KitPC! 🚀',
+                  sender='seu-email@gmail.com',
+                  recipients=[usuario_email])
+    msg.body = f'Olá! Clique no link para ativar sua conta e começar a montar seu PC: {link}'
+    # Se quiser deixar "profissional", use html em vez de body:
+    msg.html = render_template('email_confirmacao.html', link=link)
+    mail.send(msg)
+
+# 2. Configuração do Banco de Dados
+def get_cleaned_db_uri():
+    uri = os.getenv("DATABASE_URL")
+    if not uri:
+        logger.error("DATABASE_URL não definida!")
+        return None
+    if uri.startswith("mysql://"):
+        uri = uri.replace("mysql://", "mysql+pymysql://", 1)
+    return uri.strip()
+
+db_uri = get_cleaned_db_uri() or "sqlite:///local_test.db"
+app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# 3. Inicialização do Banco (Importando todas as classes do models.py)
+from models import db, Processador, PlacaMae, MemoriaRAM, PlacaVideo, Armazenamento, Fonte, Gabinete, Post, Usuario, MontagemSalva
+db.init_app(app)
+
+with app.app_context():
+    try:
+        db.create_all()
+        logger.info("Banco de dados sincronizado com sucesso.")
+    except Exception as e:
+        logger.error(f"Erro ao inicializar banco: {e}")
+
+# --- ROTAS DE NAVEGAÇÃO ---
+
+@app.route("/")
+def home():
+    try:
+        # Carrega os 4 posts mais recentes para a Home (Destaque + 3 cards)
+        posts = Post.query.order_by(Post.data_postagem.desc()).limit(4).all()
+    except Exception as e:
+        logger.error(f"Erro na home: {e}")
+        posts = []
+    return render_template("index.html", posts=posts)
+
+@app.route("/seuPc")
+def montagem():
+    return render_template("seupc.html")
+
+@app.route("/educacao")
+def educacao():
+    return render_template("educacao.html")
+
+@app.route('/educacao/guia-de-pecas')
+def guia_pecas():
+    return render_template('guia_pecas.html')
+
+@app.route('/educacao/trilha')
+def trilha_montagem():
+    return render_template('trilha.html')
+
+@app.route("/sobre")
+def sobre_nos():
+    return render_template("sobre.html")
+
+# --- SISTEMA DE LOGIN E CADASTRO ---
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        email = request.form.get("email")
+        senha = request.form.get("senha")
+        
+        user = Usuario.query.filter_by(email=email).first()
+        
+        # 1. Verifica se o usuário existe e se a senha está correta
+        if user and check_password_hash(user.senha, senha):
+            
+            # 2. NOVA TRAVA: Verifica se o e-mail foi confirmado
+            if not user.confirmado:
+                logger.warning(f"Tentativa de login: Usuário {user.email} ainda não confirmou o e-mail.")
+                return render_template("login.html", erro="Sua conta ainda não foi ativada. Verifique seu e-mail!")
+
+            # 3. Se passou em tudo, cria a sessão
+            session['usuario_id'] = user.id
+            session['nome'] = user.nome
+            session['is_admin'] = user.is_admin
+            logger.info(f"Usuário {user.nome} logado com sucesso.")
+            return redirect(url_for('home'))
+        
+        # Se a senha estiver errada ou e-mail não existir
+        return render_template("login.html", erro="E-mail ou senha incorretos!")
+
+    return render_template("login.html")
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for('home'))
+
+ # # --- FUNÇÃO SENHA FORTE ---
+
+def senha_forte(senha):
+    if len(senha) < 8:
+        return False
+    if not re.search(r"[A-Z]", senha):
+        return False
+    if not re.search(r"[0-9]", senha):
+        return False
+    if not re.search(r"[!@#$%^&*(),.?\":{}|<>]", senha):
+        return False
+    return True
+
+# No config do Google:
+oauth = OAuth(app)
+google = oauth.register(
+    name='google',
+    client_id=os.getenv('GOOGLE_CLIENT_ID'),
+    client_secret=os.getenv('GOOGLE_CLIENT_SECRET'),
+    server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
+    client_kwargs={'scope': 'openid email profile'}
+)
+
+@app.route('/login/google')
+def login_google():
+    # Esse é o link que o botão do Google vai chamar
+    redirect_uri = url_for('authorize_google', _external=True)
+    return google.authorize_redirect(redirect_uri)
+
+@app.route('/authorize/google')
+def authorize_google():
+    try:
+        token = google.authorize_access_token()
+        user_info = token.get('userinfo')
+        
+        if user_info:
+            email_google = user_info['email']
+            nome_google = user_info['name']
+            
+            # 1. Verifica se o usuário já existe no seu banco
+            user = Usuario.query.filter_by(email=email_google).first()
+            
+            if not user:
+                # 2. Se não existe, cria um novo (já confirmado!)
+                user = Usuario(
+                    nome=nome_google,
+                    email=email_google,
+                    senha="LOGIN_SOCIAL_GOOGLE", 
+                    confirmado=True 
+                )
+                db.session.add(user)
+                db.session.commit()
+            
+            # 3. Alimenta a sessão com os dados do banco
+            session['usuario_id'] = user.id
+            session['nome'] = user.nome
+            session['is_admin'] = user.is_admin
+            
+            return redirect(url_for('home'))
+            
+    except Exception as e:
+        logger.error(f"Erro no login Google: {e}")
+        flash("Erro ao autenticar com o Google.")
+        
+    return redirect(url_for('login'))
+
+# --- ROTAS DE CADASTRO COM VALIDAÇÃO E E-MAIL ---
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    if request.method == "POST":
+        nome = request.form.get("nome")
+        email = request.form.get("email")
+        senha = request.form.get("senha")
+        confirmar = request.form.get("confirmar_senha")
+
+        # 1. Validação de senha forte
+        if not senha_forte(senha):
+            flash("Senha fraca! Use 8+ caracteres, maiúscula, número e símbolo.")
+            return redirect(url_for('register'))
+
+        if senha != confirmar:
+            flash("As senhas não coincidem!")
+            return redirect(url_for('register'))
+
+        user_exists = Usuario.query.filter_by(email=email).first()
+        if user_exists:
+            flash("Este e-mail já está cadastrado.")
+            return redirect(url_for('register'))
+
+        # 2. Criando o usuário (confirmado=False por padrão)
+        senha_hash = generate_password_hash(senha)
+        novo_usuario = Usuario(
+            nome=nome, 
+            email=email, 
+            senha=senha_hash, 
+            is_admin=False 
+        )
+
+        db.session.add(novo_usuario)
+        db.session.commit()
+
+        # 3. Gerar Token e enviar E-mail
+        token = s.dumps(email, salt='email-confirm')
+        link = url_for('confirmar_email', token=token, _external=True)
+        
+        msg = Message('Confirme seu E-mail - KitPC', recipients=[email])
+        msg.body = f'Olá {nome}! Clique no link para ativar sua conta no KitPC: {link}'
+        
+        try:
+            mail.send(msg)
+            flash("Conta criada! Verifique seu e-mail para ativar.")
+        except Exception as e:
+            logger.error(f"Erro ao enviar e-mail: {e}")
+            flash("Conta criada, mas houve erro ao enviar e-mail de ativação.")
+
+        return redirect(url_for('login'))
+
+    return render_template("register.html")
+
+@app.route("/confirmar-email/<token>")
+def confirmar_email(token):
+    try:
+        email = s.loads(token, salt='email-confirm', max_age=3600)
+        user = Usuario.query.filter_by(email=email).first_or_404()
+        
+        user.confirmado = True 
+        db.session.commit()
+        
+        flash("E-mail confirmado com sucesso! Agora você pode logar.")
+        return redirect(url_for('login'))
+    except SignatureExpired:
+        return "<h1>O link expirou! Peça um novo cadastro.</h1>"
+    except Exception:
+        return "<h1>Token inválido ou corrompido!</h1>"
+
+# --- ÁREA ADMINISTRATIVA ---
+
+@app.route("/admin")
+def admin():
+    if not session.get('is_admin'):
+        return redirect(url_for('login'))
+    
+    # Busca usuários e posts para alimentar as tabelas do admin.html
+    usuarios_lista = Usuario.query.all()
+    posts_lista = Post.query.order_by(Post.data_postagem.desc()).all()
+    
+    # Importante: enviamos edit_post=None para o formulário saber que é uma NOVA postagem
+    return render_template("admin.html", usuarios=usuarios_lista, posts=posts_lista, edit_post=None)
+
+@app.route("/admin/editar-post/<int:id>")
+def editar_post(id):
+    if not session.get('is_admin'):
+        return redirect(url_for('login'))
+    
+    post = Post.query.get_or_404(id)
+    usuarios_lista = Usuario.query.all()
+    posts_lista = Post.query.order_by(Post.data_postagem.desc()).all()
+    
+    # Enviamos o post encontrado para o campo 'edit_post' para preencher o formulário
+    return render_template("admin.html", usuarios=usuarios_lista, posts=posts_lista, edit_post=post)
+
+@app.route("/admin/salvar-post", methods=["POST"])
+@app.route("/admin/salvar-post/<int:id>", methods=["POST"])
+def salvar_post(id=None):
+    if not session.get('is_admin'):
+        return redirect(url_for('login'))
+        
+    try:
+        titulo = request.form.get("titulo")
+        subtitulo = request.form.get("subtitulo")
+        conteudo = request.form.get("conteudo") 
+        
+        if id:
+            # EDIÇÃO
+            post = Post.query.get_or_404(id)
+            post.titulo = titulo
+            post.subtitulo = subtitulo
+            post.conteudo = conteudo
+        else:
+            # NOVO
+            post = Post(titulo=titulo, subtitulo=subtitulo, conteudo=conteudo, views=0)
+            db.session.add(post)
+
+        file = request.files.get('arquivo_imagem') 
+        if file and file.filename != '':
+            upload_result = cloudinary.uploader.upload(file, folder="kitpc_blog")
+            post.imagem_url = upload_result.get('secure_url')
+
+        # Gerar Slug
+      
+
+        slug = unicodedata.normalize('NFKD', titulo).encode('ascii', 'ignore').decode('ascii').lower()
+        slug = re.sub(r'[^\w\s-]', '', slug).strip()
+        post.slug = re.sub(r'[-\s]+', '-', slug)
+
+        db.session.commit()
+        flash("✅ Postagem salva com sucesso!")
+        return redirect(url_for('admin')) 
+
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Erro ao salvar: {e}")
+        return f"Erro ao salvar: {e}"
+
+@app.route("/admin/arquivar-post/<int:id>", methods=["POST"])
+def arquivar_post(id):
+    if not session.get('is_admin'):
+        return redirect(url_for('login'))
+    
+    post = Post.query.get_or_404(id)
+    # Garante que a coluna arquivado existe (evita erro caso o banco não tenha sido resetado)
+    post.arquivado = not getattr(post, 'arquivado', False) 
+    
+    db.session.commit()
+    flash("Status do post atualizado!")
+    return redirect(url_for('admin'))
+
+@app.route("/admin/upload-imagem-corpo", methods=["POST"])
+def upload_imagem_corpo():
+    if not session.get('is_admin'):
+        return jsonify({"error": "Acesso negado"}), 403
+    
+    file = request.files.get('image')
+    if file:
+        upload_result = cloudinary.uploader.upload(file, folder="kitpc_corpo_posts")
+        return jsonify({"url": upload_result.get('secure_url')})
+    return jsonify({"error": "Falha no upload"}), 400
+
+@app.route("/admin/deletar-post/<int:id>", methods=["POST"])
+def deletar_post(id):
+    if not session.get('is_admin'):
+        return "Acesso negado", 403
+    
+    post = Post.query.get_or_404(id)
+    try:
+        db.session.delete(post)
+        db.session.commit()
+        flash("Post removido!")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Erro: {e}")
+    return redirect(url_for('admin'))
+
+@app.route("/admin/confirmar-usuario/<int:id>", methods=["POST"])
+def confirmar_usuario_admin(id):
+    if not session.get('is_admin'):
+        return redirect(url_for('login'))
+        
+    usuario = Usuario.query.get_or_404(id)
+    usuario.confirmado = True 
+    
+    try:
+        db.session.commit()
+        flash(f"Usuário {usuario.nome} ativado manualmente!")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Erro ao ativar: {e}")
+        
+    return redirect(url_for('admin'))
+
+@app.route("/admin/deletar-usuario/<int:id>", methods=["POST"])
+def deletar_usuario_admin(id):
+    if not session.get('is_admin'):
+        return redirect(url_for('login'))
+        
+    usuario = Usuario.query.get_or_404(id)
+    
+    try:
+        db.session.delete(usuario)
+        db.session.commit()
+        flash(f"Usuário {usuario.nome} removido!")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Erro ao deletar: {e}")
+        
+    return redirect(url_for('admin'))
+
+# ---  ARQUIVOS DO BLOG ---
+
+@app.route("/arquivo")
+def arquivo():
+    posts = Post.query.order_by(Post.data_postagem.desc()).all()
+    return render_template("arquivo.html", posts=posts)
+
+@app.route("/blog/<slug>")
+def exibir_post(slug):
+    post = Post.query.filter_by(slug=slug).first_or_404()
+    
+    if not post.views:
+        post.views = 0
+    post.views += 1
+    
+    try:
+        db.session.commit()
+    except:
+        db.session.rollback()
+        
+    return render_template("blog_post.html", post=post)
+
+# --- LÓGICA DO MONTADOR E SETUP BANCO MANTIDOS COMO ESTÃO ---
+
+def get_total(preco_label):
+    precos = {"Um PC OK": 2000, "Um PC BOM": 3000, "Um PC MUITO BOM": 5000, "Até a NASA quer": 10000}
+    return precos.get(preco_label, 2000)
+
+def distribuir_orcamento(total, quer_gpu):
+    if quer_gpu:
+        return {"cpu": total*0.22, "placa_mae": total*0.12, "ram": total*0.12, "gpu": total*0.30, "ssd": total*0.10, "fonte": total*0.08, "gabinete": total*0.06}
+    return {"cpu": total*0.40, "placa_mae": total*0.15, "ram": total*0.15, "gpu": 0, "ssd": total*0.15, "fonte": total*0.10, "gabinete": total*0.05}
+
+def comparar_precos(termo, preco_max):
+    tabelas = [Processador, PlacaMae, MemoriaRAM, PlacaVideo, Armazenamento, Fonte, Gabinete]
+    for tabela in tabelas:
+        res = tabela.query.filter(tabela.nome.ilike(f"%{termo}%")).filter(tabela.preco <= preco_max).order_by(tabela.preco.desc()).first()
+        if res:
+            return {"nome": res.nome, "imagem": res.imagem_url, "preco": float(res.preco), "link": res.link_loja, "componente": tabela.__tablename__.upper()}
+    return None
+
+@app.route("/montar-setup", methods=["POST"])
+def montar_setup():
+    try:
+        dados = request.get_json(force=True)
+        total = get_total(dados.get("preco"))
+        gpu = dados.get("gpu") == "Sim"
+        orcamento = distribuir_orcamento(total, gpu)
+        resultado = []
+        for comp, valor in orcamento.items():
+            if valor > 0:
+                p = comparar_precos("", valor)
+                if p: resultado.append(p)
+        return jsonify(resultado)
+    except Exception as e:
+        return jsonify({"erro": str(e)}), 500
+
+# --- SETUP DO BANCO ---
+
+@app.route("/setup-db-kaio")
+def setup_db_kaio():
+    try:
+        # 1. Reset total (apaga tabelas antigas para corrigir o erro de coluna)
+        db.drop_all() 
+        
+        # 2. Recria tudo com as colunas novas
+        db.create_all()
+        
+        # 3. Puxa os dados das variáveis que você configurou no Render
+        admin_email = os.getenv("EMAIL_USER")
+        admin_pass = os.getenv("ADMIN_PASSWORD") # Puxa do Render!
+
+        if admin_email and admin_pass:
+            novo_admin = Usuario(
+                nome="Administrador",
+                email=admin_email,
+                senha=generate_password_hash(admin_pass),
+                is_admin=True,
+                confirmado=True # Admin já nasce confirmado
+            )
+            db.session.add(novo_admin)
+            db.session.commit()
+            return "✅ Sucesso: Banco MySQL resetado e Admin criado com segurança!"
+        else:
+            return "❌ Erro: Variáveis ADMIN_PASSWORD ou EMAIL_USER não encontradas no Render."
+
+    except Exception as e:
+        db.session.rollback()
+        return f"❌ Erro crítico: {e}"
+    
+@app.route("/consultoria-ia", methods=["POST"])
+def consultoria_ia():
+    dados = request.json
+    
+    # 1. Pegamos todas as peças do seu banco para a IA não inventar modelos que você não tem
+    cpus = [p.nome for p in Processador.query.all()]
+    gpus = [g.nome for g in PlacaVideo.query.all()]
+    mobos = [m.nome for m in PlacaMae.query.all()]
+    
+    # 2. Criamos um "Contexto" para a IA
+    prompt = f"""
+    Você é o Engenheiro de Hardware do KitPC. 
+    OBJETIVO: Montar o melhor PC possível para o usuário.
+    
+    DADOS DO USUÁRIO:
+    - Orçamento: R$ {dados['preco']}
+    - Uso: {dados['uso']} (Estilo: {dados['tipo']})
+    - Precisa de GPU: {dados['gpu']}
+    
+    PEÇAS DISPONÍVEIS NO MEU BANCO (Escolha APENAS desta lista):
+    - Processadores: {", ".join(cpus)}
+    - Placas-mãe: {", ".join(mobos)}
+    - Placas de Vídeo: {", ".join(gpus)}
+    
+    REGRAS DE OURO:
+    1. O socket do Processador DEVE ser compatível com a Placa-mãe.
+    2. O valor total somado das peças deve respeitar o orçamento.
+    3. Se o usuário quer jogar, foque mais orçamento na GPU.
+    
+    RETORNE ESTRITAMENTE UM JSON:
+    {{
+        "setup": [
+            {{"componente": "Processador", "nome": "NOME_EXATO_DA_LISTA", "justificativa": "Por que escolheu essa?"}},
+            {{"componente": "Placa-mãe", "nome": "NOME_EXATO_DA_LISTA", "justificativa": "Compatibilidade com o socket"}},
+            {{"componente": "Placa de Vídeo", "nome": "NOME_EXATO_DA_LISTA", "justificativa": "Performance em jogos"}}
+        ],
+        "total_estimado": "R$ X.XXX",
+        "conselho_mestre": "Dica rápida de upgrade futuro."
+    }}
+    """
+
+    try:
+        response = model.generate_content(prompt)
+        ia_data = json.loads(re.search(r'\{.*\}', response.text, re.DOTALL).group())
+
+        # 3. Agora buscamos as imagens e links REAIS no banco para cada peça que a IA escolheu
+        for item in ia_data['setup']:
+            peca_real = None
+            if item['componente'] == "Processador":
+                peca_real = Processador.query.filter_by(nome=item['nome']).first()
+            elif item['componente'] == "Placa-mãe":
+                peca_real = PlacaMae.query.filter_by(nome=item['nome']).first()
+            elif item['componente'] == "Placa de Vídeo":
+                peca_real = PlacaVideo.query.filter_by(nome=item['nome']).first()
+            
+            if peca_real:
+                item['imagem_url'] = peca_real.imagem_url
+                item['link_loja'] = peca_real.link_loja
+                item['preco'] = float(peca_real.preco)
+
+        return jsonify(ia_data)
+
+    except Exception as e:
+        logger.error(f"Erro na Consultoria IA: {e}")
+        return jsonify({"erro": "A IA se confundiu nos cabos. Tente novamente!"}), 500
+    
+@app.route('/sitemap.xml', methods=['GET'])
+def sitemap():
+    try:
+        pages = []
+        now = datetime.now().strftime('%Y-%m-%d')
+        
+        # Lista de rotas que o Google NÃO deve indexar
+        rotas_bloqueadas = [
+            '/admin', 
+            '/logout', 
+            '/setup-db-kaio', 
+            '/login', 
+            '/register', 
+            '/confirmar-email',
+            '/health',
+            '/sitemap.xml'
+        ]
+
+        # 1. Páginas Estáticas (Filtradas)
+        for rule in app.url_map.iter_rules():
+            # Filtra apenas métodos GET, sem argumentos extras e que não estejam na lista de bloqueio
+            if "GET" in rule.methods and len(rule.arguments) == 0:
+                url_path = str(rule.rule)
+                
+                # Verifica se a URL começa com algum item da lista de bloqueados
+                if not any(url_path.startswith(bloqueada) for bloqueada in rotas_bloqueadas):
+                    pages.append([f"https://kitpc.com.br{url_path}", now])
+
+        # 2. Páginas Dinâmicas (Posts do Blog)
+        posts = Post.query.filter_by(arquivado=False).all() # Só adiciona o que não estiver arquivado
+        for post in posts:
+            url = f"https://kitpc.com.br/blog/{post.slug}"
+            pages.append([url, now])
+
+        sitemap_xml = render_template('sitemap_template.xml', pages=pages)
+        response = make_response(sitemap_xml)
+        response.headers["Content-Type"] = "application/xml"
+        return response
+    except Exception as e:
+        logger.error(f"Erro ao gerar sitemap: {e}")
+        return str(e)
+
+@app.route("/privacidade")
+def privacidade():
+    return render_template("privacidade.html")
+
+@app.route("/termos")
+def termos():
+    return render_template("termos.html")
+
+@app.route('/robots.txt')
+def robots_txt():
+    return send_from_directory(app.static_folder, 'robots.txt')
+
+@app.route("/health")
+def health(): return "OK", 200
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)

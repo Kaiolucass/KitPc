@@ -1,0 +1,75 @@
+/* Estilo para as páginas Legais (Termos e Privacidade) */
+body {
+    background: radial-gradient(circle at top, #1a1a2e 0%, #0f0f0f 100%);
+    color: #e0e0e0;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+.legal-container {
+    max-width: 850px;
+    margin: 60px auto;
+    padding: 40px;
+    background: rgba(255, 255, 255, 0.03); /* Efeito Vidro */
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    border: 1px solid rgba(146, 22, 253, 0.3); /* Borda roxa suave */
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), 0 0 15px rgba(146, 22, 253, 0.1);
+}
+
+.legal-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 2.5rem;
+    background: linear-gradient(90deg, #3CC9E4, #9216FD);
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 40px;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.legal-container h3 {
+    color: #3CC9E4;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.2rem;
+    margin-top: 30px;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+}
+
+/* Adiciona um detalhe de linha antes do H3 */
+.legal-container h3::before {
+    content: "";
+    width: 4px;
+    height: 20px;
+    background: #9216FD;
+    margin-right: 12px;
+    border-radius: 2px;
+}
+
+.legal-container p {
+    line-height: 1.8;
+    color: #b0b0b0;
+    margin-bottom: 20px;
+}
+
+/* Estilo para o Rodapé */
+.main-footer {
+    padding: 40px 0;
+    text-align: center;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    margin-top: 80px;
+}
+
+.footer-link {
+    color: #3CC9E4;
+    text-decoration: none;
+    transition: 0.3s;
+    font-weight: bold;
+    margin: 0 15px;
+}
+
+.footer-link:hover {
+    color: #9216FD;
+    text-shadow: 0 0 10px rgba(146, 22, 253, 0.5);
+}

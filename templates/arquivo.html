@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blog - KitPc</title>
+  <link rel="icon" href="{{ url_for('static', filename='Imagens/favicon.png') }}">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3396569889908907"
+    crossorigin="anonymous"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='CSS/arquivo.css') }}">
+  <style>
+
+  </style>
+</head>
+
+<body class="bg-dark text-white">
+  <header>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark border-bottom border-secondary">
+      <div class="container-fluid">
+        <div class="d-flex align-items-center">
+          <img src="{{ url_for('static', filename='Imagens/Logo KitPc.png') }}" alt="Logo KitPc" class="logo-kitpc"
+            style="height: 40px;">
+          <h1 class="h4 mb-0 ms-2 text-light" style="font-family: 'Orbitron', sans-serif;">KitPC</h1>
+        </div>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ms-auto align-items-center">
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('home') }}">Início</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('montagem') }}">Montagem</a></li>
+            <li class="nav-item"><a class="nav-link active text-info" href="{{ url_for('arquivo') }}">Blog</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('educacao') }}">Educação</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('sobre_nos') }}">Sobre Nós</a></li>
+
+            {% if session['nome'] %}
+            <li class="nav-item d-flex align-items-center gap-2 ms-lg-3 mt-3 mt-lg-0">
+              <span class="text-info fw-bold">
+                <i class="fas fa-user-circle"></i> {{ session['nome'].split(' ')[0] }}
+              </span>
+              <div class="d-flex gap-2">
+                {% if session['is_admin'] %}
+                <a class="btn btn-outline-warning btn-sm" href="{{ url_for('admin') }}">ADM</a>
+                {% endif %}
+                <a class="btn btn-sm btn-outline-danger" href="{{ url_for('logout') }}"><i
+                    class="fas fa-sign-out-alt"></i></a>
+              </div>
+            </li>
+            {% else %}
+            <li class="nav-item ms-lg-3 mt-3 mt-lg-0">
+              <button class="btn btn-outline-info btn-sm fw-bold" data-bs-toggle="modal" data-bs-target="#modalAcesso">
+                <i class="fa-solid fa-arrow-right-to-bracket"></i> Entrar
+              </button>
+            </li>
+            {% endif %}
+          </ul>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <div class="modal fade" id="modalAcesso" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content bg-dark border-info">
+        <div class="modal-header border-bottom border-info">
+          <ul class="nav nav-tabs card-header-tabs w-100" id="authTabs" role="tablist">
+            <li class="nav-item"><button class="nav-link active fw-bold" data-bs-toggle="tab" data-bs-target="#login"
+                type="button" style="color: #3CC9E4;">LOGIN</button></li>
+            <li class="nav-item"><button class="nav-link fw-bold" data-bs-toggle="tab" data-bs-target="#register"
+                type="button" style="color: #9216FD;">CADASTRAR</button></li>
+          </ul>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div class="tab-content">
+            <div class="tab-pane fade show active" id="login">
+              <form action="{{ url_for('login') }}" method="POST">
+                <div class="mb-3">
+                  <label class="form-label text-info">Email</label>
+                  <input type="email" name="email" class="form-control bg-transparent text-white border-info" required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label text-info">Senha</label>
+                  <input type="password" name="senha" class="form-control bg-transparent text-white border-info"
+                    required>
+                </div>
+                <button type="submit" class="btn btn-info w-100 fw-bold">ACESSAR CONTA</button>
+              </form>
+              <a href="{{ url_for('login_google') }}" class="btn-google-custom">
+                <div class="google-icon-wrapper">
+                  <img src="{{ url_for('static', filename='Imagens/Logo-google-icon-PNG.png') }}" alt="Google">
+                </div>
+                <span class="google-text">Continuar com Google</span>
+              </a>
+            </div>
+            <div class="tab-pane fade" id="register">
+              <form action="{{ url_for('register') }}" method="POST">
+                <div class="mb-3">
+                  <label class="form-label" style="color: #9216FD;">Nome Completo</label>
+                  <input type="text" name="nome" class="form-control bg-transparent text-white"
+                    style="border: 1px solid #9216FD;" required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label" style="color: #9216FD;">Email</label>
+                  <input type="email" name="email" class="form-control bg-transparent text-white"
+                    style="border: 1px solid #9216FD;" required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label" style="color: #9216FD;">Senha</label>
+                  <input type="password" name="senha" class="form-control bg-transparent text-white"
+                    style="border: 1px solid #9216FD;" required>
+                </div>
+                <button type="submit" class="btn w-100 fw-bold" style="background-color: #9216FD; color: white;">CRIAR
+                  CONTA</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <main class="container mt-5">
+    <div class="row">
+      <div class="col-12">
+        <h2 class="titulo-pagina mb-5 text-center" style="font-family: 'Orbitron', sans-serif;">
+          <i class="fas fa-microchip text-info"></i> FEED DE NOTÍCIAS
+        </h2>
+
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+          {% if posts %}
+          {% for post in posts %}
+          <div class="col">
+            <div class="card h-100 card-post">
+              <div class="capa-container position-relative">
+                {% if post.imagem_url %}
+                <img src="{{ post.imagem_url }}" class="capa-blog" alt="{{ post.titulo }}">
+                {% else %}
+                <img src="{{ url_for('static', filename='Imagens/default-post.png') }}" class="capa-blog"
+                  alt="Sem capa">
+                {% endif %}
+                <div class="position-absolute top-0 end-0 p-2">
+                  <span class="data-badge">{{ post.data_postagem.strftime('%d/%m/%Y') }}</span>
+                </div>
+              </div>
+
+              <div class="card-body d-flex flex-column">
+                <h5 class="titulo-post mb-3">{{ post.titulo }}</h5>
+
+                <div class="mt-auto d-flex justify-content-between align-items-center">
+                  <span class="text-secondary small">
+                    <i class="far fa-eye text-info"></i> {{ post.views or 0 }} visualizações
+                  </span>
+                  <a href="{{ url_for('exibir_post', slug=post.slug) }}" class="btn btn-sm btn-outline-info fw-bold">
+                    LER MATÉRIA <i class="fas fa-arrow-right ms-1"></i>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+          {% else %}
+          <div class="col-12 text-center p-5">
+            <i class="fas fa-folder-open fa-3x mb-3 text-secondary"></i>
+            <p class="opacity-50">Nenhum post foi publicado ainda.</p>
+          </div>
+          {% endif %}
+        </div>
+
+        <div class="mt-5 text-center text-secondary small border-top border-secondary pt-4">
+          Total de matérias no banco KitPC: <span class="text-info fw-bold">{{ posts|length }}</span>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-content">
+      <p>&copy; 2026 KitPC - Todos os direitos reservados</p>
+      <div class="footer-links">
+        <a href="{{ url_for('privacidade') }}"
+          class="link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Privacidade</a> |
+        <a href="{{ url_for('termos') }}"
+          class="link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Termos de Uso</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - KitPC</title>
+  <link rel="icon" href="{{ url_for('static', filename='Imagens/favicon.png') }}" type="image/png">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='CSS/login.css') }}">
+
+<body class="auth-body">
+  <div class="auth-box">
+    <img src="{{ url_for('static', filename='Imagens/Logo KitPc.png') }}" alt="Logo KitPC" class="auth-logo">
+    <h2>Acesso</h2>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="flash {{ category }}">{{ message }}</div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('login') }}">
+      <input type="email" name="email" placeholder="Seu E-mail" required>
+      <input type="password" name="senha" placeholder="Sua Senha" required>
+      <button type="submit" class="auth-btn">Entrar</button>
+    </form>
+
+    <p class="auth-text">
+      Novo por aqui?<a href="{{ url_for('register') }}">Cadastre-se</a>
+    </p>
+    <a href="{{ url_for('login_google') }}" class="btn-google-custom">
+      <div class="google-icon-wrapper">
+        <img src="{{ url_for('static', filename='Imagens/Logo-google-icon-PNG.png') }}" alt="Google">
+      </div>
+      <span class="google-text">Continuar com Google</span>
+    </a>
+    <p class="auth-text">
+      <a href="#">Esqueceu o acesso?</a>
+    </p>
+  </div>
+</body>
+
+</html>

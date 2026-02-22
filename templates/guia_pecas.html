@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Educação - KitPc</title>
+  <link rel="icon" href="{{ url_for('static', filename='Imagens/favicon.png') }}">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3396569889908907"
+    crossorigin="anonymous"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='CSS/guia_pecas.css') }}">
+</head>
+
+<body>
+  <header>
+    <nav class="navbar navbar-expand-lg">
+      <div class="container-fluid">
+        <div class="d-flex align-items-center">
+          <img src="{{ url_for('static', filename='Imagens/Logo KitPc.png') }}" alt="Logo KitPc" class="logo-kitpc">
+          <h1 class="h4 mb-0 ms-2 text-light" style="font-family: 'Orbitron', sans-serif;">Guias de Peças</h1>
+        </div>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ms-auto align-items-center">
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('home') }}">Início</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('montagem') }}">Montagem</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('arquivo') }}">Blog</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('educacao') }}">Educação</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('sobre_nos') }}">Sobre Nós</a></li>
+
+            {% if session['nome'] %}
+            <li class="nav-item d-flex align-items-center gap-2 ms-lg-3 mt-3 mt-lg-0">
+              <span class="text-info fw-bold" style="white-space: nowrap;">
+                <i class="fas fa-user-circle"></i> {{ session['nome'].split(' ')[0] }}
+              </span>
+              <div class="d-flex gap-2">
+                {% if session['is_admin'] %}
+                <a class="btn btn-outline-warning btn-sm" href="{{ url_for('admin') }}">ADM</a>
+                {% endif %}
+                <a class="fa-solid fa-arrow-right-from-bracket" style="color: #ff4d4d;"
+                  href="{{ url_for('logout') }}"></a>
+              </div>
+            </li>
+            {% else %}
+            <li class="nav-item ms-lg-3 mt-3 mt-lg-0">
+              <button class="btn btn-outline-info btn-sm fw-bold" data-bs-toggle="modal" data-bs-target="#modalAcesso">
+                <i class="fa-solid fa-arrow-right-to-bracket"></i> Entrar
+              </button>
+            </li>
+            {% endif %}
+          </ul>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <div class="modal fade" id="modalAcesso" tabindex="-1" aria-labelledby="modalAcessoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content bg-dark border-info">
+        <div class="modal-header border-bottom border-info">
+          <ul class="nav nav-tabs card-header-tabs w-100" id="authTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active fw-bold" id="login-tab" data-bs-toggle="tab" data-bs-target="#login"
+                type="button" role="tab" style="color: #3CC9E4;">LOGIN</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link fw-bold" id="register-tab" data-bs-toggle="tab" data-bs-target="#register"
+                type="button" role="tab" style="color: #9216FD;">CADASTRAR</button>
+            </li>
+          </ul>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div class="tab-content" id="authTabsContent">
+            <div class="tab-pane fade show active" id="login" role="tabpanel">
+              <form action="{{ url_for('login') }}" method="POST">
+                <div class="mb-3">
+                  <label class="form-label text-info">Email</label>
+                  <input type="email" name="email" class="form-control bg-transparent text-white border-info" required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label text-info">Senha</label>
+                </div>
+                <button type="submit" class="btn btn-info w-100 fw-bold mt-2">ACESSAR CONTA</button>
+              </form>
+              <a href="{{ url_for('login_google') }}" class="btn-google-custom">
+                <div class="google-icon-wrapper">
+                  <img src="{{ url_for('static', filename='Imagens/Logo-google-icon-PNG.png') }}" alt="Google">
+                </div>
+                <span class="google-text">Continuar com Google</span>
+              </a>
+            </div>
+            <div class="tab-pane fade" id="register" role="tabpanel">
+              <form action="{{ url_for('register') }}" method="POST">
+                <div class="mb-3">
+                  <label class="form-label" style="color: #9216FD;">Nome Completo</label>
+                  <input type="text" name="nome" class="form-control bg-transparent text-white"
+                    style="border: 1px solid #9216FD;" required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label" style="color: #9216FD;">Email</label>
+                  <input type="email" name="email" class="form-control bg-transparent text-white"
+                    style="border: 1px solid #9216FD;" required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label" style="color: #9216FD;">Senha</label>
+                  <input type="password" name="senha" class="form-control bg-transparent text-white"
+                    style="border: 1px solid #9216FD;" required>
+                </div>
+                <button type="submit" class="btn w-100 fw-bold mt-2"
+                  style="background-color: #9216FD; color: white;">CRIAR CONTA</button>
+              </form>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <section class="container py5">
+    <div class="row align-items-center">
+      <div class="col-md-6 mb-4 mb-md-0">
+        <h1 class="display-5 mb-3 fw-bold">Entenda seu PC antes de montar</h1>
+        <p class="lead">Antes de montar seu computador, é importante conhecer os principais componentes e como eles
+          funcionam juntos. Aqui você aprende de forma simples!</p>
+      </div>
+    </div>
+
+    <section class="container mt-5">
+      <h2 class="text-center display-4 mb-4">Principais peças</h2>
+      <div class="row">
+        <div class="col-md-4">
+          <div class="card mb-4">
+            <div class="card-body">
+              <h5 class="text-center">Processador</h5>
+              <img src="{{ url_for('static', filename='Imagens/processador.png') }}" class="card-img-top"
+                alt="Processador">
+              <p class="paragrafo2">O cérebro do computador. Ele executa todas as tarefas e cálculos rapidamente.</p>
+              <button type="button" class="btn btn-outline-info" data-bs-toggle="modal"
+                data-bs-target="#modalprocessador">Saiba Mais</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="card-body">
+            <div class="card mb-4">
+              <h5 class="text-center">Placa de Vídeo</h5>
+              <img src="{{ url_for('static', filename='Imagens/placa de video.png') }}" class="card-img-top"
+                alt="Placa de Vídeo">
+              <p class="paragrafo2">Responsável pelos gráficos, ideal para jogos e edições de vídeo.</p>
+              <button type="button" class="btn btn-outline-info" data-bs-toggle="modal"
+                data-bs-target="#modalplacadevideo">Saiba Mais</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="card mb-4">
+            <div class="card-body">
+              <h5 class="text-center">Memória RAM</h5>
+              <img src="{{ url_for('static', filename='Imagens/memoria ram.png') }}" class="card-img-top"
+                alt="Memória RAM">
+              <p class="paragrafo2">Memória temporária que mantém os dados enquanto o PC está ligado.</p>
+              <button type="button" class="btn btn-outline-info" data-bs-toggle="modal"
+                data-bs-target="#modalmemoriaram">Saiba Mais</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="card mb-4">
+            <div class="card-body">
+              <h5 class="text-center">Armazenamento</h5>
+              <img src="{{ url_for('static', filename='Imagens/ssd.png') }}" class="card-img-top" alt="Armazenamento">
+              <p class="paragrafo2">Onde ficam seus arquivos, jogos e programas.</p>
+              <button type="button" class="btn btn-outline-info" data-bs-toggle="modal"
+                data-bs-target="#modalaramzenamento">Saiba Mais</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="card mb-4">
+            <div class="card-body">
+              <h5 class="text-center">Fonte de Alimentação</h5>
+              <img src="{{ url_for('static', filename='Imagens/fonte.png') }}" class="card-img-top"
+                alt="Fonte de Alimentação">
+              <p class="paragrafo2">Fornece energia elétrica para todas as peças do computador.</p>
+              <button type="button" class="btn btn-outline-info" data-bs-toggle="modal"
+                data-bs-target="#modalfonte">Saiba Mais</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="card mb-4">
+            <div class="card-body">
+              <h5 class="text-center">Placa-Mãe</h5>
+              <img src="{{ url_for('static', filename='Imagens/placa mae.png') }}" class="card-img-top" alt="Placa-Mãe">
+              <p class="paragrafo2">Conecta todos os componentes do computador entre si.</p>
+              <button type="button" class="btn btn-outline-info" data-bs-toggle="modal"
+                data-bs-target="#modalplacamae">Saiba Mais</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="card mb-4">
+            <div class="card-body">
+              <h5 class="text-center">Gabinete</h5>
+              <img src="{{ url_for('static', filename='Imagens/gabinete.png') }}" class="card-img-top" alt="Gabinete">
+              <p class="paragrafo2">Estrutura que abriga e protege os componentes do PC.</p>
+              <button type="button" class="btn btn-outline-info" data-bs-toggle="modal"
+                data-bs-target="#modalGabinete">Saiba Mais</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="card mb-4">
+            <div class="card-body">
+              <h5 class="text-center">Cooler</h5>
+              <img src="{{ url_for('static', filename='Imagens/cooler.png') }}" class="card-img-top" alt="Cooler">
+              <p class="paragrafo2">Ajuda a resfriar o computador, evitando superaquecimento.</p>
+              <button type="button" class="btn btn-outline-info" data-bs-toggle="modal"
+                data-bs-target="#modalCooler">Saiba Mais</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="card mb-4">
+            <div class="card-body">
+              <h5 class="text-center">Monitor</h5>
+              <img src="{{ url_for('static', filename='Imagens/Monitor.png') }}" class="card-img-top" alt="Monitor">
+              <p class="paragrafo2">Tela onde tudo que acontece no computador é exibido.</p>
+              <button type="button" class="btn btn-outline-info" data-bs-toggle="modal"
+                data-bs-target="#modalMonitor">Saiba Mais</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="card mb-4">
+            <div class="card-body">
+              <h5 class="text-center">Mouse e Teclado</h5>
+              <img src="{{ url_for('static', filename='Imagens/Mouse e teclado.png') }}" class="card-img-top"
+                alt="Mouse e Teclado">
+              <p class="paragrafo2">Permitem controlar e enviar comandos ao computador.</p>
+              <button type="button" class="btn btn-outline-info" data-bs-toggle="modal"
+                data-bs-target="#modalMouseTeclado">Saiba Mais</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="card mb-4">
+            <div class="card-body">
+              <h5 class="text-center">Nobreak</h5>
+              <img src="{{ url_for('static', filename='Imagens/Nobreak.png') }}" class="card-img-top" alt="Nobreak">
+              <p class="paragrafo2">Garante energia em caso de queda de luz, protegendo o PC.</p>
+              <button type="button" class="btn btn-outline-info" data-bs-toggle="modal"
+                data-bs-target="#modalNobreak">Saiba Mais</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="card mb-4">
+            <div class="card-body">
+              <h5 class="text-center">Notebook</h5>
+              <img src="{{ url_for('static', filename='Imagens/notebook.png') }}" class="card-img-top" alt="Notebook">
+              <p class="paragrafo2">Computador portátil, ideal para mobilidade no dia a dia.</p>
+              <button type="button" class="btn btn-outline-info" data-bs-toggle="modal"
+                data-bs-target="#modalNotebook">Saiba Mais</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modais dos componentes -->
+
+    <!-- Modal para Processador -->
+    <div class="modal fade" id="modalprocessador" tabindex="-1" aria-labelledby="modalprocessadorLabel"
+      aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalprocessadorLabel">🧠 Processador (CPU)</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            O processador é responsável por pensar e tomar decisões. Tudo o que você faz – abrir um programa, navegar na
+            internet, jogar – passa por ele. Quanto mais rápido e moderno, melhor o desempenho geral da máquina.
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-info" data-bs-dismiss="modal">Fechar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Modal para Placa de Vídeo -->
+    <div class="modal fade" id="modalplacadevideo" tabindex="-1" aria-labelledby="placadevideoLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="placadevideoLabel">🎮 Placa de Vídeo (GPU)</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            Se você joga, edita vídeos ou usa programas pesados de imagem, precisa de uma boa GPU. Ela processa tudo o
+            que aparece na tela com alta qualidade e desempenho. Sem ela, o processador cuida dos gráficos, mas com
+            limitações.
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-info" data-bs-dismiss="modal">Fechar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Modal para Memória RAM -->
+    <div class="modal fade" id="modalmemoriaram" tabindex="-1" aria-labelledby="modalmemoriaramLabel"
+      aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalmemoriaramLabel">⚡ Memória RAM</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            A RAM guarda temporariamente as informações que estão sendo usadas no momento. Se você abre vários programas
+            ou abas no navegador, ela que dá conta. Quanto mais RAM, menos travamentos e mais fluidez.
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-info" data-bs-dismiss="modal">Fechar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal para Armazenamento -->
+    <div class="modal fade" id="modalaramzenamento" tabindex="-1" aria-labelledby="modalConvidadoEspecialLabel"
+      aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalConvidadoEspecialLabel">💾 Armazenamento (HD / SSD)</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            HDs e SSDs armazenam todos os dados do computador. O SSD é mais rápido que o HD, o que significa
+            inicialização mais ágil e carregamentos mais curtos. O HD costuma ser maior, mas mais lento.
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-info" data-bs-dismiss="modal">Fechar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal para Fonte de Alimentação -->
+    <div class="modal fade" id="modalfonte" tabindex="-1" aria-labelledby="modalHappyHourDJLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalHappyHourDJLabel">🔌 Fonte de Alimentação</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            A fonte transforma a energia da tomada e envia a quantidade certa para cada componente. Escolher uma boa
+            fonte evita queima de peças e garante estabilidade.
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-info" data-bs-dismiss="modal">Fechar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal para Placa-Mãe -->
+    <div class="modal fade" id="modalplacamae" tabindex="-1" aria-labelledby="modalCacaTesouroLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalCacaTesouroLabel">🧩 Placa-Mãe</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            A placa-mãe liga todos os componentes e permite que eles se comuniquem entre si. É como a fundação de uma
+            casa – tudo precisa estar encaixado nela para funcionar.
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-info" data-bs-dismiss="modal">Fechar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Gabinete -->
+    <div class="modal fade" id="modalGabinete" tabindex="-1" aria-labelledby="modalGabineteLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalGabineteLabel">Gabinete</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+          </div>
+          <div class="modal-body">
+            O gabinete é a "casca" do computador. Ele protege todos os componentes internos e garante boa circulação de
+            ar para o resfriamento. Também ajuda a manter tudo organizado e seguro.
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-info" data-bs-dismiss="modal">Fechar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cooler -->
+    <div class="modal fade" id="modalCooler" tabindex="-1" aria-labelledby="modalCoolerLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalCoolerLabel">Cooler / Sistema de Resfriamento</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+          </div>
+          <div class="modal-body">
+            O cooler mantém a temperatura do computador sob controle. Isso evita superaquecimento e aumenta a vida útil
+            das peças. Existem coolers simples e sistemas mais avançados como o watercooler.
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-info" data-bs-dismiss="modal">Fechar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Monitor -->
+    <div class="modal fade" id="modalMonitor" tabindex="-1" aria-labelledby="modalMonitorLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalMonitorLabel">Monitor</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+          </div>
+          <div class="modal-body">
+            O monitor é onde tudo aparece: textos, vídeos, jogos. Sua qualidade afeta diretamente a experiência do
+            usuário. Resolução, taxa de atualização e tamanho são aspectos importantes na escolha.
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-info" data-bs-dismiss="modal">Fechar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mouse e Teclado -->
+    <div class="modal fade" id="modalMouseTeclado" tabindex="-1" aria-labelledby="modalMouseTecladoLabel"
+      aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalMouseTecladoLabel">Mouse e Teclado</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+          </div>
+          <div class="modal-body">
+            O teclado e o mouse são os principais dispositivos de entrada. O teclado serve para digitar e o mouse para
+            navegar e interagir com os elementos da tela. Existem modelos gamer, ergonômicos, sem fio, entre outros.
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-info" data-bs-dismiss="modal">Fechar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Nobreak -->
+    <div class="modal fade" id="modalNobreak" tabindex="-1" aria-labelledby="modalNobreakLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalNobreakLabel">Nobreak</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+          </div>
+          <div class="modal-body">
+            O nobreak fornece energia temporária em caso de queda de luz. Isso evita desligamentos bruscos que podem
+            causar danos aos componentes e perda de arquivos.
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-info" data-bs-dismiss="modal">Fechar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notebook -->
+    <div class="modal fade" id="modalNotebook" tabindex="-1" aria-labelledby="modalNotebookLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalNotebookLabel">Notebook</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+          </div>
+          <div class="modal-body">
+            Um notebook é um computador portátil com bateria. Ele combina todos os componentes em um único corpo
+            compacto, sendo ideal para quem precisa de mobilidade e praticidade.
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-info" data-bs-dismiss="modal">Fechar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <div vw class="enabled">
+    <div vw-access-button class="active"></div>
+    <div vw-plugin-wrapper>
+      <div class="vw-plugin-top-wrapper"></div>
+    </div>
+  </div>
+  <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
+  <script>
+    new window.VLibras.Widget('https://vlibras.gov.br/app');
+  </script>
+  <!-- Rodapé -->
+  <footer>
+    <div class="footer-content">
+      <p>&copy; 2026 KitPC - Todos os direitos reservados</p>
+      <div class="footer-links">
+        <a href="{{ url_for('privacidade') }}"
+          class="link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Privacidade</a> |
+        <a href="{{ url_for('termos') }}"
+          class="link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Termos de Uso</a>
+      </div>
+    </div>
+    </div>
+  </footer>
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+    crossorigin="anonymous"></script>
+</body>
+
+</html>

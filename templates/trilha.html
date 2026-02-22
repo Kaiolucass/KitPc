@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Educação - KitPc</title>
+  <link rel="icon" href="{{ url_for('static', filename='Imagens/favicon.png') }}">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3396569889908907"
+    crossorigin="anonymous"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='CSS/trilha.css') }}">
+</head>
+</head>
+
+<body>
+  <header>
+    <nav class="navbar navbar-expand-lg">
+      <div class="container-fluid">
+        <div class="d-flex align-items-center">
+          <img src="{{ url_for('static', filename='Imagens/Logo KitPc.png') }}" alt="Logo KitPc" class="logo-kitpc">
+          <h1 class="h4 mb-0 ms-2 text-light" style="font-family: 'Orbitron', sans-serif;">Educação</h1>
+        </div>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ms-auto align-items-center">
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('home') }}">Início</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('montagem') }}">Montagem</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('arquivo') }}">Blog</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('educacao') }}">Educação</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('sobre_nos') }}">Sobre Nós</a></li>
+
+            {% if session['nome'] %}
+            <li class="nav-item d-flex align-items-center gap-2 ms-lg-3 mt-3 mt-lg-0">
+              <span class="text-info fw-bold" style="white-space: nowrap;">
+                <i class="fas fa-user-circle"></i> {{ session['nome'].split(' ')[0] }}
+              </span>
+              <div class="d-flex gap-2">
+                {% if session['is_admin'] %}
+                <a class="btn btn-outline-warning btn-sm" href="{{ url_for('admin') }}">ADM</a>
+                {% endif %}
+                <a class="fa-solid fa-arrow-right-from-bracket" style="color: #ff4d4d;"
+                  href="{{ url_for('logout') }}"></a>
+              </div>
+            </li>
+            {% else %}
+            <li class="nav-item ms-lg-3 mt-3 mt-lg-0">
+              <button class="btn btn-outline-info btn-sm fw-bold" data-bs-toggle="modal" data-bs-target="#modalAcesso">
+                <i class="fa-solid fa-arrow-right-to-bracket"></i> Entrar
+              </button>
+            </li>
+            {% endif %}
+          </ul>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <div class="modal fade" id="modalAcesso" tabindex="-1" aria-labelledby="modalAcessoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content bg-dark border-info">
+        <div class="modal-header border-bottom border-info">
+          <ul class="nav nav-tabs card-header-tabs w-100" id="authTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active fw-bold" id="login-tab" data-bs-toggle="tab" data-bs-target="#login"
+                type="button" role="tab" style="color: #3CC9E4;">LOGIN</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link fw-bold" id="register-tab" data-bs-toggle="tab" data-bs-target="#register"
+                type="button" role="tab" style="color: #9216FD;">CADASTRAR</button>
+            </li>
+          </ul>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div class="tab-content" id="authTabsContent">
+            <div class="tab-pane fade show active" id="login" role="tabpanel">
+              <form action="{{ url_for('login') }}" method="POST">
+                <div class="mb-3">
+                  <label class="form-label text-info">Email</label>
+                  <input type="email" name="email" class="form-control bg-transparent text-white border-info" required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label text-info">Senha</label>
+                </div>
+                <button type="submit" class="btn btn-info w-100 fw-bold mt-2">ACESSAR CONTA</button>
+              </form>
+              <a href="{{ url_for('login_google') }}" class="btn-google-custom">
+                <div class="google-icon-wrapper">
+                  <img src="{{ url_for('static', filename='Imagens/Logo-google-icon-PNG.png') }}" alt="Google">
+                </div>
+                <span class="google-text">Continuar com Google</span>
+              </a>
+            </div>
+            <div class="tab-pane fade" id="register" role="tabpanel">
+              <form action="{{ url_for('register') }}" method="POST">
+                <div class="mb-3">
+                  <label class="form-label" style="color: #9216FD;">Nome Completo</label>
+                  <input type="text" name="nome" class="form-control bg-transparent text-white"
+                    style="border: 1px solid #9216FD;" required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label" style="color: #9216FD;">Email</label>
+                  <input type="email" name="email" class="form-control bg-transparent text-white"
+                    style="border: 1px solid #9216FD;" required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label" style="color: #9216FD;">Senha</label>
+                  <input type="password" name="senha" class="form-control bg-transparent text-white"
+                    style="border: 1px solid #9216FD;" required>
+                </div>
+                <button type="submit" class="btn w-100 fw-bold mt-2"
+                  style="background-color: #9216FD; color: white;">CRIAR CONTA</button>
+              </form>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+    <div class="trilha-container">
+         <div class="text-center mb-5">
+        <h1 class="display-4 fw-bold text-purple" style="font-family: 'Orbitron';">TRILHA KIT PC</h1>
+        <p class="lead text-secondary">A jornada do zero ao primeiro boot. Siga a ordem e domine seu hardware.</p>
+    </div>
+        <div class="bloco-trilha">
+            <h3 class="bloco-titulo"><span class="badge-numero">1</span> Começar do Zero (Perder o Medo)</h3>
+            <div class="lista-passos">
+                <a href="#" class="passo-item1">
+                    <div class="passo-status"><i class="far fa-circle"></i></div>
+                    <div class="passo-info1">
+                        <h5>1. Montar um PC é arriscado?</h5>
+                        <small>Quebrando o medo de perder dinheiro e queimar peças.</small>
+                    </div>
+                    <i class="fas fa-chevron-right arrow"></i>
+                </a>
+                <a href="#" class="passo-item1">
+                    <div class="passo-status"><i class="far fa-circle"></i></div>
+                    <div class="passo-info1">
+                        <h5>2. PC pronto ou montar peça por peça?</h5>
+                        <small>Vantagens, desvantagens e custo-benefício.</small>
+                    </div>
+                    <i class="fas fa-chevron-right arrow"></i>
+                </a>
+                </div>
+        </div>
+
+        <div class="bloco-trilha mt-5">
+            <h3 class="bloco-titulo text-info"><span class="badge-numero bg-info text-dark">2</span> Escolher as Peças</h3>
+            <div class="lista-passos">
+                <a href="#" class="passo-item2">
+                    <div class="passo-status"><i class="far fa-circle"></i></div>
+                    <div class="passo-info2">
+                        <h5>5. Por onde começar a escolha?</h5>
+                        <small>Definindo o orçamento e o objetivo do PC.</small>
+                    </div>
+                    <i class="fas fa-chevron-right arrow"></i>
+                </a>
+                <a href="#" class="passo-item2">
+                    <div class="passo-status"><i class="far fa-circle"></i></div>
+                    <div class="passo-info2">
+                        <h5>6. Quanto de RAM eu realmente preciso?</h5>
+                        <small>8GB, 16GB ou 32GB? Saiba o ideal para você.</small>
+                    </div>
+                    <i class="fas fa-chevron-right arrow"></i>
+                </a>
+            </div>
+        </div>
+
+        <div class="bloco-trilha mt-5">
+            <h3 class="bloco-titulo text-warning"><span class="badge-numero bg-warning text-dark">3</span> Execução Prática</h3>
+            <div class="lista-passos">
+                <a href="#" class="passo-item3">
+                    <div class="passo-status"><i class="far fa-circle"></i></div>
+                    <div class="passo-info3">
+                        <h5>10. Ordem correta de montagem</h5>
+                        <small>O que instalar primeiro para não ter que desmontar depois.</small>
+                    </div>
+                    <i class="fas fa-chevron-right arrow"></i>
+                </a>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Rodapé -->
+  <footer>
+    <div class="footer-content">
+      <p>&copy; 2026 KitPC - Todos os direitos reservados</p>
+      <div class="footer-links">
+        <a href="{{ url_for('privacidade') }}"
+          class="link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Privacidade</a> |
+        <a href="{{ url_for('termos') }}"
+          class="link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Termos de Uso</a>
+      </div>
+    </div>
+    </div>
+  </footer>
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+    crossorigin="anonymous"></script>
+</body>

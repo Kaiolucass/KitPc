@@ -1,0 +1,195 @@
+/* Configurações Globais da Página Sobre */
+body { 
+    background-color: #05001C;
+    min-height: 100vh;
+    font-family: 'Orbitron', sans-serif;
+    color: #ffffff;
+    margin: 0;
+    padding: 0;
+}
+
+/* --- FIX: EXTERMINADOR DE FUNDO BRANCO (MODAL E LOGIN) --- */
+
+.modal-content {
+    background-color: #0d1117 !important;
+    border: 1px solid #3CC9E4 !important;
+    box-shadow: 0 0 25px rgba(60, 201, 228, 0.2);
+}
+
+/* Botão Google Customizado - SEM fundo branco no hover */
+.btn-google-custom {
+    display: flex;
+    align-items: center;
+    background-color: #ffffff; /* Fundo branco como na imagem */
+    border: 2px solid #9216FD; /* Borda roxa neon */
+    border-radius: 8px;
+    padding: 1px; /* Espaço para a borda aparecer */
+    text-decoration: none;
+    transition: all 0.3s ease;
+    width: 100%;
+    height: 50px;
+    margin-top: 15px;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-google-custom:hover {
+    box-shadow: 0 0 15px rgba(146, 22, 253, 0.6);
+    transform: scale(1.02);
+}
+
+/* Container do Ícone */
+.google-icon-wrapper {
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.google-icon-wrapper img {
+    width: 20px;  
+    height: 20px; 
+    object-fit: contain; 
+}
+
+/* Texto do Botão */
+.google-text {
+    flex-grow: 1;
+    text-align: center;
+    color: #444; /* Cor do texto cinza escuro */
+    font-weight: 600;
+    font-family: 'Segoe UI', Roboto, sans-serif; /* Fonte mais limpa para o botão */
+    margin-right: 42px; /* Compensa o tamanho do ícone para centralizar o texto */
+}
+
+/* Ajuste para o botão não ficar estranho no hover (tirar o efeito branco do Bootstrap) */
+.btn-google-custom:hover .google-text {
+    color: #000;
+}
+/* Abas de Login/Cadastrar */
+.nav-tabs .nav-link {
+    border: none !important;
+    color: #666 !important;
+    background: transparent !important;
+    transition: 0.3s;
+}
+
+.nav-tabs .nav-link:hover {
+    color: #3CC9E4 !important;
+    background-color: rgba(60, 201, 228, 0.05) !important;
+}
+
+.nav-tabs .nav-link.active {
+    background-color: transparent !important;
+    color: #3CC9E4 !important;
+    border-bottom: 3px solid #3CC9E4 !important;
+}
+
+/* --- LOGO E TIPOGRAFIA --- */
+
+.logo-kitpc {
+    width: 80px;
+    height: auto;
+}
+
+h1 {
+    color: transparent;                    
+    -webkit-text-stroke: 1px #3CC9E4;
+    text-shadow: 0 0 10px rgba(60, 201, 228, 0.2);
+}
+
+h2 {
+    color: #3CC9E4;
+    text-transform: uppercase;
+}
+
+h5 {
+    color: #3CC9E4;
+    font-weight: bold;
+    margin-top: 15px;
+}
+
+/* --- NAVBAR --- */
+
+.navbar {
+    border-bottom: 2px solid #3CC9E4;
+    padding: 10px 0;
+    background-color: rgba(5, 0, 28, 0.95);
+}
+
+.nav-link {
+    color: #9216FD !important;
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+.nav-link:hover {
+    color: #3CC9E4 !important;
+    text-shadow: 0 0 8px #3CC9E4;
+}
+
+.navbar-toggler {
+    border: 1px solid #3CC9E4;
+}
+
+.navbar-toggler-icon {
+    filter: invert(54%) sepia(86%) saturate(497%) hue-rotate(163deg) brightness(92%) contrast(89%);
+}
+
+/* --- CARDS DE BLOG (CAPAS) --- */
+.card-post {
+    transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    background-color: #0d1117 !important; /* Corrigido de #1a1a1a para harmonia */
+    border: 1px solid #333 !important;
+    height: 100%;
+    overflow: hidden;
+}
+
+.card-post:hover {
+    transform: translateY(-10px);
+    border-color: #3CC9E4 !important;
+    box-shadow: 0 0 20px rgba(60, 201, 228, 0.2);
+}
+
+.capa-container {
+    height: 200px;
+    overflow: hidden;
+    border-bottom: 2px solid #3CC9E4;
+}
+
+.capa-blog {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.titulo-post {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.1rem;
+    color: #fff;
+    min-height: 2.8rem;
+}
+
+.data-badge {
+    font-size: 0.75rem;
+    background: rgba(146, 22, 253, 0.1) !important;
+    color: #9216FD !important;
+    padding: 4px 12px;
+    border-radius: 5px;
+    border: 1px solid #9216FD;
+}
+
+/* --- RODAPÉ E EXTRAS --- */
+footer {
+    border-top: 2px solid #3CC9E4;
+    padding: 30px;
+    background-color: #030014;
+    margin-top: 50px;
+}
+
+p { color: #b8b8b8; } /* Cinza para leitura, Roxo era muito escuro */
+
+.btn-close { filter: invert(1) brightness(1.5); }
+
+.bg-dark { background-color: #05001C !important; }
