@@ -137,6 +137,21 @@ async function gerarPDF() {
     doc.save("Meu_PC_KitPC.pdf");
 }
 
+
+function salvarEEnviar() {
+    const emailInput = document.querySelector('#notify-box input[name="email"]').value;
+    
+    if (emailInput && emailInput.includes('@')) {
+        localStorage.setItem('userEmail', emailInput); // Guarda no navegador
+        
+        // MUDA A COR NA HORA ANTES DE ENVIAR
+        const bell = document.getElementById("notification-bell");
+        if(bell) {
+            bell.style.background = "#3CC9E4";
+            bell.style.boxShadow = "0 0 15px #3CC9E4";
+        }
+    }
+}
 // 1. Assim que a página abre, verifica o estado do sino
 document.addEventListener("DOMContentLoaded", function() {
     const jaInscrito = localStorage.getItem('userEmail');
