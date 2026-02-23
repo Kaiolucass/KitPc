@@ -253,27 +253,26 @@
         </div>
     </div>
 
-    <div id="notification-bell" class="bell-icon" onclick="handleBellClick()" 
-    style="background: #9216FD; color: white; width: 55px; height: 55px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; box-shadow: 0 0 15px #9216FD;">
-    <i class="fa-solid fa-bell"></i>
-    <span class="pulse-ring"></span>
-</div>
-
-        <div id="notify-box" class="notify-box">
-            <h4 style="margin: 0 0 10px 0; color: #3CC9E4;">AVISOS DO BLOG</h4>
-            <p style="font-size: 13px; margin-bottom: 10px;">Deseja ser notificado via e-mail quando sair matéria nova?
-            </p>
-            <form action="/inscrever" method="POST">
-                <input type="email" name="email" placeholder="seu-email@gmail.com" required
-                    style="width: 100%; padding: 8px; margin-bottom: 10px; background: #000; border: 1px solid #3CC9E4; color: #fff;">
-                <button type="submit" onclick="salvarEEnviar()"
-                    style="background: #3CC9E4; border: none; padding: 5px 10px; cursor: pointer;">
-                    ATIVAR
-                </button>
-            </form>
-        </div>
+  <div id="notification-bell-container" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999;">
+    
+    <div id="notification-bell" onclick="handleBellClick()" 
+        style="background: #9216FD; color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 0 20px rgba(146, 34, 253, 0.6); transition: all 0.3s ease;">
+        <i class="fa-solid fa-bell" style="font-size: 25px;"></i>
     </div>
 
+    <div id="notify-box" style="display: none; position: absolute; bottom: 70px; right: 0; background: #0b052d; border: 2px solid #3CC9E4; padding: 20px; border-radius: 15px; width: 280px; box-shadow: 0 0 20px rgba(0, 242, 255, 0.2);">
+        <h4 style="margin: 0 0 10px 0; color: #3CC9E4; font-family: 'Orbitron', sans-serif; font-size: 16px;">AVISOS DO BLOG</h4>
+        <p style="font-size: 13px; color: white; margin-bottom: 15px;">Deseja ser notificado via e-mail quando sair matéria nova?</p>
+        <form action="/inscrever" method="POST">
+            <input type="email" name="email" placeholder="seu-email@gmail.com" required
+                style="width: 100%; padding: 10px; margin-bottom: 10px; background: #000; border: 1px solid #3CC9E4; color: #fff; border-radius: 5px;">
+            <button type="submit" onclick="salvarEEnviar()"
+                style="width: 100%; background: #3CC9E4; color: #000; border: none; padding: 10px; font-weight: bold; cursor: pointer; border-radius: 5px; text-transform: uppercase;">
+                ATIVAR
+            </button>
+        </form>
+    </div>
+</div>
     <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
     <script>
         new window.VLibras.Widget('https://vlibras.gov.br/app');
