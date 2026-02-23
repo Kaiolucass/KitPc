@@ -231,6 +231,51 @@ h2 {
     to { opacity: 1; transform: translateY(0); }
 }
 
+
+
+/* Estilo para o aviso Beta do Montador */
+.montador-beta-box {
+    background: rgba(146, 22, 253, 0.05);
+    border: 1px solid #9216FD;
+    border-left: 4px solid #9216FD;
+    padding: 15px;
+    margin-bottom: 25px;
+    border-radius: 4px;
+    font-family: 'Orbitron', sans-serif;
+}
+
+.beta-header {
+    color: #9216FD;
+    font-size: 0.9rem;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+}
+
+.montador-beta-box p {
+    color: #3CC9E4;
+    font-size: 0.8rem;
+    margin: 0;
+    line-height: 1.4;
+}
+
+/* Pontinho piscando para dar efeito de sistema ativo */
+.blink-dot {
+    height: 8px;
+    width: 8px;
+    background-color: #9216FD;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 10px;
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0.3; }
+    100% { opacity: 1; }
+}
+
 /* Rodapé */
 footer {
     border-top: 2px solid #3CC9E4;
