@@ -189,12 +189,12 @@
 
   <div id="notification-bell-container" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999;">
     
-    <div id="notification-bell" onclick="handleBellClick()" 
+    <div id="notification-bell" onclick="dispararSininho()" 
         style="background: #9216FD; color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 0 20px rgba(146, 34, 253, 0.6); transition: all 0.3s ease;">
         <i class="fa-solid fa-bell" style="font-size: 25px;"></i>
     </div>
 
-    <div id="notify-box" style="display: none; position: absolute; bottom: 70px; right: 0; background: #0b052d; border: 2px solid #3CC9E4; padding: 20px; border-radius: 15px; width: 280px; box-shadow: 0 0 20px rgba(0, 242, 255, 0.2);">
+    <div id="notify-box" style="display: none; position: absolute; bottom: 70px; left: 0; background: #0b052d; border: 2px solid #3CC9E4; padding: 20px; border-radius: 15px; width: 280px; box-shadow: 0 0 20px rgba(0, 242, 255, 0.2);">
         <h4 style="margin: 0 0 10px 0; color: #3CC9E4; font-family: 'Orbitron', sans-serif; font-size: 16px;">AVISOS DO BLOG</h4>
         <p style="font-size: 13px; color: white; margin-bottom: 15px;">Deseja ser notificado via e-mail quando sair matéria nova?</p>
         <form action="/inscrever" method="POST">

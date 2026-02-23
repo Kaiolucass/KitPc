@@ -138,49 +138,38 @@ async function gerarPDF() {
 }
 
 
-function salvarEEnviar() {
-    const emailInput = document.querySelector('#notify-box input[name="email"]').value;
-    
-    if (emailInput && emailInput.includes('@')) {
-        localStorage.setItem('userEmail', emailInput); // Guarda no navegador
-        
-        // MUDA A COR NA HORA ANTES DE ENVIAR
-        const bell = document.getElementById("notification-bell");
-        if(bell) {
-            bell.style.background = "#3CC9E4";
-            bell.style.boxShadow = "0 0 15px #3CC9E4";
+// Função para abrir/fechar ou mostrar o alerta
+    function dispararSininho() {
+        const box = document.getElementById("notify-box");
+        const jaInscrito = localStorage.getItem('userEmail');
+
+        if (jaInscrito) {
+            alert("🔔 Notificações já estão ativadas para: " + jaInscrito);
+        } else {
+            // Alterna entre mostrar e esconder
+            if (box.style.display === "none" || box.style.display === "") {
+                box.style.display = "block";
+            } else {
+                box.style.display = "none";
+            }
         }
     }
-}
-// 1. Assim que a página abre, verifica o estado do sino
-document.addEventListener("DOMContentLoaded", function() {
-    const jaInscrito = localStorage.getItem('userEmail');
-    const bellContainer = document.getElementById("notification-bell");
-    
-    if (jaInscrito) {
-        bellContainer.classList.add("bell-active");
-    }
-});
 
-// 2. Lógica do Clique no Sino
-function handleBellClick() {
-    const notifyBox = document.getElementById("notify-box");
-    const jaInscrito = localStorage.getItem('userEmail');
-
-    if (jaInscrito) {
-        alert("🔔 Notificações ativas para: " + jaInscrito);
-    } else {
-        notifyBox.style.display = (notifyBox.style.display === "none") ? "block" : "none";
+    // Função para salvar o email e mudar a cor
+    function registrarInscricao() {
+        const email = document.getElementById("email-notificacao").value;
+        if (email && email.includes('@')) {
+            localStorage.setItem('userEmail', email);
+            // O formulário vai dar o submit sozinho por causa do type="submit"
+        }
     }
-}
 
-// 3. Função para salvar o e-mail quando clicar no botão do formulário
-function salvarEEnviar(event) {
-    // Pegamos o e-mail que o utilizador digitou
-    const emailInput = document.querySelector('#notify-box input[name="email"]').value;
-    
-    if (emailInput && emailInput.includes('@')) {
-        localStorage.setItem('userEmail', emailInput); // Guarda no navegador
-        // O formulário seguirá o envio normal para o Flask
-    }
-}
+    // Verifica ao carregar a página se deve mudar a cor do sino
+    document.addEventListener("DOMContentLoaded", function() {
+        const jaInscrito = localStorage.getItem('userEmail');
+        const sino = document.getElementById("notification-bell");
+        if (jaInscrito && sino) {
+            sino.style.background = "#3CC9E4"; // Cor Ciano
+            sino.style.boxShadow = "0 0 20px rgba(0, 242, 255, 0.6)";
+        }
+    });
