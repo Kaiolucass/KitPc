@@ -254,6 +254,14 @@ p {
 }
 
 
+
+/* Esta classe será adicionada pelo JavaScript automaticamente */
+.bell-active i {
+    color: #3CC9E4 !important; /* Cor Ciano */
+    filter: drop-shadow(0 0 8px #3CC9E4);
+    transform: scale(1.1);
+}
+
 footer {
     border-top: 2px solid #3CC9E4;
     padding: 30px;

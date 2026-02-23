@@ -136,3 +136,36 @@ async function gerarPDF() {
 
     doc.save("Meu_PC_KitPC.pdf");
 }
+
+// 1. Assim que a página abre, verifica o estado do sino
+document.addEventListener("DOMContentLoaded", function() {
+    const jaInscrito = localStorage.getItem('userEmail');
+    const bellContainer = document.getElementById("notification-bell");
+    
+    if (jaInscrito) {
+        bellContainer.classList.add("bell-active");
+    }
+});
+
+// 2. Lógica do Clique no Sino
+function handleBellClick() {
+    const notifyBox = document.getElementById("notify-box");
+    const jaInscrito = localStorage.getItem('userEmail');
+
+    if (jaInscrito) {
+        alert("🔔 Notificações ativas para: " + jaInscrito);
+    } else {
+        notifyBox.style.display = (notifyBox.style.display === "none") ? "block" : "none";
+    }
+}
+
+// 3. Função para salvar o e-mail quando clicar no botão do formulário
+function salvarEEnviar(event) {
+    // Pegamos o e-mail que o utilizador digitou
+    const emailInput = document.querySelector('#notify-box input[name="email"]').value;
+    
+    if (emailInput && emailInput.includes('@')) {
+        localStorage.setItem('userEmail', emailInput); // Guarda no navegador
+        // O formulário seguirá o envio normal para o Flask
+    }
+}
