@@ -19,6 +19,9 @@ import unicodedata
 from flask import make_response
 from datetime import datetime
 from authlib.integrations.flask_client import OAuth
+import firebase_admin
+from firebase_admin import credentials
+import firebase_admin.firestore as firestore
 
 
 # 1. Configuração de Logging
@@ -128,6 +131,44 @@ def trilha_montagem():
 @app.route("/sobre")
 def sobre_nos():
     return render_template("sobre.html")
+
+
+    # --- CONFIGURAÇÃO FIREBASE (NOTIFICAÇÕES) ---
+if not firebase_admin._apps:
+    try:
+        # Certifique-se de que o nome do arquivo abaixo é IGUAL ao que você renomeou
+        cred = credentials.Certificate("firebase-key.json")
+        firebase_admin.initialize_app(cred)
+        logger.info("Firebase inicializado com sucesso!")
+    except Exception as e:
+        logger.error(f"Erro ao carregar chave do Firebase: {e}")
+
+db_firestore = firestore.client() 
+
+
+@app.route("/inscrever", methods=["POST"])
+def inscrever():
+    email = request.form.get("email")
+    
+    if not email or "@" not in email:
+        flash("Por favor, insira um e-mail válido.")
+        return redirect(url_for('home'))
+
+    try:
+        # Salva na coleção 'inscritos' no Firebase
+        db_firestore.collection('inscritos').add({
+            'email': email,
+            'data_inscricao': datetime.now(),
+            'origem': 'newsletter_site'
+        })
+        flash("🚀 Conectado com sucesso! Você receberá as próximas notícias do nosso site.")
+    except Exception as e:
+        logger.error(f"Erro ao salvar e-mail no Firebase: {e}")
+        flash("Erro técnico ao se inscrever. Tente novamente em instantes.")
+
+    return redirect(url_for('home'))
+
+
 
 # --- SISTEMA DE LOGIN E CADASTRO ---
 
@@ -354,21 +395,42 @@ def salvar_post(id=None):
             post.imagem_url = upload_result.get('secure_url')
 
         # Gerar Slug
-      
-
         slug = unicodedata.normalize('NFKD', titulo).encode('ascii', 'ignore').decode('ascii').lower()
         slug = re.sub(r'[^\w\s-]', '', slug).strip()
         post.slug = re.sub(r'[-\s]+', '-', slug)
 
         db.session.commit()
-        flash("✅ Postagem salva com sucesso!")
+        
+        # --- DISPARO DE NOTIFICAÇÃO DO BLOG ---
+        if id is None: # Só envia se for post novo
+            try:
+                leitores = db_firestore.collection('inscritos').stream()
+                lista_emails = [doc.to_dict()['email'] for doc in leitores]
+                
+                if lista_emails:
+                    with mail.connect() as conn:
+                        for email_leitor in lista_emails:
+                            msg = Message(
+                                subject=f"📰 Matéria Nova no KitPC: {titulo}",
+                                sender=app.config['MAIL_USERNAME'],
+                                recipients=[email_leitor]
+                            )
+                            url_post = f"https://kitpc.com.br/blog/{post.slug}"
+                            msg.body = f"Olá! Acabamos de publicar uma nova matéria no blog: {titulo}\n\nLeia agora em: {url_post}"
+                            conn.send(msg)
+                    logger.info(f"Notificações de blog enviadas para {len(lista_emails)} inscritos.")
+            except Exception as e:
+                logger.error(f"Falha ao enviar notificações do blog: {e}")
+
+        flash("✅ Postagem publicada e leitores notificados!")
         return redirect(url_for('admin')) 
 
     except Exception as e:
         db.session.rollback()
         logger.error(f"Erro ao salvar: {e}")
         return f"Erro ao salvar: {e}"
-
+    
+#admin arquivar-post/
 @app.route("/admin/arquivar-post/<int:id>", methods=["POST"])
 def arquivar_post(id):
     if not session.get('is_admin'):

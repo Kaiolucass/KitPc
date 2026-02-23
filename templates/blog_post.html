@@ -191,6 +191,22 @@
             </div>
         </div>
     </main>
+<div class="notification-bell-container">
+    <div class="bell-icon" onclick="toggleNotify()" style="background: #9216FD; color: white; width: 55px; height: 55px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; box-shadow: 0 0 15px #9216FD;">
+        <i class="fa-solid fa-bell"></i>
+        <span class="pulse-ring"></span>
+    </div>
+    
+    <div id="notify-box" class="notify-box">
+        <h4 style="margin: 0 0 10px 0; color: #3CC9E4;">AVISOS DO BLOG</h4>
+        <p style="font-size: 13px; margin-bottom: 10px;">Deseja ser notificado via e-mail quando sair matéria nova?</p>
+        <form action="/inscrever" method="POST">
+            <input type="email" name="email" placeholder="seu-email@gmail.com" required 
+                   style="width: 100%; padding: 8px; margin-bottom: 10px; background: #000; border: 1px solid #3CC9E4; color: #fff;">
+            <button type="submit" class="btn-cyber-mini">ATIVAR SININHO</button>
+        </form>
+    </div>
+</div>
 
     <div vw class="enabled">
         <div vw-access-button class="active"></div>

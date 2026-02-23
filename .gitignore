@@ -14,3 +14,6 @@ __pycache__/
 
 # arquivos do banco 
 seed.sql
+
+#ignorar chave do firebase
+firebase-key.json

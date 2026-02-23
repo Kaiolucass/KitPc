@@ -213,6 +213,47 @@ p {
 
 /* --- RODAPÉ E EXTRAS --- */
 
+
+.notification-bell-container {
+    position: fixed;
+    bottom: 30px;
+    left: 30px; /* Mudamos de right para left */
+    z-index: 999; /* Um pouco abaixo do VLibras para não sobrepor menus */
+}
+
+.notify-box {
+    display: none;
+    position: absolute;
+    bottom: 80px;
+    left: 0; /* Abre para a direita, já que o sino está na esquerda */
+    width: 260px;
+    background: #05001C;
+    border: 2px solid #9216FD; /* Borda neon roxa */
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 5px 5px 20px rgba(0,0,0,0.8);
+    color: white;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Estilo do botão dentro da caixinha */
+.btn-cyber-mini {
+    background: #3CC9E4;
+    color: #000;
+    border: none;
+    padding: 8px;
+    width: 100%;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-cyber-mini:hover {
+    background: #9216FD;
+    color: #fff;
+}
+
+
 footer {
     border-top: 2px solid #3CC9E4;
     padding: 30px;
