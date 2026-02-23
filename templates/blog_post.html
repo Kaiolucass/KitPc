@@ -171,27 +171,16 @@
                         </div>
                     </div>
                 </article>
+</main>
 
-                <div class="mt-5 p-4 text-center card-peca"
-                    style="border: 2px solid #3CC9E4; border-radius: 15px; background: rgba(60, 201, 228, 0.05);">
-                    <h2 class="h4 mb-3 text-info">Ficou com alguma dúvida?</h2>
-                    <p class="text-light opacity-75">clique em saiba mais para aprender mais sobre cada componente do
-                        seu computador!</p>
-                    <a href="{{ url_for('guia_pecas') }}" class="btn btn-info fw-bold text-dark">SAIBA MAIS</a>
-                </div>
-
-                <div class="mt-5 p-4 text-center card-peca"
-                    style="border: 2px solid #3CC9E4; border-radius: 15px; background: rgba(60, 201, 228, 0.05);">
-                    <h2 class="h4 mb-3 text-info">Gostou dessa dica?</h2>
-                    <p class="text-light opacity-75">Use nosso montador para encontrar as melhores peças para o seu
-                        setup!</p>
-                    <a href="{{ url_for('montagem') }}" class="btn btn-info fw-bold text-dark">START SETUP</a>
-                </div>
-
-            </div>
+ <div vw class="enabled">
+        <div vw-access-button class="active"></div>
+        <div vw-plugin-wrapper>
+            <div class="vw-plugin-top-wrapper"></div>
         </div>
-    </main>
-<div class="notification-bell-container">
+    </div>
+
+     <div class="notification-bell-container">
     <div class="bell-icon" onclick="toggleNotify()" style="background: #9216FD; color: white; width: 55px; height: 55px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; box-shadow: 0 0 15px #9216FD;">
         <i class="fa-solid fa-bell"></i>
         <span class="pulse-ring"></span>
@@ -208,34 +197,7 @@
     </div>
 </div>
 
-    <div vw class="enabled">
-        <div vw-access-button class="active"></div>
-        <div vw-plugin-wrapper>
-            <div class="vw-plugin-top-wrapper"></div>
-        </div>
-    </div>
     <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
     <script>
         new window.VLibras.Widget('https://vlibras.gov.br/app');
     </script>
-
-    <footer>
-        <div class="footer-content">
-            <p>&copy; 2026 KitPC - Todos os direitos reservados</p>
-            <div class="footer-links">
-                <div class="footer-links">
-                    <a href="{{ url_for('privacidade') }}"
-                        class="link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Privacidade</a>
-                    |
-                    <a href="{{ url_for('termos') }}"
-                        class="link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Termos
-                        de Uso</a>
-                </div>
-            </div>
-        </div>
-    </footer>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-
-</html>
