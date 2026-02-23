@@ -245,7 +245,7 @@ h2 {
 }
 
 .beta-header {
-    color: #9216FD;
+    color: #ff0000;
     font-size: 0.9rem;
     margin-bottom: 8px;
     display: flex;
@@ -263,7 +263,7 @@ h2 {
 .blink-dot {
     height: 8px;
     width: 8px;
-    background-color: #9216FD;
+    background-color: #ff0000;
     border-radius: 50%;
     display: inline-block;
     margin-right: 10px;
