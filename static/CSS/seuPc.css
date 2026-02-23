@@ -276,6 +276,10 @@ h2 {
     100% { opacity: 1; }
 }
 
+p{
+    color: #9216FD;
+}
+
 /* Rodapé */
 footer {
     border-top: 2px solid #3CC9E4;

@@ -261,6 +261,10 @@ h2, h5 {
     50% { opacity: 0.3; }
     100% { opacity: 1; }
 }
+
+p {
+    color: #9216FD;;
+}
 footer {
     border-top: 2px solid #3CC9E4;
     padding: 30px;

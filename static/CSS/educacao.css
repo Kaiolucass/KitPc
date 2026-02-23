@@ -209,6 +209,11 @@ h2, h5 {
   --bs-text-opacity: 1;
   color: #9216FD !important;
 }
+
+p {
+    color: #9216FD;
+}
+
 /* Rodapé */
 footer {
     border-top: 2px solid #3CC9E4;

@@ -188,7 +188,9 @@ footer {
     margin-top: 50px;
 }
 
-p { color: #b8b8b8; } /* Cinza para leitura, Roxo era muito escuro */
+p {
+    color: #9216FD;
+}
 
 .btn-close { filter: invert(1) brightness(1.5); }
 
