@@ -26,7 +26,7 @@ body {
     padding: 20px;
 }
 
-/* Labels e Inputs */
+/* Labels e Inputs Gerais */
 label {
     color: #9216FD;
     font-weight: bold;
@@ -70,78 +70,84 @@ h2, h3 {
     color: transparent;
     -webkit-text-stroke: 1px #3CC9E4;
 }
-/* Estilos extras para a tabela combinar com seu tema */
-        .table-cyber {
-            border: 1px solid #00f2ff;
-            background: rgba(0, 0, 0, 0.8);
-            color: #fff;
-        }
-        .table-cyber thead {
-            background: #00f2ff;
-            color: #000;
-        }
-        .badge-pendente { background-color: #ff9800; color: #000; }
-        .badge-ativo { background-color: #00ff88; color: #000; }
-        hr.cyber-hr {
-            border: 0;
-            height: 2px;
-            background-image: linear-gradient(to right, transparent, #00f2ff, transparent);
-            margin: 40px 0;
-        }
-           /* Estilização para o Quill combinar com o tema escuro */
-        .ql-toolbar.ql-snow {
-            background-color: #e0e0e0;
-            border-radius: 8px 8px 0 0;
-            border: 1px solid #00f2ff !important;
-        }
-        .ql-container.ql-snow {
-            border: 1px solid #00f2ff !important;
-            border-radius: 0 0 8px 8px;
-            background-color: #0d0d0d;
-            color: #fff;
-            min-height: 300px;
-            font-size: 16px;
-        }
-        .ql-editor.ql-blank::before {
-            color: #fff;
-        }
-        .cyber-hr {
-            border-top: 2px solid #00f2ff;
-            opacity: 0.5;
-            margin: 40px 0;
-        }
-        /* Ajuste para o editor não ficar sumindo no fundo escuro */
-        #editor-container {
-            height: 350px;
-            background: #fff;
-            color: #000;
-            border-bottom-left-radius: 8px;
-            border-bottom-right-radius: 8px;
-        }
-        .ql-toolbar {
-            background: #eee;
-            border-top-left-radius: 8px;
-            border-top-right-radius: 8px;
-        }
-        .drop-zone {
-            transition: all 0.3s ease;
-            background: rgba(255, 255, 255, 0.05);
-        }
-        .drop-zone:hover {
-            background: rgba(0, 242, 255, 0.1);
-            border-color: #00f2ff !important;
-        }
-        .cyber-hr { border-top: 2px solid #00f2ff; opacity: 0.5; }
-     /* Ajuste para as tabelas aparecerem no editor (tema escuro) */
-        .ql-container {
-            font-size: 16px;
-            background: #1a1a1a;
-        }
-        .ql-editor table {
-            border-collapse: collapse;
-            width: 100%;
-        }
-        .ql-editor table td {
-            border: 1px solid #00f2ff !important;
-            padding: 5px;
-        }
+
+/* --- CONFIGURAÇÃO DO EDITOR QUILL --- */
+
+/* 1. Barra de Ferramentas (Toolbar) */
+.ql-toolbar.ql-snow {
+    background-color: #e0e0e0 !important; /* Cinza claro para destacar os botões */
+    border: 1px solid #00f2ff !important;
+    border-radius: 8px 8px 0 0;
+}
+
+/* 2. Área de Digitação (Container) */
+.ql-container.ql-snow {
+    border: 1px solid #00f2ff !important;
+    border-radius: 0 0 8px 8px;
+    background-color: #ffffff !important; /* FUNDO BRANCO PARA ESCREVER */
+    min-height: 350px;
+    font-size: 16px;
+}
+
+/* 3. Letras Pretas no Editor */
+.ql-editor {
+    color: #000000 !important; /* LETRAS PRETAS */
+    text-shadow: none !important; /* Remove qualquer brilho cyberpunk enquanto digita */
+}
+
+/* Garante que títulos e listas dentro do editor também sejam pretos */
+.ql-editor h1, .ql-editor h2, .ql-editor h3, .ql-editor p, .ql-editor li {
+    color: #000000 !important;
+}
+
+/* 4. Tabelas dentro do Editor */
+.ql-editor table {
+    border-collapse: collapse;
+    width: 100%;
+    background-color: #fff; /* Fundo branco para as células da tabela no editor */
+}
+
+.ql-editor table td {
+    border: 1px solid #3CC9E4 !important;
+    padding: 5px;
+    color: #000 !important;
+}
+
+/* --- ELEMENTOS EXTRAS DO PAINEL --- */
+
+.drop-zone {
+    border: 2px dashed #3CC9E4;
+    padding: 20px;
+    text-align: center;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.05);
+    cursor: pointer;
+}
+
+.drop-zone:hover {
+    background: rgba(0, 242, 255, 0.1);
+    border-color: #00f2ff !important;
+}
+
+.cyber-hr {
+    border: 0;
+    border-top: 2px solid #00f2ff;
+    opacity: 0.5;
+    margin: 40px 0;
+}
+
+.badge-pendente { background-color: #ff9800; color: #000; }
+.badge-ativo { background-color: #00ff88; color: #000; }
+
+/* Tabelas de Gerenciamento (Posts/Usuários) */
+.table-cyber {
+    border: 1px solid #00f2ff;
+    background: rgba(0, 0, 0, 0.8);
+    color: #fff;
+}
+
+.table-cyber thead {
+    background: #00f2ff;
+    color: #000;
+}
