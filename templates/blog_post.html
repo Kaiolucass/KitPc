@@ -199,73 +199,50 @@
         </div>
     </div>
 
-   <div id="notification-bell-container" style="position: fixed; bottom: 20px; left: 20px; z-index: 9999;">
+  <div id="notification-bell-container" style="position: fixed; bottom: 20px; left: 20px; z-index: 9999;">
     
     <div id="notification-bell" onclick="toggleSininho()" 
         style="background: #9216FD; color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 0 20px rgba(146, 34, 253, 0.6); transition: all 0.3s ease;">
         <i class="fa-solid fa-bell" style="font-size: 25px;"></i>
     </div>
 
-    <div id="notify-box" style="display: none; position: absolute; bottom: 75px; left: 0; background: #0b052d; border: 2px solid #3CC9E4; padding: 20px; border-radius: 15px; width: 260px; box-shadow: 0 0 25px rgba(0, 242, 255, 0.3);">
+    <div id="notify-box" style="display: none; position: absolute; bottom: 75px; left: 0; background: #0b052d; border: 2px solid #3CC9E4; padding: 20px; border-radius: 15px; width: 260px; box-shadow: 0 0 25px rgba(0, 242, 255, 0.4);">
         <h4 style="color: #3CC9E4; font-family: 'Orbitron', sans-serif; font-size: 15px; margin: 0 0 10px 0;">NOTIFICAÇÕES</h4>
-        <p style="font-size: 13px; color: white; margin-bottom: 15px; line-height: 1.4;">
-            Deseja ativar o destaque visual para ser avisado sobre novidades no navegador?
-        </p>
-        
+        <p style="font-size: 13px; color: white; margin-bottom: 15px;">Deseja ativar o destaque visual para este navegador?</p>
         <button type="button" onclick="ativarSininhoLocal()"
-            style="width: 100%; background: #3CC9E4; color: #000; border: none; padding: 12px; font-weight: bold; cursor: pointer; border-radius: 8px; text-transform: uppercase; font-size: 12px; transition: 0.2s;">
+            style="width: 100%; background: #3CC9E4; color: #000; border: none; padding: 12px; font-weight: bold; cursor: pointer; border-radius: 8px; text-transform: uppercase; font-size: 11px;">
             ATIVAR DESTAQUE
         </button>
     </div>
 </div>
 
 <script>
-    /**
-     * LÓGICA DO SININHO - SOMENTE NAVEGADOR
-     */
-
-    // 1. Função para abrir e fechar a caixinha
     function toggleSininho() {
         const box = document.getElementById("notify-box");
         const jaAtivou = localStorage.getItem('sinoAtivo');
-
         if (jaAtivou === 'sim') {
-            alert("🔔 O destaque de notificações já está ativo no seu navegador!");
+            alert("🔔 O destaque já está ativo!");
         } else {
-            // Se não estiver ativo, alterna entre mostrar e esconder a caixa
-            if (box.style.display === "none" || box.style.display === "") {
-                box.style.display = "block";
-            } else {
-                box.style.display = "none";
-            }
+            box.style.display = (box.style.display === "none" || box.style.display === "") ? "block" : "none";
         }
     }
 
-    // 2. Função para ativar o modo Ciano e salvar a preferência
     function ativarSininhoLocal() {
-        // Salva que o usuário ativou (fica gravado no navegador dele)
         localStorage.setItem('sinoAtivo', 'sim');
-        
-        // Aplica a mudança visual imediata
         aplicarEstiloAtivo();
-        
-        // Esconde a caixinha
         document.getElementById("notify-box").style.display = "none";
     }
 
-    // 3. Função que muda as cores para Ciano
     function aplicarEstiloAtivo() {
         const sino = document.getElementById("notification-bell");
         if (sino) {
-            sino.style.background = "#3CC9E4"; // Cor Ciano KitPC
+            sino.style.background = "#3CC9E4"; 
             sino.style.boxShadow = "0 0 20px #3CC9E4";
         }
     }
 
-    // 4. Ao carregar a página, verifica se já estava ativo antes
     document.addEventListener("DOMContentLoaded", function() {
-        const status = localStorage.getItem('sinoAtivo');
-        if (status === 'sim') {
+        if (localStorage.getItem('sinoAtivo') === 'sim') {
             aplicarEstiloAtivo();
         }
     });
