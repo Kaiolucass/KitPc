@@ -37,6 +37,20 @@ load_dotenv()
 
 app = Flask(__name__)
 
+@app.context_processor
+def inject_firebase():
+    return {
+        'fb': {
+            "apiKey": os.getenv("FIREBASE_API_KEY"),
+            "authDomain": os.getenv("FIREBASE_AUTH_DOMAIN"),
+            "projectId": os.getenv("FIREBASE_PROJECT_ID"),
+            "storageBucket": os.getenv("FIREBASE_STORAGE_BUCKET"),
+            "messagingSenderId": os.getenv("FIREBASE_MESSAGING_SENDER_ID"),
+            "appId": os.getenv("FIREBASE_APP_ID"),
+            "vapidKey": os.getenv("FIREBASE_VAPID_KEY")
+        }
+    }
+
 import google.generativeai as genai
 
 # Força o uso da API v1 (Estável) em vez da v1beta
