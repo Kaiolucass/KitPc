@@ -157,8 +157,7 @@
     </div>
   </div>
 
-  <div id="notification-bell-container" style="position: fixed; bottom: 20px; left: 20px; z-index: 9999;">
-    
+ <div id="notification-bell-container" style="position: fixed; bottom: 20px; left: 20px; z-index: 9999;">
     <div id="notification-bell" onclick="toggleSininho()" 
         style="background: #9216FD; color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 0 20px rgba(146, 34, 253, 0.6); transition: all 0.3s ease;">
         <i class="fa-solid fa-bell" style="font-size: 25px;"></i>
@@ -166,29 +165,72 @@
 
     <div id="notify-box" style="display: none; position: absolute; bottom: 75px; left: 0; background: #0b052d; border: 2px solid #3CC9E4; padding: 20px; border-radius: 15px; width: 260px; box-shadow: 0 0 25px rgba(0, 242, 255, 0.4);">
         <h4 style="color: #3CC9E4; font-family: 'Orbitron', sans-serif; font-size: 15px; margin: 0 0 10px 0;">NOTIFICAÇÕES</h4>
-        <p style="font-size: 13px; color: white; margin-bottom: 15px;">Deseja ativar o destaque visual para este navegador?</p>
-        <button type="button" onclick="ativarSininhoLocal()"
+        <p style="font-size: 13px; color: white; margin-bottom: 15px; line-height: 1.4;">
+            Deseja receber avisos reais de novos posts no seu celular ou PC?
+        </p>
+        <button type="button" onclick="ativarNotificacaoReal()"
             style="width: 100%; background: #3CC9E4; color: #000; border: none; padding: 12px; font-weight: bold; cursor: pointer; border-radius: 8px; text-transform: uppercase; font-size: 11px;">
-            ATIVAR DESTAQUE
+            ATIVAR AGORA
         </button>
     </div>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compat.js"></script>
+
 <script>
+    // Configurações vindas do seu .env via Flask
+    const firebaseConfig = {
+        apiKey: "{{ fb.apiKey }}",
+        authDomain: "{{ fb.authDomain }}",
+        projectId: "{{ fb.projectId }}",
+        storageBucket: "{{ fb.storageBucket }}",
+        messagingSenderId: "{{ fb.messagingSenderId }}",
+        appId: "{{ fb.appId }}"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const messaging = firebase.messaging();
+
     function toggleSininho() {
         const box = document.getElementById("notify-box");
-        const jaAtivou = localStorage.getItem('sinoAtivo');
-        if (jaAtivou === 'sim') {
-            alert("🔔 O destaque já está ativo!");
+        const status = localStorage.getItem('sinoAtivo');
+        if (status === 'sim') {
+            alert("🔔 As notificações reais já estão ativas!");
         } else {
             box.style.display = (box.style.display === "none" || box.style.display === "") ? "block" : "none";
         }
     }
 
-    function ativarSininhoLocal() {
-        localStorage.setItem('sinoAtivo', 'sim');
-        aplicarEstiloAtivo();
-        document.getElementById("notify-box").style.display = "none";
+    async function ativarNotificacaoReal() {
+        try {
+            const permission = await Notification.requestPermission();
+            if (permission === "granted") {
+                // Tenta pegar o Token usando a Vapid Key do .env
+                const token = await messaging.getToken({ vapidKey: "{{ fb.vapidKey }}" });
+
+                if (token) {
+                    // Envia o token para a sua rota /salvar-token
+                    const res = await fetch('/salvar-token', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ token: token })
+                    });
+
+                    if (res.ok) {
+                        localStorage.setItem('sinoAtivo', 'sim');
+                        aplicarEstiloAtivo();
+                        document.getElementById("notify-box").style.display = "none";
+                        alert("🚀 Sucesso! Notificações ativadas.");
+                    }
+                }
+            } else {
+                alert("Você precisa permitir as notificações no navegador!");
+            }
+        } catch (error) {
+            console.error("Erro no Push:", error);
+            alert("Erro ao ativar. Verifique se o site tem HTTPS ou se a VapidKey está correta.");
+        }
     }
 
     function aplicarEstiloAtivo() {
@@ -199,12 +241,14 @@
         }
     }
 
+    // Mantém o sino aceso se já estiver ativo
     document.addEventListener("DOMContentLoaded", function() {
         if (localStorage.getItem('sinoAtivo') === 'sim') {
             aplicarEstiloAtivo();
         }
     });
 </script>
+
   <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
   <script>
     new window.VLibras.Widget('https://vlibras.gov.br/app');

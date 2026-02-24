@@ -105,12 +105,25 @@ with app.app_context():
 @app.route("/")
 def home():
     try:
-        # Carrega os 4 posts mais recentes para a Home (Destaque + 3 cards)
+        # Carrega os posts
         posts = Post.query.order_by(Post.data_postagem.desc()).limit(4).all()
+        
+        # Coleta os dados do .env para passar ao template
+        firebase_data = {
+            "apiKey": os.getenv("FIREBASE_API_KEY"),
+            "authDomain": os.getenv("FIREBASE_AUTH_DOMAIN"),
+            "projectId": os.getenv("FIREBASE_PROJECT_ID"),
+            "storageBucket": os.getenv("FIREBASE_STORAGE_BUCKET"),
+            "messagingSenderId": os.getenv("FIREBASE_MESSAGING_SENDER_ID"),
+            "appId": os.getenv("FIREBASE_APP_ID"),
+            "vapidKey": os.getenv("FIREBASE_VAPID_KEY")
+        }
     except Exception as e:
         logger.error(f"Erro na home: {e}")
         posts = []
-    return render_template("index.html", posts=posts)
+        firebase_data = {}
+
+    return render_template("index.html", posts=posts, fb=firebase_data)
 
 @app.route("/seuPc")
 def montagem():
@@ -168,7 +181,30 @@ def inscrever():
 
     return redirect(url_for('home'))
 
+ # Salva o token no Firestore para enviar notificações depois
+@app.route("/salvar-token", methods=["POST"])
+def salvar_token():
+    try:
+        dados = request.get_json()
+        token = dados.get("token")
+        
+        if not token:
+            return jsonify({"erro": "Token não fornecido"}), 400
 
+       
+        # Usamos o próprio token como ID do documento para evitar duplicatas
+        db_firestore.collection('tokens_push').document(token).set({
+            'token': token,
+            'data_registro': datetime.now(),
+            'plataforma': request.user_agent.platform or 'unknown'
+        })
+        
+        logger.info(f"Novo token de push registrado: {token[:10]}...")
+        return jsonify({"status": "sucesso", "mensagem": "Dispositivo pronto para notificações"}), 200
+        
+    except Exception as e:
+        logger.error(f"Erro ao salvar token no Firebase: {e}")
+        return jsonify({"erro": "Falha interna ao salvar dispositivo"}), 500
 
 # --- SISTEMA DE LOGIN E CADASTRO ---
 
@@ -429,6 +465,34 @@ def salvar_post(id=None):
         db.session.rollback()
         logger.error(f"Erro ao salvar: {e}")
         return f"Erro ao salvar: {e}"
+    
+if id is None: # Post Novo
+    # 1. Enviar E-mails (você já tem)
+    # ... seu código de e-mail aqui ...
+
+    # 2. ENVIAR NOTIFICAÇÃO PUSH REAL
+    try:
+        from firebase_admin import messaging
+        
+        # Busca todos os tokens salvos
+        tokens_docs = db_firestore.collection('tokens_push').stream()
+        lista_tokens = [doc.to_dict()['token'] for doc in tokens_docs]
+
+        if lista_tokens:
+            # Criamos a mensagem
+            notificacao = messaging.MulticastMessage(
+                notification=messaging.Notification(
+                    title=f"📰 Novo Post: {titulo}",
+                    body=subtitulo or "Confira a nova matéria no KitPC!"
+                ),
+                tokens=lista_tokens,
+                data={"slug": post.slug} # Link para o JS abrir o post certo
+            )
+            # Envia para todo mundo de uma vez
+            response = messaging.send_multicast(notificacao)
+            logger.info(f"Push enviado para {response.success_count} dispositivos.")
+    except Exception as e:
+        logger.error(f"Falha ao enviar push: {e}")
     
 #admin arquivar-post/
 @app.route("/admin/arquivar-post/<int:id>", methods=["POST"])
