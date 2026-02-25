@@ -737,45 +737,42 @@ def consultoria_ia():
     except Exception as e:
         logger.error(f"Erro na Consultoria IA: {e}")
         return jsonify({"erro": "A IA se confundiu nos cabos. Tente novamente!"}), 500
-    
 @app.route('/sitemap.xml', methods=['GET'])
 def sitemap():
     try:
         pages = []
         now = datetime.now().strftime('%Y-%m-%d')
         
-        # Rotas estáticas
+        # 1. Rotas estáticas
         rotas_bloqueadas = ['/admin', '/logout', '/setup-db-kaio', '/login', '/register', '/confirmar-email', '/health', '/sitemap.xml']
         
         for rule in app.url_map.iter_rules():
+            # Pega apenas rotas que não pedem ID ou Slug (estáticas)
             if "GET" in rule.methods and len(rule.arguments) == 0:
                 url_path = str(rule.rule)
                 if not any(url_path.startswith(b) for b in rotas_bloqueadas):
                     pages.append([f"https://kitpc.com.br{url_path}", now])
 
-        # Renderiza usando o nome CORRETO do arquivo
+        # 2. Posts do Blog (Dinâmico)
+        try:
+            # Buscamos todos os posts para garantir que não dê erro de coluna faltando
+            from models import Post # Certifique-se que o import está correto
+            posts = Post.query.all()
+            for post in posts:
+                url = f"https://kitpc.com.br/blog/{post.slug}"
+                pages.append([url, now])
+        except Exception as db_error:
+            logger.error(f"Erro ao buscar posts para sitemap: {db_error}")
+
+        # 3. Renderiza o XML
         sitemap_xml = render_template('sitemap_template.xml', pages=pages)
         response = make_response(sitemap_xml)
         response.headers["Content-Type"] = "application/xml"
         return response
-    except Exception as e:
-        logger.error(f"Erro no sitemap: {e}")
-        return str(e), 500
-    
 
-        # 2. Páginas Dinâmicas (Posts do Blog)
-        posts = Post.query.filter_by(arquivado=False).all() # Só adiciona o que não estiver arquivado
-        for post in posts:
-            url = f"https://kitpc.com.br/blog/{post.slug}"
-            pages.append([url, now])
-
-        sitemap_xml = render_template('sitemap_template.xml', pages=pages)
-        response = make_response(sitemap_xml)
-        response.headers["Content-Type"] = "application/xml"
-        return response
     except Exception as e:
-        logger.error(f"Erro ao gerar sitemap: {e}")
-        return str(e)
+        logger.error(f"Erro crítico no sitemap: {e}")
+        return f"Erro ao gerar sitemap: {str(e)}", 500
 
 @app.route("/privacidade")
 def privacidade():
