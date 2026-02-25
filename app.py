@@ -744,27 +744,24 @@ def sitemap():
         pages = []
         now = datetime.now().strftime('%Y-%m-%d')
         
-        # Lista de rotas que o Google NÃO deve indexar
-        rotas_bloqueadas = [
-            '/admin', 
-            '/logout', 
-            '/setup-db-kaio', 
-            '/login', 
-            '/register', 
-            '/confirmar-email',
-            '/health',
-            '/sitemap.xml'
-        ]
-
-        # 1. Páginas Estáticas (Filtradas)
+        # Rotas estáticas
+        rotas_bloqueadas = ['/admin', '/logout', '/setup-db-kaio', '/login', '/register', '/confirmar-email', '/health', '/sitemap.xml']
+        
         for rule in app.url_map.iter_rules():
-            # Filtra apenas métodos GET, sem argumentos extras e que não estejam na lista de bloqueio
             if "GET" in rule.methods and len(rule.arguments) == 0:
                 url_path = str(rule.rule)
-                
-                # Verifica se a URL começa com algum item da lista de bloqueados
-                if not any(url_path.startswith(bloqueada) for bloqueada in rotas_bloqueadas):
+                if not any(url_path.startswith(b) for b in rotas_bloqueadas):
                     pages.append([f"https://kitpc.com.br{url_path}", now])
+
+        # Renderiza usando o nome CORRETO do arquivo
+        sitemap_xml = render_template('sitemap_template.xml', pages=pages)
+        response = make_response(sitemap_xml)
+        response.headers["Content-Type"] = "application/xml"
+        return response
+    except Exception as e:
+        logger.error(f"Erro no sitemap: {e}")
+        return str(e), 500
+    
 
         # 2. Páginas Dinâmicas (Posts do Blog)
         posts = Post.query.filter_by(arquivado=False).all() # Só adiciona o que não estiver arquivado
