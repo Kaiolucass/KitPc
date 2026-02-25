@@ -147,8 +147,8 @@ h5 {
 
 .card-post:hover {
     transform: translateY(-10px);
-    border-color: #3CC9E4 !important;
-    box-shadow: 0 0 20px rgba(60, 201, 228, 0.2);
+    border-color: #9216FD !important;
+    box-shadow: 0 0 20px rgba(166, 60, 228, 0.2);
 }
 
 .capa-container {
@@ -174,10 +174,10 @@ h5 {
 .data-badge {
     font-size: 0.75rem;
     background: rgba(146, 22, 253, 0.1) !important;
-    color: #9216FD !important;
+    color: #3CC9E4 !important;
     padding: 4px 12px;
     border-radius: 5px;
-    border: 1px solid #9216FD;
+    border: 1px solid #3CC9E4;
 }
 
 .notification-bell-container {
