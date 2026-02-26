@@ -883,6 +883,10 @@ def robots_txt():
 @app.route("/health")
 def health(): return "OK", 200
 
+@app.route('/ping')
+def ping():
+    return "KitPC Online!", 200
+
 @app.route('/ads.txt')
 def ads_txt():
     conteudo = "google.com, pub-3396569889908907, DIRECT, f08c47fec0942fa0"
