@@ -22,7 +22,7 @@ from authlib.integrations.flask_client import OAuth
 import firebase_admin
 from firebase_admin import credentials
 import firebase_admin.firestore as firestore
-
+import threading
 
 # 1. Configuração de Logging
 logging.basicConfig(
@@ -219,6 +219,24 @@ def salvar_token():
     except Exception as e:
         logger.error(f"Erro ao salvar token no Firebase: {e}")
         return jsonify({"erro": "Falha interna ao salvar dispositivo"}), 500
+    
+def enviar_notificacoes_async(app, post_titulo, post_slug):
+    with app.app_context():
+        try:
+            # Pega todos os usuários que confirmaram o e-mail
+            usuarios = Usuario.query.filter_by(confirmado=True).all()
+            with mail.connect() as conn:
+                for usuario in usuarios:
+                    msg = Message(
+                        f"Novo Post: {post_titulo}",
+                        sender=app.config['MAIL_USERNAME'],
+                        recipients=[usuario.email]
+                    )
+                    msg.body = f"Confira nossa nova matéria: https://kitpc.com.br/blog/{post_slug}"
+                    conn.send(msg)
+            print("Notificações enviadas com sucesso!")
+        except Exception as e:
+            print(f"Erro ao enviar notificações: {e}")
 
 # --- SISTEMA DE LOGIN E CADASTRO ---
 
@@ -390,6 +408,30 @@ def confirmar_email(token):
         return "<h1>O link expirou! Peça um novo cadastro.</h1>"
     except Exception:
         return "<h1>Token inválido ou corrompido!</h1>"
+    
+
+
+def enviar_notificacoes_thread(app_obj, titulo, slug):
+    with app_obj.app_context():
+        try:
+            # Sua lógica de buscar inscritos no Firestore e enviar o e-mail aqui
+            leitores = db_firestore.collection('inscritos').stream()
+            lista_emails = [doc.to_dict()['email'] for doc in leitores]
+            
+            if lista_emails:
+                with mail.connect() as conn:
+                    for email_leitor in lista_emails:
+                        msg = Message(
+                            subject=f"📰 Matéria Nova no KitPC: {titulo}",
+                            sender=app_obj.config['MAIL_USERNAME'],
+                            recipients=[email_leitor]
+                        )
+                        url_post = f"https://kitpc.com.br/blog/{slug}"
+                        msg.body = f"Olá! Acabamos de publicar uma nova matéria: {titulo}\n\nLeia em: {url_post}"
+                        conn.send(msg)
+        except Exception as e:
+            print(f"Erro no envio background: {e}")
+
 
 # --- ÁREA ADMINISTRATIVA ---
 
@@ -416,7 +458,6 @@ def editar_post(id):
     
     # Enviamos o post encontrado para o campo 'edit_post' para preencher o formulário
     return render_template("admin.html", usuarios=usuarios_lista, posts=posts_lista, edit_post=post)
-
 @app.route("/admin/salvar-post", methods=["POST"])
 @app.route("/admin/salvar-post/<int:id>", methods=["POST"])
 def salvar_post(id=None):
@@ -429,13 +470,11 @@ def salvar_post(id=None):
         conteudo = request.form.get("conteudo") 
         
         if id:
-            # EDIÇÃO
             post = Post.query.get_or_404(id)
             post.titulo = titulo
             post.subtitulo = subtitulo
             post.conteudo = conteudo
         else:
-            # NOVO
             post = Post(titulo=titulo, subtitulo=subtitulo, conteudo=conteudo, views=0)
             db.session.add(post)
 
@@ -451,29 +490,28 @@ def salvar_post(id=None):
 
         db.session.commit()
         
-        # --- DISPARO DE NOTIFICAÇÃO DO BLOG ---
+        # --- DISPARO DE NOTIFICAÇÃO (EM SEGUNDO PLANO) ---
         if id is None: # Só envia se for post novo
-            try:
-                leitores = db_firestore.collection('inscritos').stream()
-                lista_emails = [doc.to_dict()['email'] for doc in leitores]
-                
-                if lista_emails:
-                    with mail.connect() as conn:
-                        for email_leitor in lista_emails:
-                            msg = Message(
-                                subject=f"📰 Matéria Nova no KitPC: {titulo}",
-                                sender=app.config['MAIL_USERNAME'],
-                                recipients=[email_leitor]
-                            )
-                            url_post = f"https://kitpc.com.br/blog/{post.slug}"
-                            msg.body = f"Olá! Acabamos de publicar uma nova matéria no blog: {titulo}\n\nLeia agora em: {url_post}"
-                            conn.send(msg)
-                    logger.info(f"Notificações de blog enviadas para {len(lista_emails)} inscritos.")
-            except Exception as e:
-                logger.error(f"Falha ao enviar notificações do blog: {e}")
+            thread = threading.Thread(
+                target=enviar_notificacoes_thread, 
+                args=(app._get_current_object(), post.titulo, post.slug)
+            )
+            thread.start()
 
-        flash("✅ Postagem publicada e leitores notificados!")
+        flash("✅ Postagem publicada! As notificações estão sendo enviadas em segundo plano.")
         return redirect(url_for('admin')) 
+
+    except Exception as e:
+        db.session.rollback()
+        print(f"Erro ao salvar post: {e}")
+        flash(f"❌ Erro ao salvar: {e}")
+        return redirect(url_for('admin'))
+    
+
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Erro ao salvar: {e}")
+        return f"Erro ao salvar: {e}"
 
     except Exception as e:
         db.session.rollback()
