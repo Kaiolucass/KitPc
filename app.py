@@ -738,48 +738,42 @@ def consultoria_ia():
         logger.error(f"Erro na Consultoria IA: {e}")
         return jsonify({"erro": "A IA se confundiu nos cabos. Tente novamente!"}), 500
     
+
 @app.route('/sitemap.xml', methods=['GET'])
 def sitemap():
     try:
         pages = []
         now = datetime.now().strftime('%Y-%m-%d')
         
-        # Lista de rotas que o Google NÃO deve indexar
-        rotas_bloqueadas = [
-            '/admin', 
-            '/logout', 
-            '/setup-db-kaio', 
-            '/login', 
-            '/register', 
-            '/confirmar-email',
-            '/health',
-            '/sitemap.xml'
-        ]
-
-        # 1. Páginas Estáticas (Filtradas)
+        # 1. Páginas Estáticas
+        rotas_bloqueadas = ['/admin', '/logout', '/setup-db-kaio', '/login', '/register', '/confirmar-email', '/health', '/sitemap.xml']
+        
         for rule in app.url_map.iter_rules():
-            # Filtra apenas métodos GET, sem argumentos extras e que não estejam na lista de bloqueio
             if "GET" in rule.methods and len(rule.arguments) == 0:
                 url_path = str(rule.rule)
-                
-                # Verifica se a URL começa com algum item da lista de bloqueados
-                if not any(url_path.startswith(bloqueada) for bloqueada in rotas_bloqueadas):
+                if not any(url_path.startswith(b) for b in rotas_bloqueadas):
                     pages.append([f"https://kitpc.com.br{url_path}", now])
 
-        # 2. Páginas Dinâmicas (Posts do Blog)
-        posts = Post.query.filter_by(arquivado=False).all() # Só adiciona o que não estiver arquivado
-        for post in posts:
-            url = f"https://kitpc.com.br/blog/{post.slug}"
-            pages.append([url, now])
+        # 2. Posts do Blog (Com proteção caso a coluna 'arquivado' não exista)
+        try:
+            posts = Post.query.all()
+            for post in posts:
+                # Se o post tiver o atributo arquivado e ele for True, pula
+                if getattr(post, 'arquivado', False):
+                    continue
+                url = f"https://kitpc.com.br/blog/{post.slug}"
+                pages.append([url, now])
+        except Exception as db_e:
+            logger.error(f"Erro ao buscar posts para sitemap: {db_e}")
 
         sitemap_xml = render_template('sitemap_template.xml', pages=pages)
         response = make_response(sitemap_xml)
         response.headers["Content-Type"] = "application/xml"
         return response
     except Exception as e:
-        logger.error(f"Erro ao gerar sitemap: {e}")
-        return str(e)
-
+        logger.error(f"Erro crítico no sitemap: {e}")
+        return str(e), 500
+    
 @app.route("/privacidade")
 def privacidade():
     return render_template("privacidade.html")
