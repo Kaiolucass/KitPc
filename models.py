@@ -172,3 +172,13 @@ class MontagemSalva(db.Model):
     preco_total = db.Column(db.Numeric(10, 2))
     
     data_criacao = db.Column(db.DateTime, default=datetime.utcnow)
+
+class Comentario(db.Model):
+    __tablename__ = 'comentario'
+    id = db.Column(db.Integer, primary_key=True)
+    conteudo = db.Column(db.Text, nullable=False)
+    data_postagem = db.Column(db.DateTime, default=datetime.utcnow)
+    post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
+    usuario_id = db.Column(db.Integer, db.ForeignKey('usuario.id'), nullable=False)
+    autor = db.relationship('Usuario', backref=db.backref('comentarios', lazy=True))
+    post_rel = db.relationship('Post', backref=db.backref('comentarios', lazy=True))

@@ -188,6 +188,50 @@
                     <a href="{{ url_for('montagem') }}" class="btn btn-info fw-bold text-dark">START SETUP</a>
                 </div>
 
+                <div class="leia-tambem"
+                    style="margin-top: 50px; padding: 20px; background: #f9f9f9; border-radius: 8px;">
+                    <h4>📖 Leia também:</h4>
+                    <ul style="list-style: none; padding-left: 0;">
+                        {% for sugestao in sugestoes %}
+                        <li style="margin-bottom: 10px;">
+                            <a href="{{ url_for('exibir_post', slug=sugestao.slug) }}"
+                                style="text-decoration: none; color: #007bff; font-weight: bold;">
+                                {{ sugestao.titulo }}
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <hr>
+                <h3>Comentários</h3>
+
+                <div class="comentarios-lista">
+                    {% if post.comentarios %}
+                    {% for comentario in post.comentarios %}
+                    <div style="border-bottom: 1px solid #ddd; padding: 10px 0;">
+                        <strong>{{ comentario.autor.nome }}</strong>
+                        <small style="color: gray;">em {{ comentario.data_postagem.strftime('%d/%m/%Y %H:%M') }}</small>
+                        <p>{{ comentario.conteudo }}</p>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <p>Seja o primeiro a comentar!</p>
+                    {% endif %}
+                </div>
+
+                <br>
+
+                {% if session.get('usuario_id') %}
+                <h4>Deixe seu comentário:</h4>
+                <form action="{{ url_for('comentar', post_id=post.id) }}" method="POST">
+                    <textarea name="conteudo_comentario" rows="3" class="form-control"
+                        placeholder="Escreva aqui seu comentário..." required></textarea>
+                    <button type="submit" class="btn btn-primary" style="margin-top: 10px;">Postar Comentário</button>
+                </form>
+                {% else %}
+                <p><a href="{{ url_for('login') }}">Faça login</a> para deixar um comentário.</p>
+                {% endif %}
             </div>
         </div>
     </main>
@@ -199,97 +243,99 @@
         </div>
     </div>
 
- <div id="notification-bell-container" style="position: fixed; bottom: 20px; left: 20px; z-index: 9999;">
-    <div id="notification-bell" onclick="toggleSininho()" 
-        style="background: #9216FD; color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 0 20px rgba(146, 34, 253, 0.6); transition: all 0.3s ease;">
-        <i class="fa-solid fa-bell" style="font-size: 25px;"></i>
+    <div id="notification-bell-container" style="position: fixed; bottom: 20px; left: 20px; z-index: 9999;">
+        <div id="notification-bell" onclick="toggleSininho()"
+            style="background: #9216FD; color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 0 20px rgba(146, 34, 253, 0.6); transition: all 0.3s ease;">
+            <i class="fa-solid fa-bell" style="font-size: 25px;"></i>
+        </div>
+
+        <div id="notify-box"
+            style="display: none; position: absolute; bottom: 75px; left: 0; background: #0b052d; border: 2px solid #3CC9E4; padding: 20px; border-radius: 15px; width: 260px; box-shadow: 0 0 25px rgba(0, 242, 255, 0.4);">
+            <h4 style="color: #3CC9E4; font-family: 'Orbitron', sans-serif; font-size: 15px; margin: 0 0 10px 0;">
+                NOTIFICAÇÕES</h4>
+            <p style="font-size: 13px; color: white; margin-bottom: 15px; line-height: 1.4;">
+                Deseja receber avisos reais de novos posts no seu celular ou PC?
+            </p>
+            <button type="button" onclick="ativarNotificacaoReal()"
+                style="width: 100%; background: #3CC9E4; color: #000; border: none; padding: 12px; font-weight: bold; cursor: pointer; border-radius: 8px; text-transform: uppercase; font-size: 11px;">
+                ATIVAR AGORA
+            </button>
+        </div>
     </div>
 
-    <div id="notify-box" style="display: none; position: absolute; bottom: 75px; left: 0; background: #0b052d; border: 2px solid #3CC9E4; padding: 20px; border-radius: 15px; width: 260px; box-shadow: 0 0 25px rgba(0, 242, 255, 0.4);">
-        <h4 style="color: #3CC9E4; font-family: 'Orbitron', sans-serif; font-size: 15px; margin: 0 0 10px 0;">NOTIFICAÇÕES</h4>
-        <p style="font-size: 13px; color: white; margin-bottom: 15px; line-height: 1.4;">
-            Deseja receber avisos reais de novos posts no seu celular ou PC?
-        </p>
-        <button type="button" onclick="ativarNotificacaoReal()"
-            style="width: 100%; background: #3CC9E4; color: #000; border: none; padding: 12px; font-weight: bold; cursor: pointer; border-radius: 8px; text-transform: uppercase; font-size: 11px;">
-            ATIVAR AGORA
-        </button>
-    </div>
-</div>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compat.js"></script>
 
-<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compat.js"></script>
+    <script>
+        // Configurações vindas do seu .env via Flask
+        const firebaseConfig = {
+            apiKey: "{{ fb.apiKey }}",
+            authDomain: "{{ fb.authDomain }}",
+            projectId: "{{ fb.projectId }}",
+            storageBucket: "{{ fb.storageBucket }}",
+            messagingSenderId: "{{ fb.messagingSenderId }}",
+            appId: "{{ fb.appId }}"
+        };
 
-<script>
-    // Configurações vindas do seu .env via Flask
-    const firebaseConfig = {
-        apiKey: "{{ fb.apiKey }}",
-        authDomain: "{{ fb.authDomain }}",
-        projectId: "{{ fb.projectId }}",
-        storageBucket: "{{ fb.storageBucket }}",
-        messagingSenderId: "{{ fb.messagingSenderId }}",
-        appId: "{{ fb.appId }}"
-    };
+        firebase.initializeApp(firebaseConfig);
+        const messaging = firebase.messaging();
 
-    firebase.initializeApp(firebaseConfig);
-    const messaging = firebase.messaging();
-
-    function toggleSininho() {
-        const box = document.getElementById("notify-box");
-        const status = localStorage.getItem('sinoAtivo');
-        if (status === 'sim') {
-            alert("🔔 As notificações reais já estão ativas!");
-        } else {
-            box.style.display = (box.style.display === "none" || box.style.display === "") ? "block" : "none";
-        }
-    }
-
-    async function ativarNotificacaoReal() {
-        try {
-            const permission = await Notification.requestPermission();
-            if (permission === "granted") {
-                // Tenta pegar o Token usando a Vapid Key do .env
-                const token = await messaging.getToken({ vapidKey: "{{ fb.vapidKey }}" });
-
-                if (token) {
-                    // Envia o token para a sua rota /salvar-token
-                    const res = await fetch('/salvar-token', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ token: token })
-                    });
-
-                    if (res.ok) {
-                        localStorage.setItem('sinoAtivo', 'sim');
-                        aplicarEstiloAtivo();
-                        document.getElementById("notify-box").style.display = "none";
-                        alert("🚀 Sucesso! Notificações ativadas.");
-                    }
-                }
+        function toggleSininho() {
+            const box = document.getElementById("notify-box");
+            const status = localStorage.getItem('sinoAtivo');
+            if (status === 'sim') {
+                alert("🔔 As notificações reais já estão ativas!");
             } else {
-                alert("Você precisa permitir as notificações no navegador!");
+                box.style.display = (box.style.display === "none" || box.style.display === "") ? "block" : "none";
             }
-        } catch (error) {
-            console.error("Erro no Push:", error);
-            alert("Erro ao ativar. Verifique se o site tem HTTPS ou se a VapidKey está correta.");
         }
-    }
 
-    function aplicarEstiloAtivo() {
-        const sino = document.getElementById("notification-bell");
-        if (sino) {
-            sino.style.background = "#3CC9E4"; 
-            sino.style.boxShadow = "0 0 20px #3CC9E4";
-        }
-    }
+        async function ativarNotificacaoReal() {
+            try {
+                const permission = await Notification.requestPermission();
+                if (permission === "granted") {
+                    // Tenta pegar o Token usando a Vapid Key do .env
+                    const token = await messaging.getToken({ vapidKey: "{{ fb.vapidKey }}" });
 
-    // Mantém o sino aceso se já estiver ativo
-    document.addEventListener("DOMContentLoaded", function() {
-        if (localStorage.getItem('sinoAtivo') === 'sim') {
-            aplicarEstiloAtivo();
+                    if (token) {
+                        // Envia o token para a sua rota /salvar-token
+                        const res = await fetch('/salvar-token', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ token: token })
+                        });
+
+                        if (res.ok) {
+                            localStorage.setItem('sinoAtivo', 'sim');
+                            aplicarEstiloAtivo();
+                            document.getElementById("notify-box").style.display = "none";
+                            alert("🚀 Sucesso! Notificações ativadas.");
+                        }
+                    }
+                } else {
+                    alert("Você precisa permitir as notificações no navegador!");
+                }
+            } catch (error) {
+                console.error("Erro no Push:", error);
+                alert("Erro ao ativar. Verifique se o site tem HTTPS ou se a VapidKey está correta.");
+            }
         }
-    });
-</script>
+
+        function aplicarEstiloAtivo() {
+            const sino = document.getElementById("notification-bell");
+            if (sino) {
+                sino.style.background = "#3CC9E4";
+                sino.style.boxShadow = "0 0 20px #3CC9E4";
+            }
+        }
+
+        // Mantém o sino aceso se já estiver ativo
+        document.addEventListener("DOMContentLoaded", function () {
+            if (localStorage.getItem('sinoAtivo') === 'sim') {
+                aplicarEstiloAtivo();
+            }
+        });
+    </script>
 
     <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
     <script>

@@ -104,7 +104,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # 3. Inicialização do Banco (Importando todas as classes do models.py)
-from models import db, Processador, PlacaMae, MemoriaRAM, PlacaVideo, Armazenamento, Fonte, Gabinete, Post, Usuario, MontagemSalva
+from models import db, Processador, PlacaMae, MemoriaRAM, PlacaVideo, Armazenamento, Fonte, Gabinete, Post, Usuario, MontagemSalva, Comentario
 db.init_app(app)
 
 with app.app_context():
@@ -588,21 +588,59 @@ def deletar_usuario_admin(id):
 def arquivo():
     posts = Post.query.order_by(Post.data_postagem.desc()).all()
     return render_template("arquivo.html", posts=posts)
-
 @app.route("/blog/<slug>")
 def exibir_post(slug):
+    # 1. Busca o post principal pelo slug
     post = Post.query.filter_by(slug=slug).first_or_404()
     
+    # 2. Busca os 3 posts MAIS VISTOS (Populares)
+    # Filtramos para não mostrar o post atual na lista e ignorar posts arquivados
+    sugestoes = Post.query.filter(Post.slug != slug, Post.arquivado == False)\
+                          .order_by(Post.views.desc())\
+                          .limit(3).all()
+    
+    # 3. Lógica de contagem de visualizações
     if not post.views:
         post.views = 0
     post.views += 1
     
     try:
         db.session.commit()
-    except:
+    except Exception as e:
         db.session.rollback()
+        logger.error(f"Erro ao atualizar views: {e}")
         
-    return render_template("blog_post.html", post=post)
+    # 4. Enviamos o post e a lista de sugestões para o HTML
+    return render_template("blog_post.html", post=post, sugestoes=sugestoes)
+
+@app.route("/blog/comentar/<int:post_id>", methods=["POST"])
+def comentar(post_id):
+    # 1. Trava de segurança: Só comenta se estiver logado
+    if 'usuario_id' not in session:
+        flash("Você precisa estar logado para comentar!")
+        return redirect(url_for('login'))
+    
+    conteudo = request.form.get("conteudo_comentario")
+    
+    # 2. Verifica se o comentário não está vazio
+    if conteudo and conteudo.strip():
+        try:
+            novo_comentario = Comentario(
+                conteudo=conteudo.strip(),
+                post_id=post_id,
+                usuario_id=session['usuario_id']
+            )
+            db.session.add(novo_comentario)
+            db.session.commit()
+            flash("Comentário postado com sucesso!")
+        except Exception as e:
+            db.session.rollback()
+            logger.error(f"Erro ao salvar comentário: {e}")
+            flash("Erro ao salvar comentário. Tente novamente.")
+    
+    # 3. Redireciona de volta para o post (usando o slug do post)
+    post = Post.query.get_or_404(post_id)
+    return redirect(url_for('exibir_post', slug=post.slug))
 
 # --- LÓGICA DO MONTADOR E SETUP BANCO MANTIDOS COMO ESTÃO ---
 
@@ -644,33 +682,14 @@ def montar_setup():
 @app.route("/setup-db-kaio")
 def setup_db_kaio():
     try:
-        # 1. Reset total (apaga tabelas antigas para corrigir o erro de coluna)
-        db.drop_all() 
-        
-        # 2. Recria tudo com as colunas novas
+        # O db.create_all() APENAS cria o que não existe. 
+        # Como as outras tabelas já existem, ele vai criar só a de Comentario.
         db.create_all()
         
-        # 3. Puxa os dados das variáveis que você configurou no Render
-        admin_email = os.getenv("EMAIL_USER")
-        admin_pass = os.getenv("ADMIN_PASSWORD") # Puxa do Render!
-
-        if admin_email and admin_pass:
-            novo_admin = Usuario(
-                nome="Administrador",
-                email=admin_email,
-                senha=generate_password_hash(admin_pass),
-                is_admin=True,
-                confirmado=True # Admin já nasce confirmado
-            )
-            db.session.add(novo_admin)
-            db.session.commit()
-            return "✅ Sucesso: Banco MySQL resetado e Admin criado com segurança!"
-        else:
-            return "❌ Erro: Variáveis ADMIN_PASSWORD ou EMAIL_USER não encontradas no Render."
-
+        return "✅ Sucesso: Novas tabelas (Comentários) criadas sem apagar os dados antigos!"
     except Exception as e:
         db.session.rollback()
-        return f"❌ Erro crítico: {e}"
+        return f"❌ Erro ao atualizar banco: {e}"
     
 @app.route("/consultoria-ia", methods=["POST"])
 def consultoria_ia():
@@ -779,6 +798,13 @@ def sitemap():
     except Exception as e:
         logger.error(f"Erro ao gerar sitemap: {e}")
         return str(e)
+    
+@app.route('/firebase-messaging-sw.js')
+def firebase_sw():
+    # Isso responde ao navegador com um código JavaScript básico
+    # Evita o erro 404 e permite que o Firebase funcione sem travar o Python
+    conteudo = "// Service Worker funcional\nimportScripts('https://www.gstatic.com/firebasejs/9.0.0/firebase-app-sw.js');\nimportScripts('https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-sw.js');"
+    return conteudo, 200, {'Content-Type': 'application/javascript'}
 
 @app.route("/privacidade")
 def privacidade():
@@ -790,7 +816,8 @@ def termos():
 
 @app.route('/robots.txt')
 def robots_txt():
-    return send_from_directory(app.static_folder, 'robots.txt')
+    conteudo = "User-agent: *\nDisallow: /admin\nDisallow: /setup-db-kaio\nSitemap: https://kitpc.com.br/sitemap.xml"
+    return conteudo, 200, {'Content-Type': 'text/plain'}
 
 @app.route("/health")
 def health(): return "OK", 200
