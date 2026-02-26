@@ -188,50 +188,73 @@
                     <a href="{{ url_for('montagem') }}" class="btn btn-info fw-bold text-dark">START SETUP</a>
                 </div>
 
-                <div class="leia-tambem"
-                    style="margin-top: 50px; padding: 20px; background: #f9f9f9; border-radius: 8px;">
-                    <h4>📖 Leia também:</h4>
-                    <ul style="list-style: none; padding-left: 0;">
+                {% if sugestoes %}
+                <section class="container mt-5">
+                    <h2 class="text-center section-title mb-5">LEIA TAMBÉM</h2>
+                    <div class="row justify-content-center">
                         {% for sugestao in sugestoes %}
-                        <li style="margin-bottom: 10px;">
-                            <a href="{{ url_for('exibir_post', slug=sugestao.slug) }}"
-                                style="text-decoration: none; color: #007bff; font-weight: bold;">
-                                {{ sugestao.titulo }}
-                            </a>
-                        </li>
+                        <div class="col-md-4 mb-4">
+                            <div class="card-blog-menor p-3">
+                                <a href="{{ url_for('exibir_post', slug=sugestao.slug) }}"
+                                    style="text-decoration: none; color: inherit;">
+                                    <img src="{{ sugestao.imagem_url or url_for('static', filename='Imagens/pc-padrao.png') }}"
+                                        class="img-fluid rounded border-neon-sm" alt="{{ sugestao.titulo }}"
+                                        style="height: 180px; width: 100%; object-fit: cover;">
+                                    <h5 class="mt-2">{{ sugestao.titulo }}</h5>
+                                </a>
+                            </div>
+                        </div>
                         {% endfor %}
-                    </ul>
-                </div>
+                    </div>
+                </section>
+                {% endif %}
 
                 <hr>
-                <h3>Comentários</h3>
 
-                <div class="comentarios-lista">
-                    {% if post.comentarios %}
-                    {% for comentario in post.comentarios %}
-                    <div style="border-bottom: 1px solid #ddd; padding: 10px 0;">
-                        <strong>{{ comentario.autor.nome }}</strong>
-                        <small style="color: gray;">em {{ comentario.data_postagem.strftime('%d/%m/%Y %H:%M') }}</small>
-                        <p>{{ comentario.conteudo }}</p>
+                <section class="container mt-5">
+                    <h3 class="text-info" style="font-family: 'Orbitron', sans-serif;">Comentários</h3>
+
+                    <div class="comentarios-lista">
+                        {% if post.comentarios %}
+                        {% for comentario in post.comentarios %}
+                        <div style="border-bottom: 1px solid rgba(60, 201, 228, 0.2); padding: 15px 0; color: white;">
+                            <strong class="text-info">{{ comentario.autor.nome }}</strong>
+                            <small style="color: #9216FD; margin-left: 10px;">
+                                <i class="far fa-calendar-alt"></i> {{ comentario.data_postagem.strftime('%d/%m/%Y
+                                %H:%M') }}
+                            </small>
+                            <p class="mt-2 opacity-75">{{ comentario.conteudo }}</p>
+                        </div>
+                        {% endfor %}
+                        {% else %}
+                        <div class="text-center py-4">
+                            <button class="btn btn-outline-info disabled" style="border-style: dashed;">
+                                <i class="fa-regular fa-comment-dots"></i> Seja o primeiro a comentar
+                            </button>
+                        </div>
+                        {% endif %}
                     </div>
-                    {% endfor %}
-                    {% else %}
-                    <p>Seja o primeiro a comentar!</p>
-                    {% endif %}
-                </div>
 
-                <br>
-
-                {% if session.get('usuario_id') %}
-                <h4>Deixe seu comentário:</h4>
-                <form action="{{ url_for('comentar', post_id=post.id) }}" method="POST">
-                    <textarea name="conteudo_comentario" rows="3" class="form-control"
-                        placeholder="Escreva aqui seu comentário..." required></textarea>
-                    <button type="submit" class="btn btn-primary" style="margin-top: 10px;">Postar Comentário</button>
-                </form>
-                {% else %}
-                <p><a href="{{ url_for('login') }}">Faça login</a> para deixar um comentário.</p>
-                {% endif %}
+                    <div class="mt-4 p-4" style="background: rgba(255, 255, 255, 0.05); border-radius: 12px;">
+                        {% if session.get('usuario_id') %}
+                        <h4 class="text-light h5 mb-3">Deixe sua opinião:</h4>
+                        <form action="{{ url_for('comentar', post_id=post.id) }}" method="POST">
+                            <textarea name="conteudo_comentario" rows="3"
+                                class="form-control bg-dark text-white border-info"
+                                placeholder="O que você achou dessa matéria?" required></textarea>
+                            <button type="submit" class="btn btn-info fw-bold mt-3">POSTAR COMENTÁRIO</button>
+                        </form>
+                        {% else %}
+                        <div class="alert alert-dark border-warning text-center">
+                            <i class="fa-solid fa-lock text-warning"></i>
+                            <span class="text-light">Você precisa estar </span>
+                            <a href="#" data-bs-toggle="modal" data-bs-target="#modalAcesso"
+                                class="text-warning fw-bold">logado</a>
+                            <span class="text-light">para comentar.</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </section>
             </div>
         </div>
     </main>
