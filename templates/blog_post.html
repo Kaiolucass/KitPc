@@ -208,40 +208,49 @@
                     </div>
                 </section>
                 {% endif %}
-
-                <hr>
-
-                <section class="container mt-5">
+<section class="container mt-5">
                     <h3 class="text-info" style="font-family: 'Orbitron', sans-serif;">Comentários</h3>
 
                     <div class="comentarios-lista">
-                        {% if post.comentarios %}
-                        {% for comentario in post.comentarios %}
+                        {% if comentarios %}
+                        {% for c in comentarios %}
                         <div style="border-bottom: 1px solid rgba(60, 201, 228, 0.2); padding: 15px 0; color: white;">
-                            <strong class="text-info">{{ comentario.autor.nome }}</strong>
-                            <small style="color: #9216FD; margin-left: 10px;">
-                                <i class="far fa-calendar-alt"></i> {{ comentario.data_postagem.strftime('%d/%m/%Y
-                                %H:%M') }}
-                            </small>
-                            <p class="mt-2 opacity-75">{{ comentario.conteudo }}</p>
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <strong class="text-info">{{ c.autor.nome }}</strong>
+                                    <small style="color: #9216FD; margin-left: 10px;">
+                                        <i class="far fa-calendar-alt"></i> {{ c.data_postagem.strftime('%d/%m/%Y %H:%M') }}
+                                    </small>
+                                    <p class="mt-2 opacity-75">{{ c.conteudo }}</p>
+                                </div>
+
+                                {# BOTÃO DE EXCLUIR - APARECE SÓ PARA O ADM #}
+                                {% if session.get('is_admin') %}
+                                <a href="{{ url_for('excluir_comentario', id=c.id) }}" 
+                                   class="btn btn-outline-danger btn-sm border-0" 
+                                   onclick="return confirm('Deseja apagar este comentário?')">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                                {% endif %}
+                            </div>
                         </div>
                         {% endfor %}
                         {% else %}
                         <div class="text-center py-4">
                             <button class="btn btn-outline-info disabled" style="border-style: dashed;">
-                                <i class="fa-regular fa-comment-dots"></i> Seja o primeiro a comentar
+                                <i class="fa-regular fa-comment-dots"></i> Comente a primeira opinião sobre essa matéria!
                             </button>
                         </div>
                         {% endif %}
                     </div>
 
-                    <div class="mt-4 p-4" style="background: rgba(255, 255, 255, 0.05); border-radius: 12px;">
+                    <div class="mt-4 p-4" style="background: rgba(255, 255, 255, 0.05); border-radius: 12px; border: 1px solid rgba(60, 201, 228, 0.1);">
                         {% if session.get('usuario_id') %}
                         <h4 class="text-light h5 mb-3">Deixe sua opinião:</h4>
                         <form action="{{ url_for('comentar', post_id=post.id) }}" method="POST">
                             <textarea name="conteudo_comentario" rows="3"
                                 class="form-control bg-dark text-white border-info"
-                                placeholder="O que você achou dessa matéria?" required></textarea>
+                                placeholder="O que você achou dessa matéria?" required style="resize: none;"></textarea>
                             <button type="submit" class="btn btn-info fw-bold mt-3">POSTAR COMENTÁRIO</button>
                         </form>
                         {% else %}
@@ -249,8 +258,8 @@
                             <i class="fa-solid fa-lock text-warning"></i>
                             <span class="text-light">Você precisa estar </span>
                             <a href="#" data-bs-toggle="modal" data-bs-target="#modalAcesso"
-                                class="text-warning fw-bold">logado</a>
-                            <span class="text-light">para comentar.</span>
+                                class="text-warning fw-bold text-decoration-none">logado</a>
+                            <span class="text-light"> para comentar.</span>
                         </div>
                         {% endif %}
                     </div>

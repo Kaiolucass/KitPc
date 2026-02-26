@@ -594,12 +594,18 @@ def exibir_post(slug):
     post = Post.query.filter_by(slug=slug).first_or_404()
     
     # 2. Busca os 3 posts MAIS VISTOS (Populares)
-    # Filtramos para não mostrar o post atual na lista e ignorar posts arquivados
     sugestoes = Post.query.filter(Post.slug != slug, Post.arquivado == False)\
                           .order_by(Post.views.desc())\
                           .limit(3).all()
+
+    # 3. Busca os COMENTÁRIOS (Do mais novo para o mais antigo)
+    # Importamos o modelo dentro da função para evitar erros de importação circular
+    from models import Comentario
+    comentarios = Comentario.query.filter_by(post_id=post.id)\
+                                  .order_by(Comentario.data_postagem.desc())\
+                                  .all()
     
-    # 3. Lógica de contagem de visualizações
+    # 4. Lógica de contagem de visualizações
     if not post.views:
         post.views = 0
     post.views += 1
@@ -608,10 +614,14 @@ def exibir_post(slug):
         db.session.commit()
     except Exception as e:
         db.session.rollback()
-        logger.error(f"Erro ao atualizar views: {e}")
+        # Se o seu logger não estiver configurado, pode usar print(e) para testar
+        print(f"Erro ao atualizar views: {e}")
         
-    # 4. Enviamos o post e a lista de sugestões para o HTML
-    return render_template("blog_post.html", post=post, sugestoes=sugestoes)
+    # 5. Enviamos tudo para o HTML (agora com a variável 'comentarios')
+    return render_template("blog_post.html", 
+                           post=post, 
+                           sugestoes=sugestoes, 
+                           comentarios=comentarios)
 
 @app.route("/blog/comentar/<int:post_id>", methods=["POST"])
 def comentar(post_id):
@@ -641,6 +651,19 @@ def comentar(post_id):
     # 3. Redireciona de volta para o post (usando o slug do post)
     post = Post.query.get_or_404(post_id)
     return redirect(url_for('exibir_post', slug=post.slug))
+
+@app.route("/excluir-comentario/<int:id>")
+def excluir_comentario(id):
+    if not session.get('is_admin'):
+        return "Acesso negado", 403
+    
+    from models import Comentario
+    comentario = Comentario.query.get_or_404(id)
+    post_slug = comentario.post_rel.slug # Pega o slug para voltar para a mesma página
+    
+    db.session.delete(comentario)
+    db.session.commit()
+    return redirect(url_for('exibir_post', slug=post_slug))
 
 # --- LÓGICA DO MONTADOR E SETUP BANCO MANTIDOS COMO ESTÃO ---
 
