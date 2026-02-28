@@ -2,22 +2,21 @@ importScripts('https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js')
 importScripts('https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compat.js');
 
 firebase.initializeApp({
-  apiKey: "SUA_API_KEY",
-  projectId: "SEU_PROJECT_ID",
-  messagingSenderId: "SEU_SENDER_ID",
-  appId: "SEU_APP_ID"
+  apiKey: "AIzaSyBBHTJbRxW6DCYtzOCUAZ-UGkvOZXD3waw",
+  authDomain: "kitpc-17567.firebaseapp.com",
+  projectId: "kitpc-17567",
+  storageBucket: "kitpc-17567.firebasestorage.app",
+  messagingSenderId: "868153808593",
+  appId: "1:868153808593:web:15759921e8736b075d57f0"
 });
 
 const messaging = firebase.messaging();
 
-// Exibe a notificação quando o site está fechado
 messaging.onBackgroundMessage((payload) => {
-  console.log('Notificação recebida em segundo plano:', payload);
+  console.log('Mensagem recebida', payload);
   const notificationTitle = payload.notification.title;
   const notificationOptions = {
     body: payload.notification.body,
-    icon: '/static/Imagens/favicon.png'
   };
-
   self.registration.showNotification(notificationTitle, notificationOptions);
 });
