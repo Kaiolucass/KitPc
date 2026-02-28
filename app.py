@@ -860,6 +860,9 @@ def sitemap():
         logger.error(f"Erro ao gerar sitemap: {e}")
         return str(e)
     
+@app.route('/firebase-messaging-sw.js')
+def serve_sw():
+    return send_from_directory('.', 'firebase-messaging-sw.js')
 
 @app.route("/privacidade")
 def privacidade():

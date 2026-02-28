@@ -189,7 +189,7 @@
         appId: "{{ fb.appId }}"
     };
 
-    firebase.initializeApp(firebaseConfig);
+   navigator.serviceWorker.register('/firebase-messaging-sw.js');
     const messaging = firebase.messaging();
 
     function toggleSininho() {
