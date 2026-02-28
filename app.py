@@ -860,12 +860,6 @@ def sitemap():
         logger.error(f"Erro ao gerar sitemap: {e}")
         return str(e)
     
-@app.route('/firebase-messaging-sw.js')
-def firebase_sw():
-    # Isso responde ao navegador com um código JavaScript básico
-    # Evita o erro 404 e permite que o Firebase funcione sem travar o Python
-    conteudo = "// Service Worker funcional\nimportScripts('https://www.gstatic.com/firebasejs/9.0.0/firebase-app-sw.js');\nimportScripts('https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-sw.js');"
-    return conteudo, 200, {'Content-Type': 'application/javascript'}
 
 @app.route("/privacidade")
 def privacidade():
