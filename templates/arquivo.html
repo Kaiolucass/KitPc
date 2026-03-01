@@ -210,7 +210,7 @@
 
 <script>
     // Configurações vindas do seu .env via Flask
-    const firebaseConfig = {
+     const firebaseConfig = {
         apiKey: "{{ fb.apiKey }}",
         authDomain: "{{ fb.authDomain }}",
         projectId: "{{ fb.projectId }}",
@@ -219,7 +219,8 @@
         appId: "{{ fb.appId }}"
     };
 
-    if ('serviceWorker' in navigator) {
+    firebase.initializeApp(firebaseConfig);
+     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('/firebase-messaging-sw.js')
             .then(function(reg) {
                 console.log('Service Worker registrado com sucesso!', reg);

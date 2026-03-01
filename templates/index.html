@@ -306,6 +306,7 @@
         appId: "{{ fb.appId }}"
     };
 
+    firebase.initializeApp(firebaseConfig);
      if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('/firebase-messaging-sw.js')
             .then(function(reg) {
