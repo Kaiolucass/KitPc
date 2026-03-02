@@ -430,8 +430,31 @@ def enviar_notificacoes_thread(app_obj, titulo, slug):
                         msg.body = f"Olá! Acabamos de publicar uma nova matéria: {titulo}\n\nLeia em: {url_post}"
                         conn.send(msg)
         except Exception as e:
-            print(f"Erro no envio background: {e}")
+            print(f"Erro no envio background (email): {e}")
 
+        # 2. ENVIAR NOTIFICAÇÃO PUSH REAL
+        try:
+            from firebase_admin import messaging
+            
+            # Busca todos os tokens salvos
+            tokens_docs = db_firestore.collection('tokens_push').stream()
+            lista_tokens = [doc.to_dict()['token'] for doc in tokens_docs]
+
+            if lista_tokens:
+                # Criamos a mensagem
+                notificacao = messaging.MulticastMessage(
+                    notification=messaging.Notification(
+                        title=f"📰 Novo Post: {titulo}",
+                        body="Confira a nova matéria no KitPC!"
+                    ),
+                    tokens=lista_tokens,
+                    data={"slug": slug} # Link para o JS abrir o post certo
+                )
+                # Envia para todo mundo de uma vez
+                response = messaging.send_multicast(notificacao)
+                logger.info(f"Push enviado para {response.success_count} dispositivos.")
+        except Exception as e:
+            logger.error(f"Falha ao enviar push: {e}")
 
 # --- ÁREA ADMINISTRATIVA ---
 
@@ -508,44 +531,7 @@ def salvar_post(id=None):
         return redirect(url_for('admin'))
     
 
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"Erro ao salvar: {e}")
-        return f"Erro ao salvar: {e}"
 
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"Erro ao salvar: {e}")
-        return f"Erro ao salvar: {e}"
-    
-if id is None: # Post Novo
-    # 1. Enviar E-mails (você já tem)
-    # ... seu código de e-mail aqui ...
-
-    # 2. ENVIAR NOTIFICAÇÃO PUSH REAL
-    try:
-        from firebase_admin import messaging
-        
-        # Busca todos os tokens salvos
-        tokens_docs = db_firestore.collection('tokens_push').stream()
-        lista_tokens = [doc.to_dict()['token'] for doc in tokens_docs]
-
-        if lista_tokens:
-            # Criamos a mensagem
-            notificacao = messaging.MulticastMessage(
-                notification=messaging.Notification(
-                    title=f"📰 Novo Post: {titulo}",
-                    body=subtitulo or "Confira a nova matéria no KitPC!"
-                ),
-                tokens=lista_tokens,
-                data={"slug": post.slug} # Link para o JS abrir o post certo
-            )
-            # Envia para todo mundo de uma vez
-            response = messaging.send_multicast(notificacao)
-            logger.info(f"Push enviado para {response.success_count} dispositivos.")
-    except Exception as e:
-        logger.error(f"Falha ao enviar push: {e}")
-    
 #admin arquivar-post/
 @app.route("/admin/arquivar-post/<int:id>", methods=["POST"])
 def arquivar_post(id):
@@ -714,14 +700,6 @@ def distribuir_orcamento(total, quer_gpu):
         return {"cpu": total*0.22, "placa_mae": total*0.12, "ram": total*0.12, "gpu": total*0.30, "ssd": total*0.10, "fonte": total*0.08, "gabinete": total*0.06}
     return {"cpu": total*0.40, "placa_mae": total*0.15, "ram": total*0.15, "gpu": 0, "ssd": total*0.15, "fonte": total*0.10, "gabinete": total*0.05}
 
-def comparar_precos(termo, preco_max):
-    tabelas = [Processador, PlacaMae, MemoriaRAM, PlacaVideo, Armazenamento, Fonte, Gabinete]
-    for tabela in tabelas:
-        res = tabela.query.filter(tabela.nome.ilike(f"%{termo}%")).filter(tabela.preco <= preco_max).order_by(tabela.preco.desc()).first()
-        if res:
-            return {"nome": res.nome, "imagem": res.imagem_url, "preco": float(res.preco), "link": res.link_loja, "componente": tabela.__tablename__.upper()}
-    return None
-
 @app.route("/montar-setup", methods=["POST"])
 def montar_setup():
     try:
@@ -729,11 +707,90 @@ def montar_setup():
         total = get_total(dados.get("preco"))
         gpu = dados.get("gpu") == "Sim"
         orcamento = distribuir_orcamento(total, gpu)
+        
         resultado = []
-        for comp, valor in orcamento.items():
-            if valor > 0:
-                p = comparar_precos("", valor)
-                if p: resultado.append(p)
+        socket_escolhido = None
+        
+        # 1. Escolher CPU
+        if orcamento.get("cpu", 0) > 0:
+            cpu = Processador.query.filter(Processador.preco <= orcamento["cpu"]).order_by(Processador.preco.desc()).first()
+            if not cpu:
+                cpu = Processador.query.order_by(Processador.preco.asc()).first()
+            
+            if cpu:
+                socket_escolhido = cpu.socket_id
+                resultado.append({
+                    "nome": cpu.nome, "imagem": cpu.imagem_url, "preco": float(cpu.preco), 
+                    "link": cpu.link_loja, "componente": "PROCESSADOR"
+                })
+
+        # 2. Escolher Placa-mãe (Compatível com o Socket da CPU)
+        if orcamento.get("placa_mae", 0) > 0 and socket_escolhido:
+            mobo = PlacaMae.query.filter(PlacaMae.preco <= orcamento["placa_mae"], PlacaMae.socket_id == socket_escolhido).order_by(PlacaMae.preco.desc()).first()
+            if not mobo:
+                mobo = PlacaMae.query.filter(PlacaMae.socket_id == socket_escolhido).order_by(PlacaMae.preco.asc()).first()
+            
+            if mobo:
+                resultado.append({
+                    "nome": mobo.nome, "imagem": mobo.imagem_url, "preco": float(mobo.preco), 
+                    "link": mobo.link_loja, "componente": "PLACA MAE"
+                })
+
+        # 3. Escolher Memória RAM
+        if orcamento.get("ram", 0) > 0:
+            ram = MemoriaRAM.query.filter(MemoriaRAM.preco <= orcamento["ram"]).order_by(MemoriaRAM.preco.desc()).first()
+            if not ram:
+                ram = MemoriaRAM.query.order_by(MemoriaRAM.preco.asc()).first()
+            if ram:
+                 resultado.append({
+                    "nome": ram.nome, "imagem": ram.imagem_url, "preco": float(ram.preco), 
+                    "link": ram.link_loja, "componente": "MEMORIA RAM"
+                })
+
+        # 4. Escolher Placa de Vídeo (se houver)
+        if orcamento.get("gpu", 0) > 0:
+            gpu_item = PlacaVideo.query.filter(PlacaVideo.preco <= orcamento["gpu"]).order_by(PlacaVideo.preco.desc()).first()
+            if not gpu_item:
+                gpu_item = PlacaVideo.query.order_by(PlacaVideo.preco.asc()).first()
+            if gpu_item:
+                 resultado.append({
+                    "nome": gpu_item.nome, "imagem": gpu_item.imagem_url, "preco": float(gpu_item.preco), 
+                    "link": gpu_item.link_loja, "componente": "PLACA DE VIDEO"
+                })
+        
+        # 5. Escolher Armazenamento (SSD)
+        if orcamento.get("ssd", 0) > 0:
+            ssd = Armazenamento.query.filter(Armazenamento.preco <= orcamento["ssd"]).order_by(Armazenamento.preco.desc()).first()
+            if not ssd:
+                ssd = Armazenamento.query.order_by(Armazenamento.preco.asc()).first()
+            if ssd:
+                 resultado.append({
+                    "nome": ssd.nome, "imagem": ssd.imagem_url, "preco": float(ssd.preco), 
+                    "link": ssd.link_loja, "componente": "ARMAZENAMENTO"
+                })
+        
+        # 6. Escolher Fonte
+        if orcamento.get("fonte", 0) > 0:
+            fonte = Fonte.query.filter(Fonte.preco <= orcamento["fonte"]).order_by(Fonte.preco.desc()).first()
+            if not fonte:
+                fonte = Fonte.query.order_by(Fonte.preco.asc()).first()
+            if fonte:
+                 resultado.append({
+                    "nome": fonte.nome, "imagem": fonte.imagem_url, "preco": float(fonte.preco), 
+                    "link": fonte.link_loja, "componente": "FONTE"
+                })
+
+        # 7. Escolher Gabinete
+        if orcamento.get("gabinete", 0) > 0:
+            gab = Gabinete.query.filter(Gabinete.preco <= orcamento["gabinete"]).order_by(Gabinete.preco.desc()).first()
+            if not gab:
+                gab = Gabinete.query.order_by(Gabinete.preco.asc()).first()
+            if gab:
+                 resultado.append({
+                    "nome": gab.nome, "imagem": gab.imagem_url, "preco": float(gab.preco), 
+                    "link": gab.link_loja, "componente": "GABINETE"
+                })
+
         return jsonify(resultado)
     except Exception as e:
         return jsonify({"erro": str(e)}), 500
@@ -861,8 +918,8 @@ def sitemap():
         return str(e)
     
 @app.route('/firebase-messaging-sw.js')
-def serve_sw():
-    return send_from_directory('.', 'firebase-messaging-sw.js')
+def firebase_sw():
+    return send_from_directory(os.path.dirname(os.path.abspath(__file__)), 'firebase-messaging-sw.js')
 
 @app.route("/privacidade")
 def privacidade():
