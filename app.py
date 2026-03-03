@@ -1,3 +1,5 @@
+from concurrent.futures import thread
+
 from flask import Flask, request, jsonify, render_template, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
@@ -84,7 +86,7 @@ def send_async_email(app_obj, msg):
     with app_obj.app_context():
         try:
             mail.send(msg)
-            logger.info("E-mail de confirmação enviado em segundo plano.")
+            logger.info("E-mail de confirmação enviado com sucesso!")
         except Exception as e:
             logger.error(f"Erro no envio de e-mail background: {e}")
 
@@ -528,10 +530,11 @@ def salvar_post(id=None):
         
         # --- DISPARO DE NOTIFICAÇÃO (EM SEGUNDO PLANO) ---
         if id is None: # Só envia se for post novo
+           # No def register():
             thread = threading.Thread(
-                target=enviar_notificacoes_thread, 
-                args=(app._get_current_object(), post.titulo, post.slug)
-            )
+    target=enviar_notificacoes_thread, 
+    args=(app, post.titulo, post.slug) # Passando 'app' em vez de '_get_current_object()'
+)
             thread.start()
 
         flash("✅ Postagem publicada! As notificações estão sendo enviadas em segundo plano.")
