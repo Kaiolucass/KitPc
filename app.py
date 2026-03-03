@@ -50,7 +50,7 @@ def inject_firebase():
             "vapidKey": os.getenv("FIREBASE_VAPID_KEY")
         }
     }
-
+# IA do gemini para ajudar no montador
 import google.generativeai as genai
 
 # Força o uso da API v1 (Estável) em vez da v1beta
@@ -79,15 +79,31 @@ app.config['MAIL_PASSWORD'] = 'sua-senha-de-app-aqui' # 16 caracteres
 mail = Mail(app)
 s = URLSafeTimedSerializer(app.secret_key)
 
-def enviar_confirmacao(usuario_email, token):
-    link = f"https://kitpc.com.br/confirmar-email/{token}"
+# email de confirmaçao
+def send_async_email(app_obj, msg):
+    with app_obj.app_context():
+        try:
+            mail.send(msg)
+            logger.info("E-mail de confirmação enviado em segundo plano.")
+        except Exception as e:
+            logger.error(f"Erro no envio de e-mail background: {e}")
+
+def enviar_confirmacao(usuario_email, token, usuario_nome):
+    # Geramos o link
+    link = url_for('confirmar_email', token=token, _external=True)
+    
+    # Criamos a mensagem
     msg = Message('Confirme sua conta no KitPC! 🚀',
-                  sender='seu-email@gmail.com',
+                  sender=app.config['MAIL_USERNAME'], # Melhor usar a config
                   recipients=[usuario_email])
-    msg.body = f'Olá! Clique no link para ativar sua conta e começar a montar seu PC: {link}'
-    # Se quiser deixar "profissional", use html em vez de body:
-    msg.html = render_template('email_confirmacao.html', link=link)
-    mail.send(msg)
+    
+    msg.body = f'Olá {usuario_nome}! Clique no link para ativar sua conta: {link}'
+    msg.html = render_template('email_confirmacao.html', link=link, nome=usuario_nome)
+    
+    # DISPARO ASSÍNCRONO (Igual ao código do condomínio)
+    thread = threading.Thread(target=send_async_email, args=(app._get_current_object(), msg))
+    thread.start()
+
 
 # 2. Configuração do Banco de Dados
 def get_cleaned_db_uri():
@@ -375,19 +391,16 @@ def register():
         db.session.add(novo_usuario)
         db.session.commit()
 
-        # 3. Gerar Token e enviar E-mail
+#       3. Gerar Token e enviar E-mail
         token = s.dumps(email, salt='email-confirm')
-        link = url_for('confirmar_email', token=token, _external=True)
-        
-        msg = Message('Confirme seu E-mail - KitPC', recipients=[email])
-        msg.body = f'Olá {nome}! Clique no link para ativar sua conta no KitPC: {link}'
         
         try:
-            mail.send(msg)
+            # Chamamos a nossa nova função assíncrona
+            enviar_confirmacao(email, token, nome)
             flash("Conta criada! Verifique seu e-mail para ativar.")
         except Exception as e:
-            logger.error(f"Erro ao enviar e-mail: {e}")
-            flash("Conta criada, mas houve erro ao enviar e-mail de ativação.")
+            logger.error(f"Erro ao disparar thread de e-mail: {e}")
+            flash("Conta criada, mas houve um erro ao processar o envio do e-mail.")
 
         return redirect(url_for('login'))
 
