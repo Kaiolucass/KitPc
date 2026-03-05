@@ -1,5 +1,3 @@
-from concurrent.futures import thread
-
 from flask import Flask, request, jsonify, render_template, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
@@ -76,8 +74,8 @@ CORS(app)
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = 'seu-email@gmail.com'
-app.config['MAIL_PASSWORD'] = 'sua-senha-de-app-aqui' # 16 caracteres
+app.config['MAIL_USERNAME'] = 'EMAIL_USER'
+app.config['MAIL_PASSWORD'] = 'EMAIL_PASS' 
 mail = Mail(app)
 s = URLSafeTimedSerializer(app.secret_key)
 
@@ -96,13 +94,13 @@ def enviar_confirmacao(usuario_email, token, usuario_nome):
     
     # Criamos a mensagem
     msg = Message('Confirme sua conta no KitPC! 🚀',
-                  sender=app.config['MAIL_USERNAME'], # Melhor usar a config
+                  sender=app.config['MAIL_USERNAME'], 
                   recipients=[usuario_email])
     
     msg.body = f'Olá {usuario_nome}! Clique no link para ativar sua conta: {link}'
     msg.html = render_template('email_confirmacao.html', link=link, nome=usuario_nome)
     
-    # DISPARO ASSÍNCRONO (Igual ao código do condomínio)
+    # DISPARO ASSÍNCRONO
     thread = threading.Thread(target=send_async_email, args=(app._get_current_object(), msg))
     thread.start()
 

@@ -173,3 +173,59 @@ async function gerarPDF() {
             sino.style.boxShadow = "0 0 20px rgba(0, 242, 255, 0.6)";
         }
     });
+// ... (mantenha suas funções setAnswer, finalizar e gerarPDF acima)
+
+async function registerServiceWorkerAndGetToken() {
+    // Verifica se o navegador suporta notificações
+    if (!('serviceWorker' in navigator) || !('Notification' in window)) {
+        console.warn('Este navegador não suporta notificações Push.');
+        return;
+    }
+
+    try {
+        const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+        
+        // Pede permissão apenas se ainda não foi concedida ou negada
+        if (Notification.permission === 'default') {
+            const permission = await Notification.requestPermission();
+            if (permission !== 'granted') return;
+        }
+
+        if (Notification.permission === 'granted') {
+            const currentToken = await messaging.getToken({ 
+                vapidKey: firebaseConfig.vapidKey, // Usa a variável definida no HTML
+                serviceWorkerRegistration: registration 
+            });
+
+            if (currentToken) {
+                sendTokenToServer(currentToken);
+            }
+        }
+    } catch (error) {
+        console.error('Erro no Firebase:', error);
+    }
+}
+
+function sendTokenToServer(token) {
+    fetch('/salvar-token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: token }),
+    })
+    .then(res => res.json())
+    .then(data => console.log('Servidor respondeu:', data))
+    .catch(err => console.error('Erro ao enviar token:', err));
+}
+
+// Inicia o processo
+window.addEventListener('load', registerServiceWorkerAndGetToken);
+
+// Listener para mensagens em primeiro plano
+messaging.onMessage((payload) => {
+    console.log('Notificação recebida:', payload);
+    // Cria um alerta visual bonito ou usa o Notification API
+    new Notification(payload.notification.title, {
+        body: payload.notification.body,
+        icon: '/static/Imagens/Logo KitPc.png'
+    });
+});
