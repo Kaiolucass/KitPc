@@ -105,6 +105,8 @@ def enviar_confirmacao(usuario_email, token, usuario_nome):
     thread.start()
 
 
+    
+
 # 2. Configuração do Banco de Dados
 def get_cleaned_db_uri():
     uri = os.getenv("DATABASE_URL")

@@ -330,36 +330,46 @@
         }
     }
 
-    async function ativarNotificacaoReal() {
-        try {
-            const permission = await Notification.requestPermission();
-            if (permission === "granted") {
-                // Tenta pegar o Token usando a Vapid Key do .env
-                const token = await messaging.getToken({ vapidKey: "{{ fb.vapidKey }}" });
-
-                if (token) {
-                    // Envia o token para a sua rota /salvar-token
-                    const res = await fetch('/salvar-token', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ token: token })
-                    });
-
-                    if (res.ok) {
-                        localStorage.setItem('sinoAtivo', 'sim');
-                        aplicarEstiloAtivo();
-                        document.getElementById("notify-box").style.display = "none";
-                        alert("🚀 Sucesso! Notificações ativadas.");
-                    }
-                }
-            } else {
-                alert("Você precisa permitir as notificações no navegador!");
+   async function ativarNotificacaoReal() {
+    try {
+        const permission = await Notification.requestPermission();
+        if (permission === "granted") {
+            // Pegamos o registro do Service Worker que já está rodando
+            const registration = await navigator.serviceWorker.getRegistration();
+            
+            if (!registration) {
+                alert("Erro: Service Worker não encontrado. Tente atualizar a página.");
+                return;
             }
-        } catch (error) {
-            console.error("Erro no Push:", error);
-            alert("Erro ao ativar. Verifique se o site tem HTTPS ou se a VapidKey está correta.");
+
+            // Agora pedimos o token passando o registro do SW
+            const token = await messaging.getToken({ 
+                vapidKey: "BLGmKdSJv_-CkxhHrI2yjpp3QQnxCX98uuyEqH03KeBI0GbrTmgJq5WmN4SwZWCte-0rtICQG_vVVAOG4TdU-vc",
+                serviceWorkerRegistration: registration 
+            });
+
+            if (token) {
+                const res = await fetch('/salvar-token', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token: token })
+                });
+
+                if (res.ok) {
+                    localStorage.setItem('sinoAtivo', 'sim');
+                    aplicarEstiloAtivo();
+                    document.getElementById("notify-box").style.display = "none";
+                    alert("🚀 Sucesso! Notificações ativadas.");
+                }
+            }
+        } else {
+            alert("Você precisa permitir as notificações no navegador!");
         }
+    } catch (error) {
+        console.error("Erro no Push:", error);
+        alert("Erro técnico. Verifique o console do navegador.");
     }
+}
 
     function aplicarEstiloAtivo() {
         const sino = document.getElementById("notification-bell");
