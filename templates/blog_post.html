@@ -208,7 +208,7 @@
                     </div>
                 </section>
                 {% endif %}
-<section class="container mt-5">
+                <section class="container mt-5">
                     <h3 class="text-info" style="font-family: 'Orbitron', sans-serif;">Comentários</h3>
 
                     <div class="comentarios-lista">
@@ -219,16 +219,17 @@
                                 <div>
                                     <strong class="text-info">{{ c.autor.nome }}</strong>
                                     <small style="color: #9216FD; margin-left: 10px;">
-                                        <i class="far fa-calendar-alt"></i> {{ c.data_postagem.strftime('%d/%m/%Y %H:%M') }}
+                                        <i class="far fa-calendar-alt"></i> {{ c.data_postagem.strftime('%d/%m/%Y
+                                        %H:%M') }}
                                     </small>
                                     <p class="mt-2 opacity-75">{{ c.conteudo }}</p>
                                 </div>
 
                                 {# BOTÃO DE EXCLUIR - APARECE SÓ PARA O ADM #}
                                 {% if session.get('is_admin') %}
-                                <a href="{{ url_for('excluir_comentario', id=c.id) }}" 
-                                   class="btn btn-outline-danger btn-sm border-0" 
-                                   onclick="return confirm('Deseja apagar este comentário?')">
+                                <a href="{{ url_for('excluir_comentario', id=c.id) }}"
+                                    class="btn btn-outline-danger btn-sm border-0"
+                                    onclick="return confirm('Deseja apagar este comentário?')">
                                     <i class="fas fa-trash"></i>
                                 </a>
                                 {% endif %}
@@ -238,13 +239,15 @@
                         {% else %}
                         <div class="text-center py-4">
                             <button class="btn btn-outline-info disabled" style="border-style: dashed;">
-                                <i class="fa-regular fa-comment-dots"></i> Comente a primeira opinião sobre essa matéria!
+                                <i class="fa-regular fa-comment-dots"></i> Comente a primeira opinião sobre essa
+                                matéria!
                             </button>
                         </div>
                         {% endif %}
                     </div>
 
-                    <div class="mt-4 p-4" style="background: rgba(255, 255, 255, 0.05); border-radius: 12px; border: 1px solid rgba(60, 201, 228, 0.1);">
+                    <div class="mt-4 p-4"
+                        style="background: rgba(255, 255, 255, 0.05); border-radius: 12px; border: 1px solid rgba(60, 201, 228, 0.1);">
                         {% if session.get('usuario_id') %}
                         <h4 class="text-light h5 mb-3">Deixe sua opinião:</h4>
                         <form action="{{ url_for('comentar', post_id=post.id) }}" method="POST">
@@ -295,31 +298,31 @@
         </div>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-messaging-compat.js"></script>
 
     <script>
         // Configurações vindas do seu .env via Flask
-         const firebaseConfig = {
-        apiKey: "{{ fb.apiKey }}",
-        authDomain: "{{ fb.authDomain }}",
-        projectId: "{{ fb.projectId }}",
-        storageBucket: "{{ fb.storageBucket }}",
-        messagingSenderId: "{{ fb.messagingSenderId }}",
-        appId: "{{ fb.appId }}"
-    };
+        const firebaseConfig = {
+            apiKey: "{{ fb.apiKey }}",
+            authDomain: "{{ fb.authDomain }}",
+            projectId: "{{ fb.projectId }}",
+            storageBucket: "{{ fb.storageBucket }}",
+            messagingSenderId: "{{ fb.messagingSenderId }}",
+            appId: "{{ fb.appId }}"
+        };
 
-    firebase.initializeApp(firebaseConfig);
-     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/firebase-messaging-sw.js')
-            .then(function(reg) {
-                console.log('Service Worker registrado com sucesso!', reg);
-            })
-            .catch(function(err) {
-                console.error('Erro ao registrar Service Worker:', err);
-            });
-    }
-    const messaging = firebase.messaging();
+        firebase.initializeApp(firebaseConfig);
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/firebase-messaging-sw.js')
+                .then(function (reg) {
+                    console.log('Service Worker registrado com sucesso!', reg);
+                })
+                .catch(function (err) {
+                    console.error('Erro ao registrar Service Worker:', err);
+                });
+        }
+        const messaging = firebase.messaging();
 
         function toggleSininho() {
             const box = document.getElementById("notify-box");

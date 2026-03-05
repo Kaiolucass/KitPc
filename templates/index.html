@@ -275,13 +275,15 @@
 </div>
 
 <div id="notification-bell-container" style="position: fixed; bottom: 20px; left: 20px; z-index: 9999;">
-    <div id="notification-bell" onclick="toggleSininho()" 
+    <div id="notification-bell" onclick="toggleSininho()"
         style="background: #9216FD; color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 0 20px rgba(146, 34, 253, 0.6); transition: all 0.3s ease;">
         <i class="fa-solid fa-bell" style="font-size: 25px;"></i>
     </div>
 
-    <div id="notify-box" style="display: none; position: absolute; bottom: 75px; left: 0; background: #0b052d; border: 2px solid #3CC9E4; padding: 20px; border-radius: 15px; width: 260px; box-shadow: 0 0 25px rgba(0, 242, 255, 0.4);">
-        <h4 style="color: #3CC9E4; font-family: 'Orbitron', sans-serif; font-size: 15px; margin: 0 0 10px 0;">NOTIFICAÇÕES</h4>
+    <div id="notify-box"
+        style="display: none; position: absolute; bottom: 75px; left: 0; background: #0b052d; border: 2px solid #3CC9E4; padding: 20px; border-radius: 15px; width: 260px; box-shadow: 0 0 25px rgba(0, 242, 255, 0.4);">
+        <h4 style="color: #3CC9E4; font-family: 'Orbitron', sans-serif; font-size: 15px; margin: 0 0 10px 0;">
+            NOTIFICAÇÕES</h4>
         <p style="font-size: 13px; color: white; margin-bottom: 15px; line-height: 1.4;">
             Deseja receber avisos reais de novos posts no seu celular ou PC?
         </p>
@@ -292,8 +294,8 @@
     </div>
 </div>
 
-<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-messaging-compat.js"></script>
 
 <script>
     // Configurações vindas do seu .env via Flask
@@ -307,12 +309,12 @@
     };
 
     firebase.initializeApp(firebaseConfig);
-     if ('serviceWorker' in navigator) {
+    if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('/firebase-messaging-sw.js')
-            .then(function(reg) {
+            .then(function (reg) {
                 console.log('Service Worker registrado com sucesso!', reg);
             })
-            .catch(function(err) {
+            .catch(function (err) {
                 console.error('Erro ao registrar Service Worker:', err);
             });
     }
@@ -362,13 +364,13 @@
     function aplicarEstiloAtivo() {
         const sino = document.getElementById("notification-bell");
         if (sino) {
-            sino.style.background = "#3CC9E4"; 
+            sino.style.background = "#3CC9E4";
             sino.style.boxShadow = "0 0 20px #3CC9E4";
         }
     }
 
     // Mantém o sino aceso se já estiver ativo
-    document.addEventListener("DOMContentLoaded", function() {
+    document.addEventListener("DOMContentLoaded", function () {
         if (localStorage.getItem('sinoAtivo') === 'sim') {
             aplicarEstiloAtivo();
         }
