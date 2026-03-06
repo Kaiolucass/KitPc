@@ -182,3 +182,16 @@ class Comentario(db.Model):
     usuario_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False)
     autor = db.relationship('Usuario', backref=db.backref('meus_comentarios', lazy=True))
     post_rel = db.relationship('Post', backref=db.backref('comentarios_do_post', lazy=True))
+
+    # --- TABELAS DE NOTIFICAÇÕES ---
+
+class PushToken(db.Model):
+    __tablename__ = 'push_tokens'
+    id = db.Column(db.Integer, primary_key=True)
+    token_valor = db.Column(db.String(255), unique=True, nullable=False)
+    data_criacao = db.Column(db.DateTime, default=datetime.utcnow)
+    # Opcional: Vincular o token a um usuário se ele estiver logado
+    usuario_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=True)
+
+    def __repr__(self):
+        return f'<PushToken {self.id}>'

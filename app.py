@@ -932,10 +932,23 @@ def sitemap():
     except Exception as e:
         logger.error(f"Erro ao gerar sitemap: {e}")
         return str(e)
+@app.route('/salvar-token', methods=['POST'])
+def salvar_token():
+    dados = request.get_json()
+    token_recebido = dados.get('token')
     
-@app.route('/firebase-messaging-sw.js')
-def firebase_sw():
-    return send_from_directory(os.path.dirname(os.path.abspath(__file__)), 'firebase-messaging-sw.js')
+    # Verifica se o token já existe
+    existe = PushToken.query.filter_by(token_valor=token_recebido).first()
+    
+    if not existe:
+        # Se o usuário estiver logado, pegamos o ID dele da sessão
+        u_id = session.get('user_id') # ou o nome que você usa na session
+        novo = PushToken(token_valor=token_recebido, usuario_id=u_id)
+        db.session.add(novo)
+        db.session.commit()
+        return {"status": "sucesso", "msg": "Token salvo"}, 200
+    
+    return {"status": "sucesso", "msg": "Token já existia"}, 200
 
 @app.route("/privacidade")
 def privacidade():

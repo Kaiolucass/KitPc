@@ -238,7 +238,7 @@
 
         firebase.initializeApp(firebaseConfig);
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/firebase-messaging-sw.js')
+            navigator.serviceWorker.register("{{ url_for('static', filename='firebase-messaging-sw.js') }}")
                 .then(function (reg) {
                     console.log('Service Worker registrado com sucesso!', reg);
                 })
@@ -352,7 +352,7 @@
             }
         }
     </script>
-    <script src="{{ url_for('static', filename='JS/script.js') }}"></script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 
 </html>
