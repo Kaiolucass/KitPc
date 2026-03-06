@@ -218,25 +218,39 @@ def inscrever():
 def salvar_token():
     try:
         dados = request.get_json()
-        token = dados.get("token")
+        token_recebido = dados.get("token")
         
-        if not token:
+        if not token_recebido:
             return jsonify({"erro": "Token não fornecido"}), 400
 
-       
-        # Usamos o próprio token como ID do documento para evitar duplicatas
-        db_firestore.collection('tokens_push').document(token).set({
-            'token': token,
+        # --- 1. SALVAR NO SQL (Banco de Dados local/Render) ---
+        from models import PushToken
+        try:
+            existe_sql = PushToken.query.filter_by(token_valor=token_recebido).first()
+            if not existe_sql:
+                # Tenta pegar o ID do usuário da sessão se estiver logado
+                u_id = session.get('usuario_id') 
+                novo_token_sql = PushToken(token_valor=token_recebido, usuario_id=u_id)
+                db.session.add(novo_token_sql)
+                db.session.commit()
+                logger.info("✅ Token registrado no SQL.")
+        except Exception as sql_err:
+            logger.error(f"Erro ao salvar no SQL (talvez tabela não exista): {sql_err}")
+            # Não paramos o código aqui para tentar salvar no Firebase ao menos
+
+        # --- 2. SALVAR NO FIRESTORE (Firebase Cloud) ---
+        db_firestore.collection('tokens_push').document(token_recebido).set({
+            'token': token_recebido,
             'data_registro': datetime.now(),
             'plataforma': request.user_agent.platform or 'unknown'
         })
         
-        logger.info(f"Novo token de push registrado: {token[:10]}...")
-        return jsonify({"status": "sucesso", "mensagem": "Dispositivo pronto para notificações"}), 200
+        logger.info(f"🚀 Token registrado no Firestore: {token_recebido[:10]}...")
+        return jsonify({"status": "sucesso", "mensagem": "Dispositivo pronto!"}), 200
         
     except Exception as e:
-        logger.error(f"Erro ao salvar token no Firebase: {e}")
-        return jsonify({"erro": "Falha interna ao salvar dispositivo"}), 500
+        logger.error(f"Erro geral no salvar_token: {e}")
+        return jsonify({"erro": "Falha interna"}), 500
     
 def enviar_notificacoes_async(app, post_titulo, post_slug):
     with app.app_context():
@@ -932,23 +946,6 @@ def sitemap():
     except Exception as e:
         logger.error(f"Erro ao gerar sitemap: {e}")
         return str(e)
-@app.route('/salvar-token', methods=['POST'])
-def salvar_token():
-    dados = request.get_json()
-    token_recebido = dados.get('token')
-    
-    # Verifica se o token já existe
-    existe = PushToken.query.filter_by(token_valor=token_recebido).first()
-    
-    if not existe:
-        # Se o usuário estiver logado, pegamos o ID dele da sessão
-        u_id = session.get('user_id') # ou o nome que você usa na session
-        novo = PushToken(token_valor=token_recebido, usuario_id=u_id)
-        db.session.add(novo)
-        db.session.commit()
-        return {"status": "sucesso", "msg": "Token salvo"}, 200
-    
-    return {"status": "sucesso", "msg": "Token já existia"}, 200
 
 @app.route("/privacidade")
 def privacidade():
