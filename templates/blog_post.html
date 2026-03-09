@@ -298,96 +298,112 @@
         </div>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-messaging-compat.js"></script>
+   
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-messaging-compat.js"></script>
 
-    <script>
-        // Configurações vindas do seu .env via Flask
-        const firebaseConfig = {
-            apiKey: "{{ fb.apiKey }}",
-            authDomain: "{{ fb.authDomain }}",
-            projectId: "{{ fb.projectId }}",
-            storageBucket: "{{ fb.storageBucket }}",
-            messagingSenderId: "{{ fb.messagingSenderId }}",
-            appId: "{{ fb.appId }}"
-        };
+<script>
+    // 2. Configurações vindas do Flask
+    const firebaseConfig = {
+        apiKey: "{{ fb.apiKey }}",
+        authDomain: "{{ fb.authDomain }}",
+        projectId: "{{ fb.projectId }}",
+        storageBucket: "{{ fb.storageBucket }}",
+        messagingSenderId: "{{ fb.messagingSenderId }}",
+        appId: "{{ fb.appId }}"
+    };
 
-        firebase.initializeApp(firebaseConfig);
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register("{{ url_for('static', filename='firebase-messaging-sw.js') }}")
-                .then(function (reg) {
-                    console.log('Service Worker registrado com sucesso!', reg);
-                })
-                .catch(function (err) {
-                    console.error('Erro ao registrar Service Worker:', err);
-                });
-        }
-        const messaging = firebase.messaging();
+    // 3. INICIALIZAÇÃO OBRIGATÓRIA (Nesta ordem exata)
+    firebase.initializeApp(firebaseConfig);
+    const messaging = firebase.messaging(); // Agora o messaging é criado DEPOIS do app estar pronto
 
-        function toggleSininho() {
-            const box = document.getElementById("notify-box");
-            const status = localStorage.getItem('sinoAtivo');
-            if (status === 'sim') {
-                alert("🔔 As notificações reais já estão ativas!");
-            } else {
-                box.style.display = (box.style.display === "none" || box.style.display === "") ? "block" : "none";
-            }
-        }
-
-     async function ativarNotificacaoReal() {
-    try {
-        // 1. Pede permissão
-        const permission = await Notification.requestPermission();
-        
-        if (permission === "granted") {
-            // 2. Espera o Service Worker estar pronto (evita o erro de DOMException)
-            const registration = await navigator.serviceWorker.ready;
-            
-            // 3. Pede o Token
-            const token = await messaging.getToken({ 
-                vapidKey: "BLGmKdSJv_-CkxhHrI2yjpp3QQnxCX98uuyEqH03KeBI0GbrTmgJq5WmN4SwZWCte-0rtICQG_vVVAOG4TdU-vc",
-                serviceWorkerRegistration: registration 
+    // 4. Registro do Service Worker
+    if ('serviceWorker' in navigator) {
+        // Usamos o caminho que você definiu na pasta static
+        navigator.serviceWorker.register("{{ url_for('static', filename='firebase-messaging-sw.js') }}")
+            .then(function (reg) {
+                console.log('✅ Service Worker registrado com sucesso!');
+            })
+            .catch(function (err) {
+                console.error('❌ Erro ao registrar Service Worker:', err);
             });
+    }
 
-            if (token) {
-                // 4. Envia para o Flask
-                const res = await fetch('/salvar-token', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ token: token })
+    // --- FUNÇÕES DO SININHO ---
+
+    function toggleSininho() {
+        const box = document.getElementById("notify-box");
+        const status = localStorage.getItem('sinoAtivo');
+        
+        if (status === 'sim') {
+            alert("🔔 As notificações reais já estão ativas!");
+        } else {
+            // Alterna entre block e none
+            if (box.style.display === "none" || box.style.display === "") {
+                box.style.display = "block";
+            } else {
+                box.style.display = "none";
+            }
+        }
+    }
+
+    async function ativarNotificacaoReal() {
+        try {
+            // Pede permissão ao usuário
+            const permission = await Notification.requestPermission();
+            
+            if (permission === "granted") {
+                // Espera o Service Worker estar pronto
+                const registration = await navigator.serviceWorker.ready;
+                
+                // Pede o Token ao Firebase usando a sua VAPID KEY
+                const token = await messaging.getToken({ 
+                    vapidKey: "{{ fb.vapidKey }}", // Usando a chave do seu .env
+                    serviceWorkerRegistration: registration 
                 });
 
-                if (res.ok) {
-                    localStorage.setItem('sinoAtivo', 'sim');
-                    aplicarEstiloAtivo();
-                    document.getElementById("notify-box").style.display = "none";
-                    alert("🚀 Notificações configuradas com sucesso!");
+                if (token) {
+                    // Envia para a rota do seu Flask (app.py)
+                    const res = await fetch('/salvar-token', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ token: token })
+                    });
+
+                    if (res.ok) {
+                        localStorage.setItem('sinoAtivo', 'sim');
+                        aplicarEstiloAtivo();
+                        document.getElementById("notify-box").style.display = "none";
+                        alert("🚀 Notificações configuradas com sucesso!");
+                    } else {
+                        alert("Erro ao salvar token no servidor.");
+                    }
                 }
+            } else {
+                alert("Você bloqueou as notificações. Ative-as nas configurações do navegador (ícone de cadeado).");
             }
-        } else {
-            alert("Você bloqueou as notificações. Clique no cadeado para permitir.");
+        } catch (error) {
+            console.error("Erro detalhado:", error);
+            alert("Erro ao recuperar assinatura. Tente novamente.");
         }
-    } catch (error) {
-        console.error("Erro detalhado:", error);
-        alert("Erro ao recuperar assinatura. Tente limpar os dados do site no cadeado do navegador.");
     }
-}
 
-        function aplicarEstiloAtivo() {
-            const sino = document.getElementById("notification-bell");
-            if (sino) {
-                sino.style.background = "#3CC9E4";
-                sino.style.boxShadow = "0 0 20px #3CC9E4";
-            }
+    function aplicarEstiloAtivo() {
+        const sino = document.getElementById("notification-bell");
+        if (sino) {
+            sino.style.background = "#3CC9E4";
+            sino.style.boxShadow = "0 0 20px #3CC9E4";
         }
+    }
 
-        // Mantém o sino aceso se já estiver ativo
-        document.addEventListener("DOMContentLoaded", function () {
-            if (localStorage.getItem('sinoAtivo') === 'sim') {
-                aplicarEstiloAtivo();
-            }
-        });
-    </script>
+    // Mantém o estado visual ao carregar a página
+    document.addEventListener("DOMContentLoaded", function () {
+        if (localStorage.getItem('sinoAtivo') === 'sim') {
+            aplicarEstiloAtivo();
+        }
+    });
+</script>
+
 
     <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
     <script>
