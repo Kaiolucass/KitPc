@@ -44,6 +44,7 @@ class Processador(db.Model):
     imagem_url = db.Column(db.Text)
     link_loja = db.Column(db.Text)
     socket_id = db.Column(db.Integer, db.ForeignKey('sockets_cpu.id'))
+    tdp = db.Column(db.Integer, default=65)
 
 class PlacaMae(db.Model):
     __tablename__ = 'placas_mae'
@@ -53,6 +54,8 @@ class PlacaMae(db.Model):
     imagem_url = db.Column(db.Text)
     link_loja = db.Column(db.Text)
     socket_id = db.Column(db.Integer, db.ForeignKey('sockets_cpu.id'))
+    tipo_memoria = db.Column(db.String(20), default='DDR4')
+    tamanho = db.Column(db.String(20), default='Micro-ATX')
 
 class MemoriaRAM(db.Model):
     __tablename__ = 'memorias_ram'
@@ -70,6 +73,7 @@ class PlacaVideo(db.Model):
     preco = db.Column(db.Numeric(10, 2))
     imagem_url = db.Column(db.Text)
     link_loja = db.Column(db.Text)
+    tdp = db.Column(db.Integer, default=0)
 
 class Armazenamento(db.Model):
     __tablename__ = 'armazenamentos'
@@ -87,6 +91,7 @@ class Gabinete(db.Model):
     preco = db.Column(db.Numeric(10, 2))
     imagem_url = db.Column(db.Text)
     link_loja = db.Column(db.Text)
+    tamanho_suportado = db.Column(db.String(50), default='ATX, Micro-ATX, Mini-ITX')
 
 class Fonte(db.Model):
     __tablename__ = 'fontes'

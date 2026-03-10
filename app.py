@@ -946,6 +946,17 @@ def sitemap():
     except Exception as e:
         logger.error(f"Erro ao gerar sitemap: {e}")
         return str(e)
+    
+@app.route('/executar-migracao-manual')
+def executar_migracao_manual():
+    try:
+        from migracao_montador import run_migration 
+        run_migration()
+        db.create_all() 
+        
+        return "<h1>✅ Sucesso!</h1><p>As colunas (TDP, Tamanho) e a tabela PushToken foram criadas.</p>"
+    except Exception as e:
+        return f"<h1>❌ Erro na migração</h1><p>{str(e)}</p>"
 
 @app.route("/privacidade")
 def privacidade():
