@@ -316,6 +316,8 @@ p {
 }
 
 footer {
+    border-top: 2px solid #3CC9E4;
+    padding: 30px;
     text-align: center;
     padding: 40px 0;
     margin-top: 50px;
