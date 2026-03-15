@@ -177,14 +177,6 @@ def trilha_montagem():
 def sobre_nos():
     return render_template("sobre.html")
 
-@app.route('/cookies')
-def cookies():
-    return render_template('cookies.html')
-
-@app.route('/contato')
-def contatos():
-    return render_template('contato.html')
-
 
     # --- CONFIGURAÇÃO FIREBASE (NOTIFICAÇÕES) ---
 if not firebase_admin._apps:
@@ -1141,6 +1133,14 @@ def privacidade():
 @app.route("/termos")
 def termos():
     return render_template("termos.html")
+
+@app.route('/cookies')
+def cookies():
+    return render_template('cookies.html')
+
+@app.route('/contato')
+def contato():
+    return render_template('contato.html')
 
 @app.route('/robots.txt')
 def robots_txt():
