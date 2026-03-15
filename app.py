@@ -122,7 +122,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # 3. Inicialização do Banco (Importando todas as classes do models.py)
-from models import db, Processador, PlacaMae, MemoriaRAM, PlacaVideo, Armazenamento, Fonte, Gabinete, Post, Usuario, MontagemSalva, Comentario
+from models import MensagemContato, db, Processador, PlacaMae, MemoriaRAM, PlacaVideo, Armazenamento, Fonte, Gabinete, Post, Usuario, MontagemSalva, Comentario
 db.init_app(app)
 
 with app.app_context():
@@ -541,6 +541,9 @@ def salvar_post(id=None):
         post.slug = re.sub(r'[-\s]+', '-', slug)
 
         db.session.commit()
+
+
+        
         
         # --- DISPARO DE NOTIFICAÇÃO (EM SEGUNDO PLANO) ---
         if id is None: # Só envia se for post novo
@@ -636,6 +639,13 @@ def deletar_usuario_admin(id):
         
     return redirect(url_for('admin'))
 
+@app.route('/admin/mensagens')
+def ver_mensagens():
+    if not session.get('is_admin'):
+        return redirect(url_for('home'))
+        
+    mensagens = MensagemContato.query.order_by(MensagemContato.data_envio.desc()).all()
+    return render_template('admin_mensagens.html', mensagens=mensagens)
 # ---  ARQUIVOS DO BLOG ---
 
 @app.route("/arquivo")
@@ -841,69 +851,196 @@ def setup_db_kaio():
     
 @app.route("/consultoria-ia", methods=["POST"])
 def consultoria_ia():
-    dados = request.json
-    
-    # 1. Pegamos todas as peças do seu banco para a IA não inventar modelos que você não tem
-    cpus = [p.nome for p in Processador.query.all()]
-    gpus = [g.nome for g in PlacaVideo.query.all()]
-    mobos = [m.nome for m in PlacaMae.query.all()]
-    
-    # 2. Criamos um "Contexto" para a IA
-    prompt = f"""
-    Você é o Engenheiro de Hardware do KitPC. 
-    OBJETIVO: Montar o melhor PC possível para o usuário.
-    
-    DADOS DO USUÁRIO:
-    - Orçamento: R$ {dados['preco']}
-    - Uso: {dados['uso']} (Estilo: {dados['tipo']})
-    - Precisa de GPU: {dados['gpu']}
-    
-    PEÇAS DISPONÍVEIS NO MEU BANCO (Escolha APENAS desta lista):
-    - Processadores: {", ".join(cpus)}
-    - Placas-mãe: {", ".join(mobos)}
-    - Placas de Vídeo: {", ".join(gpus)}
-    
-    REGRAS DE OURO:
-    1. O socket do Processador DEVE ser compatível com a Placa-mãe.
-    2. O valor total somado das peças deve respeitar o orçamento.
-    3. Se o usuário quer jogar, foque mais orçamento na GPU.
-    
-    RETORNE ESTRITAMENTE UM JSON:
-    {{
-        "setup": [
-            {{"componente": "Processador", "nome": "NOME_EXATO_DA_LISTA", "justificativa": "Por que escolheu essa?"}},
-            {{"componente": "Placa-mãe", "nome": "NOME_EXATO_DA_LISTA", "justificativa": "Compatibilidade com o socket"}},
-            {{"componente": "Placa de Vídeo", "nome": "NOME_EXATO_DA_LISTA", "justificativa": "Performance em jogos"}}
-        ],
-        "total_estimado": "R$ X.XXX",
-        "conselho_mestre": "Dica rápida de upgrade futuro."
-    }}
-    """
-
     try:
-        response = model.generate_content(prompt)
-        ia_data = json.loads(re.search(r'\{.*\}', response.text, re.DOTALL).group())
-
-        # 3. Agora buscamos as imagens e links REAIS no banco para cada peça que a IA escolheu
-        for item in ia_data['setup']:
-            peca_real = None
-            if item['componente'] == "Processador":
-                peca_real = Processador.query.filter_by(nome=item['nome']).first()
-            elif item['componente'] == "Placa-mãe":
-                peca_real = PlacaMae.query.filter_by(nome=item['nome']).first()
-            elif item['componente'] == "Placa de Vídeo":
-                peca_real = PlacaVideo.query.filter_by(nome=item['nome']).first()
+        dados = request.json
+        preco_label = dados.get("preco", "Um PC OK")
+        gpu_escolhida = dados.get("gpu") == "Sim"
+        uso = dados.get("uso", "Uso geral")
+        marca_cpu = dados.get("processador", "Qualquer")
+        
+        # 1. Obter Total e distribuir o orçamento para as peças
+        total = get_total(preco_label)
+        orcamento = distribuir_orcamento(total, gpu_escolhida)
+        
+        setup = []
+        custo_total = 0
+        total_tdp = 150 # Margem Base (Placa-mãe, fans, disco, periféricos)
+        
+        # Variáveis globais de compatibilidade
+        socket_escolhido = None
+        tipo_memoria_escolhida = None
+        tamanho_mobo = None
+        
+        # --- 1. Processador ---
+        query_cpu = Processador.query.filter(Processador.preco <= orcamento.get("cpu", 0))
+        if marca_cpu in ["AMD", "Intel"]:
+            query_cpu = query_cpu.filter(Processador.nome.ilike(f"%{marca_cpu}%"))
             
-            if peca_real:
-                item['imagem_url'] = peca_real.imagem_url
-                item['link_loja'] = peca_real.link_loja
-                item['preco'] = float(peca_real.preco)
+        cpu = query_cpu.order_by(Processador.preco.desc()).first()
+        if not cpu: # Fallback genérico caso orçamento seja baixo demais
+            cpu = Processador.query.order_by(Processador.preco.asc()).first()
+            
+        if cpu:
+            socket_escolhido = cpu.socket_id
+            total_tdp += cpu.tdp if getattr(cpu, 'tdp', None) else 65
+            custo_total += float(cpu.preco)
+            setup.append({
+                "componente": "Processador",
+                "nome": cpu.nome,
+                "imagem_url": cpu.imagem_url,
+                "link_loja": cpu.link_loja,
+                "preco": float(cpu.preco),
+                "preco_estimado": f"R$ {float(cpu.preco):,.2f}".replace(",", "X").replace(".", ",").replace("X", "."),
+                "justificativa": f"A base do seu computador. Escolhido para ter o melhor desempenho na categoria {uso}."
+            })
+            
+        # --- 2. Placa-Mãe ---
+        mobo = None
+        if socket_escolhido:
+            mobo = PlacaMae.query.filter(PlacaMae.preco <= orcamento.get("placa_mae", 0), PlacaMae.socket_id == socket_escolhido).order_by(PlacaMae.preco.desc()).first()
+            if not mobo:
+                mobo = PlacaMae.query.filter(PlacaMae.socket_id == socket_escolhido).order_by(PlacaMae.preco.asc()).first()
+                
+        if mobo:
+            tipo_memoria_escolhida = getattr(mobo, 'tipo_memoria', 'DDR4')
+            tamanho_mobo = getattr(mobo, 'tamanho', 'Micro-ATX')
+            custo_total += float(mobo.preco)
+            setup.append({
+                "componente": "Placa-Mãe",
+                "nome": mobo.nome,
+                "imagem_url": mobo.imagem_url,
+                "link_loja": mobo.link_loja,
+                "preco": float(mobo.preco),
+                "preco_estimado": f"R$ {float(mobo.preco):,.2f}".replace(",", "X").replace(".", ",").replace("X", "."),
+                "justificativa": f"O corpo do PC! Garantida 100% de compatibilidade com o processador escolhendo padrão {tipo_memoria_escolhida}."
+            })
+            
+        # --- 3. Memória RAM ---
+        ram = None
+        if tipo_memoria_escolhida:
+            ram = MemoriaRAM.query.filter(MemoriaRAM.preco <= orcamento.get("ram", 0), MemoriaRAM.tipo == tipo_memoria_escolhida).order_by(MemoriaRAM.preco.desc()).first()
+            if not ram:
+                ram = MemoriaRAM.query.filter(MemoriaRAM.tipo == tipo_memoria_escolhida).order_by(MemoriaRAM.preco.asc()).first()
+                
+        if not ram: # Fallback de contorno
+            ram = MemoriaRAM.query.filter(MemoriaRAM.preco <= orcamento.get("ram", 0)).order_by(MemoriaRAM.preco.desc()).first()
+            if not ram:
+                ram = MemoriaRAM.query.order_by(MemoriaRAM.preco.asc()).first()
+        
+        if ram:
+            custo_total += float(ram.preco)
+            setup.append({
+                "componente": "Memória RAM",
+                "nome": ram.nome,
+                "imagem_url": ram.imagem_url,
+                "link_loja": ram.link_loja,
+                "preco": float(ram.preco),
+                "preco_estimado": f"R$ {float(ram.preco):,.2f}".replace(",", "X").replace(".", ",").replace("X", "."),
+                "justificativa": f"É aqui que os programas abertos ficam. Esta {tipo_memoria_escolhida} garante agilidade."
+            })
+            
+        # --- 4. Placa de Vídeo ---
+        if gpu_escolhida:
+            gpu_item = PlacaVideo.query.filter(PlacaVideo.preco <= orcamento.get("gpu", 0)).order_by(PlacaVideo.preco.desc()).first()
+            if not gpu_item:
+                gpu_item = PlacaVideo.query.order_by(PlacaVideo.preco.asc()).first()
+                
+            if gpu_item:
+                total_tdp += gpu_item.tdp if getattr(gpu_item, 'tdp', None) else 150
+                custo_total += float(gpu_item.preco)
+                setup.append({
+                    "componente": "Placa de Vídeo",
+                    "nome": gpu_item.nome,
+                    "imagem_url": gpu_item.imagem_url,
+                    "link_loja": gpu_item.link_loja,
+                    "preco": float(gpu_item.preco),
+                    "preco_estimado": f"R$ {float(gpu_item.preco):,.2f}".replace(",", "X").replace(".", ",").replace("X", "."),
+                    "justificativa": "Esta é a peça principal pra dar muito FPS e qualidade nos jogos que você vai curtir!"
+                })
+                
+        # --- 5. Armazenamento (SSD) ---
+        ssd = Armazenamento.query.filter(Armazenamento.preco <= orcamento.get("ssd", 0)).order_by(Armazenamento.preco.desc()).first()
+        if not ssd:
+            ssd = Armazenamento.query.order_by(Armazenamento.preco.asc()).first()
+            
+        if ssd:
+            custo_total += float(ssd.preco)
+            setup.append({
+                "componente": "Armazenamento",
+                "nome": ssd.nome,
+                "imagem_url": ssd.imagem_url,
+                "link_loja": ssd.link_loja,
+                "preco": float(ssd.preco),
+                "preco_estimado": f"R$ {float(ssd.preco):,.2f}".replace(",", "X").replace(".", ",").replace("X", "."),
+                "justificativa": "Um SSD pra Windows ligar em poucos segundos e nada travar carregando."
+            })
+            
+        # --- 6. Fonte de Alimentação ---
+        tdp_necessario = total_tdp * 1.25 # Folga de 25% obrigatória para segurança
+        fonte = Fonte.query.filter(Fonte.potencia >= tdp_necessario, Fonte.preco <= orcamento.get("fonte", 0)).order_by(Fonte.preco.desc()).first()
+        if not fonte:
+            fonte = Fonte.query.filter(Fonte.potencia >= tdp_necessario).order_by(Fonte.preco.asc()).first()
+            if not fonte:
+                fonte = Fonte.query.order_by(Fonte.preco.desc()).first()
+                
+        if fonte:
+            custo_total += float(fonte.preco)
+            potencia_fonte = getattr(fonte, 'potencia', '?')
+            setup.append({
+                "componente": "Fonte de Alimentação",
+                "nome": fonte.nome,
+                "imagem_url": fonte.imagem_url,
+                "link_loja": fonte.link_loja,
+                "preco": float(fonte.preco),
+                "preco_estimado": f"R$ {float(fonte.preco):,.2f}".replace(",", "X").replace(".", ",").replace("X", "."),
+                "justificativa": f"O coração que bombeia energia pro PC. O seu exige ~{int(tdp_necessario)}W, esta envia {potencia_fonte}W com folga."
+            })
+            
+        # --- 7. Gabinete ---
+        query_gab = Gabinete.query.filter(Gabinete.preco <= orcamento.get("gabinete", 0))
+        if tamanho_mobo:
+            query_gab = query_gab.filter(Gabinete.tamanho_suportado.ilike(f"%{tamanho_mobo}%"))
+            
+        gab = query_gab.order_by(Gabinete.preco.desc()).first()
+        if not gab:
+            gab = Gabinete.query.filter(Gabinete.tamanho_suportado.ilike(f"%{tamanho_mobo}%")).order_by(Gabinete.preco.asc()).first()
+            if not gab:
+                gab = Gabinete.query.order_by(Gabinete.preco.asc()).first()
+                
+        if gab:
+            custo_total += float(gab.preco)
+            setup.append({
+                "componente": "Gabinete",
+                "nome": gab.nome,
+                "imagem_url": gab.imagem_url,
+                "link_loja": gab.link_loja,
+                "preco": float(gab.preco),
+                "preco_estimado": f"R$ {float(gab.preco):,.2f}".replace(",", "X").replace(".", ",").replace("X", "."),
+                "justificativa": f"As peças ficarão protegidas. Ele tem espaço suficiente para o modelo {tamanho_mobo} da placa-mãe."
+            })
+            
+        # --- 8. Conselho Mestre Dinâmico e Seguro ---
+        try:
+            # Pede conselho usando nomes já formatados para a IA não retornar arrays bizarros
+            nomes_pecas = ", ".join([str(s.get('nome', '')) for s in setup])
+            prompt = f"Um usuário está montando um PC focado em '{uso}' com: {nomes_pecas}. Escreva uma ÚNICA dica prática, rápida (1 frase entusiástica) de cuidado na montagem usando essas tecnologias ou um upgrade sugerido para o futuro."
+            resposta = model.generate_content(prompt)
+            conselho_mestre = resposta.text.replace("*", "").strip() if resposta.text else "Tudo pronto! Seu setup é altamente compatível."
+        except Exception as e_ia:
+            logger.warning(f"IA Conselho falhou ({e_ia}), usando fallback.")
+            conselho_mestre = "Seu setup foi montado com sucesso! Cuidado ao instalar o processador e garanta um bom fluxo de ar no gabinete."
 
-        return jsonify(ia_data)
+        return jsonify({
+            "setup": setup,
+            "total_estimado": f"R$ {custo_total:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."),
+            "conselho_mestre": conselho_mestre
+        })
 
     except Exception as e:
-        logger.error(f"Erro na Consultoria IA: {e}")
-        return jsonify({"erro": "A IA se confundiu nos cabos. Tente novamente!"}), 500
+        import traceback
+        erro_str = traceback.format_exc()
+        logger.error(f"Erro no Algoritmo do Montador:\n{erro_str}")
+        return jsonify({"erro": f"Ops, ocorreu um erro! Detalhe técnico: {str(e)}"}), 500
     
 @app.route('/sitemap.xml', methods=['GET'])
 def sitemap():
@@ -946,6 +1083,48 @@ def sitemap():
     except Exception as e:
         logger.error(f"Erro ao gerar sitemap: {e}")
         return str(e)
+    
+    # --- Fale Conosco ---
+
+@app.route('/fale-conosco', methods=['GET', 'POST'])
+def fale_conosco():
+    if request.method == 'POST':
+        # 1. Pegar os dados do formulário
+        nome = request.form.get('nome')
+        email = request.form.get('email')
+        assunto = request.form.get('assunto')
+        texto = request.form.get('mensagem')
+
+        # 2. Validação simples
+        if not nome or not email or not texto:
+            return render_template('fale-conosco.html', erro="Por favor, preencha todos os campos obrigatórios.")
+
+        try:
+            # 3. Criar o objeto da mensagem (conforme o modelo que criamos antes)
+            nova_mensagem = MensagemContato(
+                nome=nome,
+                email=email,
+                assunto=assunto,
+                mensagem=texto
+            )
+            
+            # 4. Salvar no Banco de Dados
+            db.session.add(nova_mensagem)
+            db.session.commit()
+            
+            print(f"✅ Nova mensagem de {nome} salva com sucesso!")
+            
+            # Retorna a página com uma variável de sucesso para mostrar o alerta
+            return render_template('fale-conosco.html', sucesso=True)
+
+        except Exception as e:
+            db.session.rollback()
+            print(f"❌ Erro ao salvar mensagem: {e}")
+            return render_template('fale-conosco.html', erro="Ocorreu um erro técnico. Tente novamente mais tarde.")
+
+    # Se for GET, apenas mostra a página limpa
+    return render_template('fale-conosco.html')
+
     
 @app.route("/privacidade")
 def privacidade():

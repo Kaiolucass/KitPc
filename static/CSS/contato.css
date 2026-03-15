@@ -70,6 +70,29 @@ body {
     color: #b0b0b0;
 }
 
+/* Estilo para os campos de formulário */
+.form-control, .form-select {
+    border-radius: 8px;
+    transition: all 0.3s;
+}
+
+.form-control:focus, .form-select:focus {
+    background-color: rgba(60, 201, 228, 0.05) !important;
+    border-color: #3CC9E4 !important;
+    box-shadow: 0 0 10px rgba(60, 201, 228, 0.3);
+    color: white;
+}
+
+/* Remove o fundo branco do autofill do navegador */
+input:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0px 1000px #0b052d inset !important;
+    -webkit-text-fill-color: white !important;
+}
+
+.border-end {
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
 /* Ajuste do Alerta do Bootstrap */
 .alert-info {
     border-left: 5px solid #3CC9E4 !important;

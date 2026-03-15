@@ -151,3 +151,11 @@ h2, h3 {
     background: #00f2ff;
     color: #000;
 }
+
+.modal-content {
+    box-shadow: 0 0 30px rgba(60, 201, 228, 0.2);
+    color: #e0e0e0;
+}
+.table-hover tbody tr:hover {
+    background-color: rgba(60, 201, 228, 0.05);
+}

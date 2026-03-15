@@ -12,28 +12,99 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='CSS/privacidade.css') }}">
 
 </head>
-<body>
+<header>
     <nav class="navbar navbar-expand-lg">
         <div class="container-fluid">
             <div class="d-flex align-items-center">
-                <img src="{{ url_for('static', filename='Imagens/Logo KitPc.png') }}" alt="Logo KitPc" style="height: 40px;">
+                <img src="{{ url_for('static', filename='Imagens/Logo KitPc.png') }}" alt="logo-kitpc"
+                    class="logo-kitpc">
                 <h1 class="h4 mb-0 ms-2 text-light" style="font-family: 'Orbitron', sans-serif;">KitPC</h1>
             </div>
-            <div class="ms-auto">
-                <a class="nav-link text-light" href="{{ url_for('home') }}">Voltar ao Início</a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('home') }}">Início</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('montagem') }}">Montagem</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('arquivo') }}">Blog</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('educacao') }}">Educação</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('sobre_nos') }}">Sobre Nós</a></li>
+
+                    {% if session['nome'] %}
+                    <li class="nav-item d-flex align-items-center gap-2 ms-lg-3 mt-3 mt-lg-0">
+                        <span class="text-info fw-bold" style="white-space: nowrap;">
+                            <i class="fas fa-user-circle"></i> {{ session['nome'].split(' ')[0] }}
+                        </span>
+                        <div class="d-flex gap-2">
+                            {% if session['is_admin'] %}
+                            <a class="btn btn-outline-warning btn-sm" href="{{ url_for('admin') }}">ADM</a>
+                            {% endif %}
+                            <a class="fa-solid fa-arrow-right-from-bracket" style="color: #ff4d4d;"
+                                href="{{ url_for('logout') }}"></a>
+                        </div>
+                    </li>
+                    {% else %}
+                    <li class="nav-item ms-lg-3 mt-3 mt-lg-0">
+                        <button class="btn btn-outline-info btn-sm fw-bold" data-bs-toggle="modal"
+                            data-bs-target="#modalAcesso">
+                            <i class="fa-solid fa-arrow-right-to-bracket"></i> Entrar
+                        </button>
+                    </li>
+                    {% endif %}
+                </ul>
             </div>
         </div>
     </nav>
+</header>
 
-    <div class="content-box">
-        <h1>Política de Privacidade</h1>
-        <p>A sua privacidade é importante para nós. É política do KitPC respeitar a sua privacidade em relação a qualquer informação sua que possamos coletar no site.</p>
-        
-        <h3>Cookies e Publicidade</h3>
-        <p>O Google, como fornecedor de terceiros, utiliza cookies para exibir anúncios no nosso site. Esses cookies permitem que o Google e seus parceiros exibam anúncios com base em suas visitas ao KitPC ou outros sites na Internet.</p>
-        
-        <h3>Uso de Dados</h3>
-        <p>Nós apenas solicitamos informações pessoais quando realmente precisamos delas para lhe fornecer um serviço (como o cadastro de usuário). Fazemo-lo por meios justos e legais, com o seu conhecimento e consentimento.</p>
+<body>
+    
+   <div class="content-box">
+    <h1 class="mb-4" style="color: #3CC9E4; font-family: 'Orbitron', sans-serif;">Política de Privacidade</h1>
+    
+    <p>A sua privacidade é importante para nós. Esta Política de Privacidade descreve como o <strong>KitPC</strong> coleta, utiliza e protege as informações dos visitantes que acessam o nosso site.</p>
+    <p>Ao utilizar o site, você concorda com as práticas descritas nesta política.</p>
+
+    <hr class="border-info opacity-25">
+
+    <h3><i class="fas fa-database text-info me-2"></i>Coleta de Informações</h3>
+    <p>Podemos coletar informações pessoais apenas quando realmente necessário para fornecer algum serviço ao usuário, como:</p>
+    <ul class="text-light opacity-75">
+        <li>Cadastro em áreas específicas do site</li>
+        <li>Envio de comentários ou mensagens</li>
+        <li>Assinatura de newsletters ou notificações</li>
+    </ul>
+    <p>A coleta dessas informações é feita de forma transparente, legal e com o consentimento do usuário.</p>
+    
+    <p>Também podemos coletar dados não pessoais automaticamente para melhorar a experiência de navegação:</p>
+    <ul class="text-light opacity-75">
+        <li>Tipo de navegador e dispositivo utilizado</li>
+        <li>Páginas acessadas e tempo de permanência</li>
+    </ul>
+
+    <h3><i class="fas fa-cookie-bite text-info me-2"></i>Cookies e Publicidade</h3>
+    <p>O KitPC utiliza cookies para melhorar a experiência do usuário e exibir anúncios relevantes.</p>
+    <p>O <strong>Google</strong>, como fornecedor de terceiros, utiliza cookies para exibir anúncios com base em visitas anteriores. Os visitantes podem desativar a publicidade personalizada acessando as configurações de anúncios do Google.</p>
+
+    <h3><i class="fas fa-shield-alt text-info me-2"></i>Uso das Informações</h3>
+    <p>As informações coletadas são utilizadas para:</p>
+    <ul class="text-light opacity-75">
+        <li>Melhorar o funcionamento do site e entender a interação do usuário</li>
+        <li>Exibir publicidade relevante e aprimorar nossos conteúdos</li>
+    </ul>
+    <p>O KitPC <strong>não vende, troca ou compartilha</strong> informações pessoais com terceiros, exceto quando exigido por lei.</p>
+
+    <h3><i class="fas fa-external-link-alt text-info me-2"></i>Links para Sites Externos</h3>
+    <p>Nosso site pode conter links para sites externos não operados por nós. Não temos controle sobre o conteúdo ou as políticas desses sites e não assumimos responsabilidade por suas práticas.</p>
+
+    <h3><i class="fas fa-sync-alt text-info me-2"></i>Alterações nesta Política</h3>
+    <p>Podemos atualizar esta Política periodicamente. Recomendamos que os usuários revisitem esta página regularmente para se manterem informados.</p>
+
+    <p class="mt-4 small text-info opacity-50">Última atualização: Março de 2026</p>
+</div>
         
         <p style="color: gray; font-size: 0.8rem; margin-top: 30px;">Atualizado em 18 de fevereiro de 2026.</p>
     </div>
@@ -42,6 +113,8 @@
         <p>&copy; 2026 KitPC - Guia de Hardware</p>
         <a href="{{ url_for('privacidade') }}">Privacidade</a>
         <a href="{{ url_for('termos') }}">Termos de Uso</a>
+        <a href="{{ url_for('cookies') }}">Política de Cookies</a>
+        <a href="{{ url_for('contatos') }}">Fale Conosco</a>
     </footer>
 </body>
 </html>

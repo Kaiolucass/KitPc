@@ -152,6 +152,77 @@
             </div>
         </div>
     </div>
+
+    {% extends "base.html" %}
+{% block content %}
+<section class="container mt-5 pt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="section-title" style="color: #3CC9E4;">MENSAGENS RECEBIDAS</h2>
+        <a href="{{ url_for('admin') }}" class="btn btn-outline-secondary btn-sm">Voltar ao Painel</a>
+    </div>
+
+    <div class="card-blog-menor p-3 border-neon">
+        <div class="table-responsive">
+            <table class="table table-dark table-hover align-middle">
+                <thead class="text-info">
+                    <tr>
+                        <th>Data</th>
+                        <th>Nome</th>
+                        <th>Assunto</th>
+                        <th>Mensagem</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for msg in mensagens %}
+                    <tr>
+                        <td class="small">{{ msg.data_envio.strftime('%d/%m/%y %H:%M') }}</td>
+                        <td>
+                            <div class="fw-bold">{{ msg.nome }}</div>
+                            <div class="small text-secondary">{{ msg.email }}</div>
+                        </td>
+                        <td><span class="badge bg-info text-dark">{{ msg.assunto }}</span></td>
+                        <td>
+                            <div class="text-truncate" style="max-width: 300px;" title="{{ msg.mensagem }}">
+                                {{ msg.mensagem }}
+                            </div>
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#modalMsg{{ msg.id }}">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </td>
+                    </tr>
+
+                    <div class="modal fade" id="modalMsg{{ msg.id }}" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content bg-dark border-info">
+                                <div class="modal-header border-info">
+                                    <h5 class="modal-title text-info">{{ msg.assunto }}</h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <p class="text-secondary small">De: <strong>{{ msg.nome }}</strong> ({{ msg.email }})</p>
+                                    <hr class="border-secondary">
+                                    <p style="white-space: pre-wrap;">{{ msg.mensagem }}</p>
+                                </div>
+                                <div class="modal-footer border-info">
+                                    <a href="mailto:{{ msg.email }}" class="btn btn-info w-100 fw-bold">RESPONDER VIA E-MAIL</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center text-secondary py-4">Nenhuma mensagem recebida ainda. 📭</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+{% endblock %}
     
     <div class="d-grid gap-2 mt-5 p-5">
         <a href="/" class="btn btn-outline-secondary">SAIR E VOLTAR PARA A HOME</a>

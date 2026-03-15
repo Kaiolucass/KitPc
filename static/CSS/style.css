@@ -266,8 +266,7 @@ p {
 /* Rodapé */
 footer {
     border-top: 2px solid #3CC9E4;
-    background-color: #030014;
-    color: #3CC9E4;
-    padding: 20px 0;
-    text-align: center;
+    padding: 30px;
+    background-color: #05001C;
+    margin-top: 50px;
 }
