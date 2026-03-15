@@ -177,6 +177,14 @@ def trilha_montagem():
 def sobre_nos():
     return render_template("sobre.html")
 
+@app.route('/cookies')
+def cookies():
+    return render_template('cookies.html')
+
+@app.route('/Contatos')
+def contatos():
+    return render_template('contato.html')
+
 
     # --- CONFIGURAÇÃO FIREBASE (NOTIFICAÇÕES) ---
 if not firebase_admin._apps:

@@ -404,19 +404,27 @@
     new window.VLibras.Widget('https://vlibras.gov.br/app');
 
 </script>
+
 <footer>
     <div class="footer-content">
-        <p>&copy; 2026 KitPC - Todos os direitos reservados</p>
-        <div class="footer-links">
-            <a href="{{ url_for('privacidade') }}"
-                class="link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Privacidade</a>
-            |
-            <a href="{{ url_for('termos') }}"
-                class="link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Termos
-                de Uso</a>
-        </div>
+      <p>&copy; 2026 KitPC - Todos os direitos reservados</p>
+      <div class="footer-links">
+        <a href="{{ url_for('privacidade') }}"
+          class="link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Privacidade</a>
+        |
+        <a href="{{ url_for('termos') }}"
+          class="link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Termos
+          de Uso</a>
+        |
+ <a href="{{ url_for('contato') }}"
+          class="link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Fale conosco</a>
+        |
+        <a href="{{ url_for('cookies') }}"
+          class="link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Cookies</a>
+
+      </div>
     </div>
-</footer>
+  </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
