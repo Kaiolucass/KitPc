@@ -230,10 +230,23 @@ h5 {
 
 /* --- RODAPÉ E EXTRAS --- */
 footer {
-    border-top: 2px solid #3CC9E4;
-    padding: 30px;
-    background-color: #030014;
+    text-align: center;
+    padding: 40px 0;
     margin-top: 50px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    background: #05001C;
+}
+
+footer a {
+    color: #3CC9E4;
+    text-decoration: none;
+    margin: 0 15px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+footer a:hover {
+    color: #9216FD;
 }
 
 p {
