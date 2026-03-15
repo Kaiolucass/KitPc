@@ -181,7 +181,7 @@ def sobre_nos():
 def cookies():
     return render_template('cookies.html')
 
-@app.route('/Contatos')
+@app.route('/contato')
 def contatos():
     return render_template('contato.html')
 
