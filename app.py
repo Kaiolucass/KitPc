@@ -61,8 +61,7 @@ genai.configure(api_key=GOOGLE_API_KEY)
 
 # Configuramos o modelo
 model = genai.GenerativeModel(
-    model_name='gemini-1.5-flash',
-    generation_config={"response_mime_type": "application/json"}
+    model_name='gemini-1.5-flash'
 )
 
 
@@ -74,8 +73,8 @@ CORS(app)
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = 'EMAIL_USER'
-app.config['MAIL_PASSWORD'] = 'EMAIL_PASS' 
+app.config['MAIL_USERNAME'] = os.getenv('EMAIL_USER')
+app.config['MAIL_PASSWORD'] = os.getenv('EMAIL_PASS')
 mail = Mail(app)
 s = URLSafeTimedSerializer(app.secret_key)
 
@@ -852,7 +851,7 @@ def setup_db_kaio():
 @app.route("/consultoria-ia", methods=["POST"])
 def consultoria_ia():
     try:
-        dados = request.json
+        dados = request.get_json(force=True)
         preco_label = dados.get("preco", "Um PC OK")
         gpu_escolhida = dados.get("gpu") == "Sim"
         uso = dados.get("uso", "Uso geral")
@@ -1046,10 +1045,11 @@ def consultoria_ia():
 def sitemap():
     try:
         pages = []
+
         now = datetime.now().strftime('%Y-%m-%d')
         
-        # Lista de rotas que o Google NÃO deve indexar
-        rotas_bloqueadas = [
+        # Lista EXATA de rotas que o Google NÃO deve indexar
+        rotas_bloqueadas = {
             '/admin', 
             '/logout', 
             '/setup-db-kaio', 
@@ -1057,32 +1057,46 @@ def sitemap():
             '/register', 
             '/confirmar-email',
             '/health',
-            '/sitemap.xml'
-        ]
+            '/sitemap.xml',
+            '/static' 
+        }
 
-        # 1. Páginas Estáticas (Filtradas)
+        # 1. Páginas Estáticas
         for rule in app.url_map.iter_rules():
-            # Filtra apenas métodos GET, sem argumentos extras e que não estejam na lista de bloqueio
+            # Filtra apenas métodos GET e rotas que não pedem <id> ou <slug>
             if "GET" in rule.methods and len(rule.arguments) == 0:
                 url_path = str(rule.rule)
                 
-                # Verifica se a URL começa com algum item da lista de bloqueados
-                if not any(url_path.startswith(bloqueada) for bloqueada in rotas_bloqueadas):
-                    pages.append([f"https://kitpc.com.br{url_path}", now])
+                # Ignora rotas de sistema do Flask e a lista de bloqueio
+                if not url_path.startswith('/static') and url_path not in rotas_bloqueadas:
+                    # Remove a barra final se a rota for apenas "/" para não ficar https://kitpc.com.br//
+                    full_url = f"https://kitpc.com.br{url_path}"
+                    if full_url.endswith('//'): 
+                        full_url = full_url[:-1]
+                        
+                    pages.append([full_url, now])
 
         # 2. Páginas Dinâmicas (Posts do Blog)
-        posts = Post.query.filter_by(arquivado=False).all() # Só adiciona o que não estiver arquivado
+        # Verifique se o nome da classe é Post e se os campos estão corretos
+        posts = Post.query.filter_by(arquivado=False).all() 
         for post in posts:
-            url = f"https://kitpc.com.br/blog/{post.slug}"
+            # Garanta que o caminho aqui seja exatamente como o da sua rota de post
+            url = f"https://kitpc.com.br/post/{post.slug}" # ou /blog/ dependendo da sua rota
             pages.append([url, now])
+
+        # Remove duplicatas se houver
+        pages = list(set(tuple(p) for p in pages))
 
         sitemap_xml = render_template('sitemap_template.xml', pages=pages)
         response = make_response(sitemap_xml)
         response.headers["Content-Type"] = "application/xml"
         return response
     except Exception as e:
-        logger.error(f"Erro ao gerar sitemap: {e}")
-        return str(e)
+        # Se der erro, ele mostra no log do Render
+        print(f"Erro ao gerar sitemap: {e}") 
+        return str(e), 500
+    
+    
     
     # --- Fale Conosco ---
 
