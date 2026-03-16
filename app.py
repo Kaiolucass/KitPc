@@ -1049,7 +1049,7 @@ def sitemap():
         now = datetime.now().strftime('%Y-%m-%d')
         
         # Lista EXATA de rotas que o Google NÃO deve indexar
-        rotas_bloqueadas = {
+        rotas_bloqueadas = [
             '/admin', 
             '/logout', 
             '/setup-db-kaio', 
@@ -1058,22 +1058,25 @@ def sitemap():
             '/confirmar-email',
             '/health',
             '/sitemap.xml',
-            '/static' 
-        }
+            '/authorize', 
+            '/ping',      
+            '/ads.txt',   
+            '/robots.txt',
+            '/fale-conosco' 
+        ]
 
         # 1. Páginas Estáticas
         for rule in app.url_map.iter_rules():
-            # Filtra apenas métodos GET e rotas que não pedem <id> ou <slug>
             if "GET" in rule.methods and len(rule.arguments) == 0:
                 url_path = str(rule.rule)
                 
-                # Ignora rotas de sistema do Flask e a lista de bloqueio
-                if not url_path.startswith('/static') and url_path not in rotas_bloqueadas:
-                    # Remove a barra final se a rota for apenas "/" para não ficar https://kitpc.com.br//
+                # Só adiciona se não estiver na lista de bloqueio e não for estático
+                if url_path not in rotas_bloqueadas and not url_path.startswith('/static'):
                     full_url = f"https://kitpc.com.br{url_path}"
-                    if full_url.endswith('//'): 
-                        full_url = full_url[:-1]
-                        
+                    # Garante que a home não fique com //
+                    if url_path == '/':
+                        full_url = "https://kitpc.com.br/"
+                    
                     pages.append([full_url, now])
 
         # 2. Páginas Dinâmicas (Posts do Blog)
@@ -1096,7 +1099,7 @@ def sitemap():
         print(f"Erro ao gerar sitemap: {e}") 
         return str(e), 500
     
-    
+
     
     # --- Fale Conosco ---
 
