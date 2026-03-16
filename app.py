@@ -1065,19 +1065,27 @@ def sitemap():
             '/fale-conosco' 
         ]
 
-        # 1. Páginas Estáticas
+       # 1. Páginas Estáticas
         for rule in app.url_map.iter_rules():
             if "GET" in rule.methods and len(rule.arguments) == 0:
                 url_path = str(rule.rule)
                 
-                # Só adiciona se não estiver na lista de bloqueio e não for estático
-                if url_path not in rotas_bloqueadas and not url_path.startswith('/static'):
-                    full_url = f"https://kitpc.com.br{url_path}"
-                    # Garante que a home não fique com //
-                    if url_path == '/':
-                        full_url = "https://kitpc.com.br/"
-                    
-                    pages.append([full_url, now])
+                # BLOQUEIO INTELIGENTE:
+                # Se a URL for exatamente uma das bloqueadas...
+                if url_path in rotas_bloqueadas:
+                    continue
+                
+                # ...ou se ela começar com termos proibidos (como /admin/algo ou /login/algo)
+                if any(url_path.startswith(prefix) for prefix in ['/admin', '/login', '/authorize', '/static', '/google']):
+                    continue
+
+                full_url = f"https://kitpc.com.br{url_path}"
+                
+                # Ajuste fino para a Home
+                if url_path == '/':
+                    full_url = "https://kitpc.com.br/"
+                
+                pages.append([full_url, now])
 
         # 2. Páginas Dinâmicas (Posts do Blog)
         # Verifique se o nome da classe é Post e se os campos estão corretos
