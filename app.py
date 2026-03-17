@@ -121,7 +121,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # 3. Inicialização do Banco (Importando todas as classes do models.py)
-from models import MensagemContato, db, Processador, PlacaMae, MemoriaRAM, PlacaVideo, Armazenamento, Fonte, Gabinete, Post, Usuario, MontagemSalva, Comentario
+from models import MensagemContato, db, Processador, PlacaMae, MemoriaRAM, PlacaVideo, Armazenamento, Fonte, Gabinete, Post, Usuario, MontagemSalva, Comentario,Notebook
 db.init_app(app)
 
 with app.app_context():
@@ -852,10 +852,39 @@ def setup_db_kaio():
 def consultoria_ia():
     try:
         dados = request.get_json(force=True)
+        
+        # 1. Variáveis Base
+        is_laptop = dados.get("laptop") == "Sim"
         preco_label = dados.get("preco", "Um PC OK")
-        gpu_escolhida = dados.get("gpu") == "Sim"
         uso = dados.get("uso", "Uso geral")
+        gpu_escolhida = dados.get("gpu") == "Sim"
         marca_cpu = dados.get("processador", "Qualquer")
+        
+        total_maximo = get_total(preco_label)
+
+        # --- FLUXO NOTEBOOK ---
+        if is_laptop:
+            notebook = Notebook.query.filter(Notebook.preco <= total_maximo)\
+                                     .order_by(Notebook.preco.desc()).first()
+            
+            if not notebook:
+                notebook = Notebook.query.order_by(Notebook.preco.asc()).first()
+
+            if notebook:
+                preco_formatado = f"R$ {float(notebook.preco):,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+                return jsonify({
+                    "setup": [{
+                        "componente": "Notebook",
+                        "nome": notebook.nome,
+                        "imagem_url": notebook.imagem_url,
+                        "link_loja": notebook.link_loja,
+                        "preco": float(notebook.preco),
+                        "preco_estimado": preco_formatado,
+                        "justificativa": f"Para quem precisa de mobilidade. Este modelo é ideal para {uso}."
+                    }],
+                    "total_estimado": preco_formatado,
+                    "conselho_mestre": "Notebooks são práticos, mas lembre-se: upgrades futuros são limitados geralmente a RAM e SSD!"
+                })
         
         # 1. Obter Total e distribuir o orçamento para as peças
         total = get_total(preco_label)
@@ -1034,6 +1063,8 @@ def consultoria_ia():
             "total_estimado": f"R$ {custo_total:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."),
             "conselho_mestre": conselho_mestre
         })
+    
+    
 
     except Exception as e:
         import traceback

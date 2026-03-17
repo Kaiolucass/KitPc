@@ -158,6 +158,18 @@ class Cadeira(db.Model):
     imagem_url = db.Column(db.Text)
     link_loja = db.Column(db.Text)
 
+class Notebook(db.Model):
+    __tablename__ = 'notebooks'
+    id = db.Column(db.Integer, primary_key=True)
+    nome = db.Column(db.String(255), nullable=False)
+    preco = db.Column(db.Float, nullable=False)
+    uso_sugerido = db.Column(db.String(100))  # Ex: Gamer, Escritório, Edição
+    link_loja = db.Column(db.String(500))
+    imagem_url = db.Column(db.String(500), default="https://res.cloudinary.com/seu_user/image/upload/v1/kitpc/notebook_default.png")
+
+    def __repr__(self):
+        return f'<Notebook {self.nome}>'
+
 # --- TABELA DE MONTAGENS SALVAS ---
 
 class MontagemSalva(db.Model):
