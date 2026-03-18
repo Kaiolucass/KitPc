@@ -23,6 +23,10 @@ import firebase_admin
 from firebase_admin import credentials
 import firebase_admin.firestore as firestore
 import threading
+from fpdf import FPDF
+from flask import send_file, request, jsonify
+import io
+import os
 
 # 1. Configuração de Logging
 logging.basicConfig(
@@ -853,6 +857,129 @@ def montar_setup():
         return jsonify(resultado)
     except Exception as e:
         return jsonify({"erro": str(e)}), 500
+    
+    #-- ROTA PARA GERAR PDF DO SETUP (COM O TOQUE ESPECIAL DO MANUAL DE MONTAGEM) ---
+
+@app.route("/gerar-pdf", methods=["POST"])
+def gerar_pdf():
+    try:
+        dados = request.get_json()
+        setup = dados.get("setup", [])
+        total = dados.get("total_estimado", "R$ 0,00")
+        objetivo = dados.get("objetivo", "Uso Geral")
+        conselho = dados.get("conselho_mestre", "Boa sorte na montagem!")
+
+        # --- LÓGICA DE DETECÇÃO DE PEÇAS ---
+        tem_gpu = any(item['componente'] == 'Placa de Vídeo' for item in setup)
+        tem_ssd = any(item['componente'] in ['Armazenamento', 'SSD'] for item in setup)
+        tem_cooler = any('Cooler' in item['nome'] for item in setup)
+        
+        # Identificar se o PC é potente para a explicação
+        preco_total_num = float(total.replace('R$', '').replace('.', '').replace(',', '.').strip())
+        
+        pdf = FPDF()
+        pdf.set_auto_page_break(auto=True, margin=15)
+        pdf.add_page()
+
+        # --- 1. CABEÇALHO COM LOGO E TÍTULO ---
+        caminho_logo = os.path.join('static', 'Imagens', 'logo.png')
+        if os.path.exists(caminho_logo):
+            pdf.image(caminho_logo, 10, 8, 30)
+        
+        pdf.set_font("Arial", 'B', 18)
+        pdf.set_text_color(33, 37, 41)
+        pdf.cell(0, 15, "GUIA DE MONTAGEM - KITPC", ln=True, align='R')
+        pdf.ln(10)
+
+        # --- 2. EXPLICAÇÃO DO SETUP (ITEM 2 DO SEU PLANO) ---
+        pdf.set_font("Arial", 'B', 12)
+        pdf.set_fill_color(240, 240, 240)
+        pdf.cell(0, 10, " PARA QUE SERVE ESTE COMPUTADOR?", ln=True, fill=True)
+        pdf.ln(2)
+        pdf.set_font("Arial", size=11)
+        
+        if preco_total_num > 5000:
+            resumo = f"Este setup de {total} é uma máquina de ALTO DESEMPENHO. Ideal para {objetivo}, garantindo fluidez máxima e longevidade para os próximos anos."
+        elif tem_gpu:
+            resumo = f"Este é um PC Gamer Equilibrado. Perfeito para {objetivo}, com foco em estabilidade gráfica e ótimo custo-benefício."
+        else:
+            resumo = f"Setup focado em Eficiência e Velocidade. Excelente para {objetivo}, estudos e produtividade diária."
+        
+        pdf.multi_cell(0, 7, resumo)
+        pdf.ln(5)
+
+        # --- 3. LISTA DE PEÇAS ESCOLHIDAS ---
+        pdf.set_font("Arial", 'B', 12)
+        pdf.cell(0, 10, " SEU HARDWARE SELECIONADO:", ln=True)
+        pdf.set_font("Arial", size=10)
+        
+        for item in setup:
+            pdf.set_font("Arial", 'B', 10)
+            pdf.cell(40, 8, f"{item['componente']}:", ln=False)
+            pdf.set_font("Arial", size=10)
+            pdf.cell(0, 8, f"{item['nome']} ({item['preco_estimado']})", ln=True)
+        
+        pdf.ln(2)
+        pdf.set_font("Arial", 'B', 11)
+        pdf.cell(0, 10, f"TOTAL INVESTIDO: {total}", ln=True, align='R')
+        pdf.ln(5)
+
+        # --- 4. MANUAL DE MONTAGEM INTELIGENTE (ITEM 3 DO SEU PLANO) ---
+        pdf.set_font("Arial", 'B', 12)
+        pdf.set_fill_color(0, 102, 204) # Azul KitPC
+        pdf.set_text_color(255, 255, 255)
+        pdf.cell(0, 10, " PASSO A PASSO PERSONALIZADO", ln=True, fill=True)
+        pdf.ln(4)
+        pdf.set_text_color(0, 0, 0)
+        pdf.set_font("Arial", size=10)
+
+        passos = []
+        passos.append("Coloque a placa-mãe sobre a caixa dela e instale o processador com cuidado (alinhe a seta).")
+        passos.append("Encaixe os pentes de memória RAM nos slots até ouvir o clique de travamento.")
+        
+        if tem_ssd:
+            passos.append("Instale o SSD no slot M.2 da placa-mãe e prenda com o parafuso de fixação.")
+        
+        passos.append("Instale o espelho traseiro no gabinete e depois parafuse a placa-mãe nos espaçadores.")
+
+        if tem_gpu:
+            passos.append("Abra a trava do slot PCIe e instale a Placa de Vídeo, parafusando-a na traseira do gabinete.")
+
+        if tem_cooler:
+            passos.append("Instale o cooler sobre o processador. Verifique se precisa aplicar pasta térmica.")
+
+        passos.append("Conecte os cabos de energia da fonte (24 pinos placa-mãe e 4/8 pinos CPU).")
+        passos.append("Ligue o PC e pressione DEL ou F2 para configurar a BIOS e ativar o perfil de memória (XMP).")
+
+        for i, texto in enumerate(passos, 1):
+            pdf.set_font("Arial", 'B', 10)
+            pdf.cell(7, 7, f"{i}.", ln=False)
+            pdf.set_font("Arial", size=10)
+            pdf.multi_cell(0, 7, texto)
+            pdf.ln(1)
+
+        # --- 5. RODAPÉ E CONSELHO ---
+        pdf.ln(10)
+        pdf.set_font("Arial", 'I', 10)
+        pdf.set_text_color(100, 100, 100)
+        pdf.multi_cell(0, 7, f"Dica do Mestre: {conselho}")
+        
+        pdf.set_y(-20)
+        pdf.set_font("Arial", 'B', 8)
+        pdf.cell(0, 10, "Gerado por KitPC - Seu guia inteligente de hardware", align='C', ln=True)
+
+        # Retornar o PDF para o navegador
+        output = io.BytesIO()
+        pdf_output = pdf.output(dest='S').encode('latin-1', 'ignore')
+        output.write(pdf_output)
+        output.seek(0)
+
+        return send_file(output, as_attachment=True, download_name="manual_kitpc.pdf", mimetype="application/pdf")
+
+    except Exception as e:
+        print(f"Erro ao gerar PDF: {e}")
+        return jsonify({"error": "Erro interno ao gerar o arquivo"}), 500
+
 
 # --- SETUP DO BANCO ---
 

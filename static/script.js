@@ -229,3 +229,25 @@ messaging.onMessage((payload) => {
         icon: '/static/Imagens/Logo KitPc.png'
     });
 });
+
+function gerarPDF() {
+    // Pega os dados que já estão na tela (que o seu montador gerou)
+    const dadosSetup = {
+        setup: setupAtual, // Você deve salvar o JSON da resposta numa variável global
+        total_estimado: document.getElementById("total-preco").innerText
+    };
+
+    fetch("/gerar-pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(dadosSetup)
+    })
+    .then(response => response.blob())
+    .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = "meu_pc.pdf";
+        a.click();
+    });
+}
