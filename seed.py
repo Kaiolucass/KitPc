@@ -108,11 +108,11 @@ def popular_banco_seguro():
 
         # --- 8. NOTEBOOKS (Opções prontas para quem não quer montar PC) ---
         notebooks_data = [
-            {"nome": "Samsung Book i3", "preco": 2450.00, "uso": "Estudos/Escritório", "img": "https://m.media-amazon.com/images/I/61m9vS9v6FL._AC_SL1000_.jpg"},
-            {"nome": "Lenovo Ideapad Gaming 3i", "preco": 3800.00, "uso": "Jogos Leves/Edição", "img": "https://m.media-amazon.com/images/I/61fScl7N9mL._AC_SL1500_.jpg"},
-            {"nome": "Acer Nitro 5", "preco": 4500.00, "uso": "Jogos/Profissional", "img": "https://m.media-amazon.com/images/I/71u9S9S-h1L._AC_SL1500_.jpg"},
-            {"nome": "Dell G15 RTX 3050", "preco": 5400.00, "uso": "Jogos Pesados", "img": "https://m.media-amazon.com/images/I/61V6fS8-RDL._AC_SL1200_.jpg"},
-            {"nome": "MacBook Air M2", "preco": 7900.00, "uso": "Premium/Trabalho", "img": "https://m.media-amazon.com/images/I/719C6bJv8jL._AC_SL1500_.jpg"}
+            {"nome": "Samsung Book i3", "preco": 2450.00, "uso": "Estudos/Escritório", "img": "https://samsungbrshop.vtexassets.com/arquivos/ids/180101-1000-auto?v=637558607985000000&width=1000&height=auto&aspect=true"},
+            {"nome": "Lenovo Ideapad Gaming 3i", "preco": 3800.00, "uso": "Jogos Leves/Edição", "img": "https://p1-ofp.static.pub/medias/23809986225_IdeaPad115ADA7Cloud_Grey_202108120307091751053200811.png?width=400&height=400"},
+            {"nome": "Acer Nitro 5", "preco": 4500.00, "uso": "Jogos/Profissional", "img": "https://http2.mlstatic.com/D_NQ_NP_2X_924349-MLA97662433070_112025-F.webp"},
+            {"nome": "Dell G15 RTX 3050", "preco": 5400.00, "uso": "Jogos Pesados", "img": "https://benchpromos.com.br/_next/image?url=https%3A%2F%2Fi.ibb.co%2FqMCqVwtB%2F9e88f8f1-4313-43b5-b5e0-69dc4b56e112.png&w=3840&q=75"},
+            {"nome": "MacBook Air M2", "preco": 7900.00, "uso": "Premium/Trabalho", "img": "https://images2.kabum.com.br/produtos/fotos/954432/macbook-air-apple-13-6-chip-m2-cpu-8-nucleos-gpu-10-nucleos-24gb-ssd-512gb-meia-noite-z1hn0bz-a_1769544448_gg.jpg"}
         ]
 
         for data in notebooks_data:
