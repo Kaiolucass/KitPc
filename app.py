@@ -104,8 +104,6 @@ def enviar_confirmacao(usuario_email, token, usuario_nome):
     thread.start()
 
 
-    
-
 # 2. Configuração do Banco de Dados
 def get_cleaned_db_uri():
     uri = os.getenv("DATABASE_URL")
@@ -540,9 +538,6 @@ def salvar_post(id=None):
         post.slug = re.sub(r'[-\s]+', '-', slug)
 
         db.session.commit()
-
-
-        
         
         # --- DISPARO DE NOTIFICAÇÃO (EM SEGUNDO PLANO) ---
         if id is None: # Só envia se for post novo
@@ -744,6 +739,31 @@ def montar_setup():
     try:
         dados = request.get_json(force=True)
         total = get_total(dados.get("preco"))
+
+# VERIFICAÇÃO DE NOTEBOOK 
+        quer_laptop = dados.get("laptop") == "Sim"
+        
+        if quer_laptop:
+            # Busca o notebook mais caro que ainda cabe no orçamento total
+            note = Notebook.query.filter(Notebook.preco <= total).order_by(Notebook.preco.desc()).first()
+            
+            # Se não achar nenhum no preço, pega o mais barato da loja pra não vir vazio
+            if not note:
+                note = Notebook.query.order_by(Notebook.preco.asc()).first()
+            
+            if note:
+                return jsonify({
+                    "setup": [{
+                        "nome": note.nome,
+                        "imagem_url": note.imagem_url,
+                        "preco_estimado": f"R$ {note.preco:,.2f}",
+                        "link_loja": note.link_loja,
+                        "componente": "NOTEBOOK",
+                        "justificativa": f"Ótima opção de mobilidade. {note.especificacoes}"
+                    }],
+                    "conselho_mestre": "Como você precisa de mobilidade, escolhemos um notebook que entrega o melhor desempenho para o seu orçamento!"
+                })
+
         gpu = dados.get("gpu") == "Sim"
         orcamento = distribuir_orcamento(total, gpu)
         
@@ -1071,7 +1091,8 @@ def consultoria_ia():
         erro_str = traceback.format_exc()
         logger.error(f"Erro no Algoritmo do Montador:\n{erro_str}")
         return jsonify({"erro": f"Ops, ocorreu um erro! Detalhe técnico: {str(e)}"}), 500
-    
+
+  # --- SITEMAP DINÂMICO PARA GOOGLE ---  
 @app.route('/sitemap.xml', methods=['GET'])
 def sitemap():
     try:
