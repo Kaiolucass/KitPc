@@ -1,5 +1,5 @@
 from app import app, db
-from models import Processador, PlacaMae, MemoriaRAM, PlacaVideo, Armazenamento, Fonte, Gabinete,Notebook
+from models import Processador, PlacaMae, MemoriaRAM, PlacaVideo, Armazenamento, Fonte, Gabinete, Notebook
 
 def popular_banco_seguro():
     with app.app_context():
@@ -24,7 +24,7 @@ def popular_banco_seguro():
 
         for data in cpus_data:
             if not Processador.query.filter_by(nome=data["nome"]).first():
-                db.session.add(Processador(nome=data["nome"], preco=data["preco"], socket_id=data["socket"], tdp=data["tdp"], link_loja="#", imagem_url="#"))
+                db.session.add(Processador(nome=data["nome"], preco=data["preco"], socket_id=data["socket"], tdp=data["tdp"], link_loja="#", imagem_url=data["img"]))
 
         # --- 2. PLACAS-MÃE ---
         mobos_data = [
@@ -41,7 +41,7 @@ def popular_banco_seguro():
 
         for data in mobos_data:
             if not PlacaMae.query.filter_by(nome=data["nome"]).first():
-                db.session.add(PlacaMae(nome=data["nome"], preco=data["preco"], socket_id=data["sock"], tipo_memoria=data["mem"], tamanho=data["tam"], link_loja="#", imagem_url="#"))
+                db.session.add(PlacaMae(nome=data["nome"], preco=data["preco"], socket_id=data["sock"], tipo_memoria=data["mem"], tamanho=data["tam"], link_loja="#", imagem_url=data["img"]))
 
         # --- 3. PLACAS DE VÍDEO (GPUs) ---
         gpus_data = [
@@ -56,7 +56,7 @@ def popular_banco_seguro():
 
         for data in gpus_data:
             if not PlacaVideo.query.filter_by(nome=data["nome"]).first():
-                db.session.add(PlacaVideo(nome=data["nome"], preco=data["preco"], tdp=data["tdp"], link_loja="#", imagem_url="#"))
+                db.session.add(PlacaVideo(nome=data["nome"], preco=data["preco"], tdp=data["tdp"], link_loja="#", imagem_url=data["img"]))
 
         # --- 4. MEMÓRIA RAM ---
         rams_data = [
@@ -69,7 +69,7 @@ def popular_banco_seguro():
 
         for data in rams_data:
             if not MemoriaRAM.query.filter_by(nome=data["nome"]).first():
-                db.session.add(MemoriaRAM(nome=data["nome"], preco=data["preco"], tipo=data["tipo"], link_loja="#", imagem_url="#"))
+                db.session.add(MemoriaRAM(nome=data["nome"], preco=data["preco"], tipo=data["tipo"], link_loja="#", imagem_url=data["img"]))
 
         # --- 5. FONTES (Com foco em TDP variado) ---
         fontes_data = [
@@ -82,7 +82,7 @@ def popular_banco_seguro():
 
         for data in fontes_data:
             if not Fonte.query.filter_by(nome=data["nome"]).first():
-                db.session.add(Fonte(nome=data["nome"], preco=data["preco"], potencia=data["pot"], link_loja="#", imagem_url="#"))
+                db.session.add(Fonte(nome=data["nome"], preco=data["preco"], potencia=data["pot"], link_loja="#", imagem_url=data["img"]))
 
         # --- 6. ARMAZENAMENTO ---
         ssds_data = [
@@ -94,8 +94,7 @@ def popular_banco_seguro():
 
         for data in ssds_data:
             if not Armazenamento.query.filter_by(nome=data["nome"]).first():
-                db.session.add(Armazenamento(nome=data["nome"], preco=data["preco"], link_loja="#", imagem_url="#"))
-
+                db.session.add(Armazenamento(nome=data["nome"], preco=data["preco"], link_loja="#", imagem_url=data["img"]))
         # --- 7. GABINETES ---
         gab_data = [
             {"nome": "Mancer Goblin (Preto)", "preco": 160.00, "tam": "Micro-ATX", "img": "https://media.pichau.com.br/media/catalog/product/cache/2f958555330323e505eba7ce930bdf27/m/c/mcr-gbnv2-bk4.jpg"},
@@ -103,6 +102,9 @@ def popular_banco_seguro():
             {"nome": "Montech Air 903 Base", "preco": 350.00, "tam": "Micro-ATX, ATX, E-ATX", "img": "https://img.terabyteshop.com.br/produto/g/gabinete-gamer-montech-air-903-base-mid-tower-e-atx-black-sem-fonte-com-3-fans_172737.jpg"},
             {"nome": "Lian Li Lancool 216", "preco": 750.00, "tam": "Micro-ATX, ATX", "img": "https://lian-li.com/wp-content/uploads/2022/11/1007_136-b.jpg"}
         ]
+        for data in gab_data:
+            if not Gabinete.query.filter_by(nome=data["nome"]).first():
+                db.session.add(Gabinete(nome=data["nome"], preco=data["preco"], tamanho_suportado=data["tam"], link_loja="#", imagem_url=data["img"]))
 
         # --- 8. NOTEBOOKS (Opções prontas para quem não quer montar PC) ---
         notebooks_data = [
@@ -113,10 +115,14 @@ def popular_banco_seguro():
             {"nome": "MacBook Air M2", "preco": 7900.00, "uso": "Premium/Trabalho", "img": "https://m.media-amazon.com/images/I/719C6bJv8jL._AC_SL1500_.jpg"}
         ]
 
-        for data in gab_data:
-            if not Gabinete.query.filter_by(nome=data["nome"]).first():
-                db.session.add(Gabinete(nome=data["nome"], preco=data["preco"], tamanho_suportado=data["tam"], link_loja="#", imagem_url="#"))
-
+        for data in notebooks_data:
+            if not Notebook.query.filter_by(nome=data["nome"]).first():
+                db.session.add(Notebook(
+                    nome=data["nome"], 
+                    preco=data["preco"], 
+                    link_loja="#", 
+                    imagem_url=data["img"]
+        ))
         db.session.commit()
         print(f"✅ Catálogo finalizado! Seus posts e usuários estão seguros.")
 
