@@ -43,7 +43,7 @@ class Processador(db.Model):
     preco = db.Column(db.Numeric(10, 2))
     imagem_url = db.Column(db.Text)
     link_loja = db.Column(db.Text)
-    socket_id = db.Column(db.Integer, db.ForeignKey('sockets_cpu.id'))
+    socket_id = db.Column(db.String(50), nullable=False)
     tdp = db.Column(db.Integer, default=65)
 
 class PlacaMae(db.Model):
@@ -53,7 +53,7 @@ class PlacaMae(db.Model):
     preco = db.Column(db.Numeric(10, 2))
     imagem_url = db.Column(db.Text)
     link_loja = db.Column(db.Text)
-    socket_id = db.Column(db.Integer, db.ForeignKey('sockets_cpu.id'))
+    socket_id = db.Column(db.String(50), nullable=False)
     tipo_memoria = db.Column(db.String(20), default='DDR4')
     tamanho = db.Column(db.String(20), default='Micro-ATX')
 
