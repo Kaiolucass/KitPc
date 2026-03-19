@@ -92,52 +92,6 @@ function finalizar() {
     });
 }
 
-// FUNÇÃO PARA GERAR O PDF
-async function gerarPDF() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    const data = JSON.parse(localStorage.getItem('ia_last_response_data'));
-
-    if (!data) return alert("Erro ao carregar dados do PDF.");
-
-    // Estilo do PDF
-    doc.setFillColor(20, 20, 20); // Fundo escuro
-    doc.rect(0, 0, 210, 297, 'F');
-    
-    doc.setTextColor(0, 242, 255); // Ciano
-    doc.setFontSize(22);
-    doc.text("KITPC - CONSULTORIA TÉCNICA", 10, 20);
-    
-    doc.setDrawColor(0, 242, 255);
-    doc.line(10, 25, 200, 25);
-
-    let y = 40;
-    doc.setFontSize(14);
-    doc.text("Configuração Recomendada:", 10, y);
-    y += 10;
-
-    data.setup.forEach(comp => {
-        doc.setTextColor(0, 242, 255);
-        doc.setFontSize(11);
-        doc.text(`${comp.componente}: ${comp.nome}`, 10, y);
-        y += 6;
-        doc.setTextColor(200, 200, 200);
-        const desc = doc.splitTextToSize(`Explicação: ${comp.descricao_leiga}`, 180);
-        doc.text(desc, 15, y);
-        y += (desc.length * 5) + 5;
-    });
-
-    doc.setTextColor(0, 242, 255);
-    doc.text("Justificativa do Especialista:", 10, y);
-    y += 7;
-    doc.setTextColor(255, 255, 255);
-    const justificativa = doc.splitTextToSize(data.justificativa_geral, 180);
-    doc.text(justificativa, 10, y);
-
-    doc.save("Meu_PC_KitPC.pdf");
-}
-
-
 // Função para abrir/fechar ou mostrar o alerta
     function dispararSininho() {
         const box = document.getElementById("notify-box");
@@ -231,23 +185,45 @@ messaging.onMessage((payload) => {
 });
 
 function gerarPDF() {
-    // Pega os dados que já estão na tela (que o seu montador gerou)
+    // 1. Captura os dados da tela
+    const precoTexto = document.getElementById("total-preco")?.innerText || "R$ 0,00";
+    const objetivoTexto = document.getElementById("objetivo-selecionado")?.value || "Uso Geral";
+    const conselhoTexto = document.getElementById("conselho-mestre")?.innerText || "Boa montagem!";
+
     const dadosSetup = {
-        setup: setupAtual, // Você deve salvar o JSON da resposta numa variável global
-        total_estimado: document.getElementById("total-preco").innerText
+        setup: setupAtual, // Certifique-se que esta variável global foi preenchida na função de montar
+        total_estimado: precoTexto,
+        objetivo: objetivoTexto,
+        conselho_mestre: conselhoTexto
     };
+
+    // Mensagem visual para o usuário saber que está gerando
+    const btnPdf = document.querySelector(".btn-pdf");
+    if(btnPdf) btnPdf.innerText = "⏳ Gerando PDF...";
 
     fetch("/gerar-pdf", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(dadosSetup)
     })
-    .then(response => response.blob())
+    .then(response => {
+        if (!response.ok) throw new Error("Erro no servidor ao gerar PDF");
+        return response.blob();
+    })
     .then(blob => {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
+        a.style.display = 'none';
         a.href = url;
-        a.download = "meu_pc.pdf";
+        a.download = "Guia_Montagem_KitPC.pdf";
+        document.body.appendChild(a);
         a.click();
+        window.URL.revokeObjectURL(url);
+        if(btnPdf) btnPdf.innerText = "📄 Gerar Relatório PDF";
+    })
+    .catch(error => {
+        console.error("Erro:", error);
+        alert("Ops! Houve um erro ao gerar o seu manual.");
+        document.getElementById("area-acoes-pos-montagem").style.display = "block";
     });
 }
