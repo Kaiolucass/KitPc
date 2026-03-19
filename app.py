@@ -950,31 +950,99 @@ def gerar_pdf():
         
         # FASE 1
         pdf.secao_fase(1, "PREPARACAO DA PLACA-MAE")
-        passos1 = "1. Coloque a placa-mae sobre a caixa de papelao.\n2. Levante a alavanca do socket e encaixe o Processador (alinhe o triangulo).\n3. Encaixe a Memoria RAM nos slots ate ouvir o clique dos dois lados."
-        if tem_ssd: passos1 += "\n4. Instale o SSD M.2 e aperte o parafuso de fixacao."
+        
+        pdf.set_font("Arial", 'B', 10)
+        pdf.multi_cell(0, 6, "Antes de colocar no gabinete, vamos montar as pecas principais com calma.")
         pdf.set_font("Arial", size=10)
+        pdf.multi_cell(0, 6, "Use a caixa da placa-mae como base para evitar danos estaticos.")
+        pdf.ln(2)
+
+        # Passos da Fase 1
+        passos1 = (
+            "1. Coloque a placa-mae sobre a caixa.\n"
+            "2. Instale o processador (alinhe o triangulo e nao force).\n"
+            "3. Encaixe a memoria RAM ate ouvir o clique."
+        )
+        if tem_ssd:
+            passos1 += "\n4. Instale o SSD M.2 na diagonal e parafuse."
+        
         pdf.multi_cell(0, 6, passos1)
+        pdf.ln(2)
+
+        # Alerta e Dica Fase 1
+        pdf.set_text_color(200, 0, 0)
+        pdf.set_font("Arial", 'B', 9)
+        pdf.multi_cell(0, 5, "ATENCAO: Nunca force o processador. Se nao encaixar facil, esta errado.")
+        pdf.set_text_color(0, 0, 0)
+        pdf.set_font("Arial", 'I', 9)
+        pdf.multi_cell(0, 5, "DICA: Evite montar em tapetes e toque em algo metalico antes para descarregar a estatica.")
         pdf.ln(4)
 
         # FASE 2
         pdf.secao_fase(2, "INSTALACAO NO GABINETE")
-        passos2 = "1. Encaixe o espelho traseiro no gabinete.\n2. Posicione a placa-mae sobre os espacadores e parafuse.\n3. Instale a Fonte de Alimentacao (fan virada para baixo)."
-        if tem_cooler: passos2 += "\n4. Instale o Cooler/AirCooler e conecte o cabo CPU_FAN."
         pdf.set_font("Arial", size=10)
+        pdf.multi_cell(0, 6, "Agora vamos colocar a placa-mae dentro do gabinete com seguranca.")
+        pdf.ln(2)
+
+        passos2 = (
+            "1. Encaixe o espelho traseiro no gabinete.\n"
+            "2. Verifique os espacadores (pezinhos dourados).\n"
+            "3. Posicione a placa-mae sobre os espacadores.\n"
+            "4. Parafuse sem apertar excessivamente."
+        )
+        if tem_cooler:
+            passos2 += "\n5. Instale o cooler e conecte o cabo no CPU_FAN."
+        
         pdf.multi_cell(0, 6, passos2)
+        pdf.ln(2)
+        
+        pdf.set_text_color(200, 0, 0)
+        pdf.set_font("Arial", 'B', 9)
+        pdf.multi_cell(0, 5, "ATENCAO: Nunca monte sem os espacadores - isso pode queimar sua placa!")
+        pdf.set_text_color(0, 0, 0)
         pdf.ln(4)
 
         # FASE 3
-        pdf.secao_fase(3, "CABOS E PLACA DE VIDEO")
-        passos3 = "1. Conecte o cabo maior de 24 pinos na placa-mae.\n2. Conecte o cabo de 4/8 pinos (CPU) no topo da placa."
-        if tem_gpu: passos3 += "\n3. Encaixe a Placa de Video no primeiro slot PCIe e parafuse.\n4. Se a placa pedir, conecte os cabos de energia da fonte (PCI-E)."
-        passos3 += "\n5. Conecte os cabos do painel frontal (Power, Reset, USB)."
+        pdf.secao_fase(3, "ENERGIA E CABOS")
         pdf.set_font("Arial", size=10)
+        pdf.multi_cell(0, 6, "Momento de conectar a energia e os fios do painel.")
+        pdf.ln(2)
+
+        passos3 = (
+            "1. Conecte o cabo de 24 pinos (Energia Geral).\n"
+            "2. Conecte o cabo do processador (4/8 pinos no topo)."
+        )
+        if tem_gpu:
+            passos3 += (
+                "\n3. Encaixe a placa de video no slot PCIe.\n"
+                "4. Parafuse e conecte os cabos de energia da GPU (PCI-E)."
+            )
+        passos3 += "\n5. Conecte os cabos do painel frontal (Power, Reset, USB, Audio)."
+        
         pdf.multi_cell(0, 6, passos3)
+        pdf.ln(4)
+
+        # FASE 4
+        pdf.secao_fase(4, "PRIMEIRA INICIALIZACAO")
+        pdf.set_font("Arial", size=10)
+        pdf.multi_cell(0, 6, "Hora do 'VRAU'! Vamos ligar a maquina.")
+        pdf.ln(2)
+
+        passos4 = (
+            "1. Ligue o computador e pressione DEL ou F2 repetidamente.\n"
+            "2. Na BIOS, ative o perfil XMP ou DOCP para a memoria RAM.\n"
+            "3. Verifique se as temperaturas estao normais (entre 30C e 50C)."
+        )
+        pdf.multi_cell(0, 6, passos4)
+        pdf.ln(3)
+
+        pdf.set_text_color(200, 0, 0)
+        pdf.set_font("Arial", 'B', 9)
+        pdf.multi_cell(0, 5, "SE NAO LIGAR: Verifique os cabos de energia, tente trocar a RAM de slot e confira os cabos do botao Power.")
+        pdf.set_text_color(0, 0, 0)
 
         # --- FINALIZAÇÃO E ENVIO ---
         output = io.BytesIO()
-        # 'latin-1' + 'ignore' garante que o PDF não quebre com caracteres especiais
         pdf_output = pdf.output(dest='S').encode('latin-1', 'ignore')
         output.write(pdf_output)
         output.seek(0)
@@ -984,7 +1052,6 @@ def gerar_pdf():
     except Exception as e:
         print(f"ERRO NO PDF: {str(e)}")
         return jsonify({"error": str(e)}), 500
-
 # --- SETUP DO BANCO ---
 
 @app.route("/setup-db-kaio")

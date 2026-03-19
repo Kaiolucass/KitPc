@@ -19,15 +19,14 @@ function finalizar() {
     const faltando = camposObrigatorios.find(campo => !respostas[campo]);
 
     if (faltando) {
-        alert("⚠️ Por favor, responda todas as perguntas para a IA trabalhar!");
+        alert("⚠️ Por favor, responda todas as perguntas!");
         return;
     }
 
-    // Efeito de carregamento
     document.getElementById("resultado").innerHTML = `
         <div class="text-center p-5 border border-info rounded bg-dark shadow-lg mt-4">
             <div class="spinner-grow text-info" role="status"></div>
-            <p class="mt-3 fs-5 text-info animate-pulse">🤖 A IA está analisando peças e preços para 2026...</p>
+            <p class="mt-3 fs-5 text-info animate-pulse"> Estamos Calculando melhor custo-benefício...</p>
         </div>
     `;
 
@@ -43,31 +42,37 @@ function finalizar() {
             return;
         }
 
-        // SALVA OS DADOS PARA O PDF PODER USAR DEPOIS
         setupAtual = data.setup;
-        localStorage.setItem('ia_last_response_data', JSON.stringify(data));
-
-        // MONTA O HTML DAS PEÇAS
+        let somaTotal = 0;
         let htmlComponentes = "";
+
+        // Percorre as peças, limpa o preço e soma
         data.setup.forEach(comp => {
+            // Transforma "R$ 1.200,50" em 1200.50
+            const precoLimpo = comp.preco_estimado
+                .replace(/[R$\s.]/g, "") // Remove R$, espaços e pontos de milhar
+                .replace(",", ".");      // Troca vírgula por ponto decimal
+            
+            somaTotal += parseFloat(precoLimpo) || 0;
+
             htmlComponentes += `
-            <div class="card mb-3 bg-dark border-secondary text-white shadow-sm animate-fade-in">
+            <div class="card mb-3 bg-dark border-secondary text-white shadow-sm">
                 <div class="row g-0 align-items-center">
                     <div class="col-md-2 text-center p-2">
-                        <img src="${comp.imagem_url}" class="img-fluid rounded" 
-                             onerror="this.src='/static/Imagens/placeholder.png'" 
-                             style="max-height: 80px; object-fit: contain;">
+                        <img src="${comp.imagem_url}" class="img-fluid rounded" onerror="this.src='/static/Imagens/placeholder.png'" style="max-height: 70px;">
                     </div>
                     <div class="col-md-10">
                         <div class="card-body py-2">
                             <h6 class="text-info mb-1">${comp.componente}</h6>
                             <p class="mb-0"><strong>${comp.nome}</strong> - <span class="text-success">${comp.preco_estimado}</span></p>
-                            <p class="small text-muted mb-0">${comp.descricao_leiga}</p>
                         </div>
                     </div>
                 </div>
             </div>`;
         });
+
+        // Formata o total para exibir na tela
+        const totalFormatado = somaTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
         document.getElementById("resultado").innerHTML = `
             <div class="card bg-dark border-info shadow-lg mt-4 animate-fade-in">
@@ -76,13 +81,18 @@ function finalizar() {
                 </div>
                 <div class="card-body p-4">
                     ${htmlComponentes}
+                    
+                    <div class="text-end my-4 p-3 bg-black rounded border border-secondary">
+                        <h4 class="text-white mb-0">Total Estimado: <span class="text-success" id="preco-total-calculado">${totalFormatado}</span></h4>
+                    </div>
+
                     <div class="ai-response mt-4 p-3 border-start border-info bg-black text-light">
                         <h5 class="text-info">Por que esse PC?</h5>
                         <p style="white-space: pre-line;">${data.justificativa_geral}</p>
                     </div>
                     <div class="text-center mt-4">
-                        <button class="btn btn-outline-info" onclick="gerarPDF()">
-                            <i class="fas fa-file-pdf"></i> Baixar Meu Guia de Montagem (PDF)
+                        <button class="btn btn-info btn-lg fw-bold text-dark" onclick="gerarPDF()">
+                            <i class="fas fa-file-pdf"></i> BAIXAR GUIA DE MONTAGEM (PDF)
                         </button>
                     </div>
                 </div>
@@ -90,7 +100,7 @@ function finalizar() {
         `;
     })
     .catch(error => {
-        document.getElementById("resultado").innerHTML = `<div class="alert alert-danger">❌ Erro ao conectar com o Flask.</div>`;
+        document.getElementById("resultado").innerHTML = `<div class="alert alert-danger">❌ Erro na conexão.</div>`;
     });
 }
 
@@ -187,21 +197,25 @@ messaging.onMessage((payload) => {
 });
 
 function gerarPDF() {
-    // 1. Captura os dados da tela
-    const precoTexto = document.getElementById("total-preco")?.innerText || "R$ 0,00";
-    const objetivoTexto = document.getElementById("objetivo-selecionado")?.value || "Uso Geral";
-    const conselhoTexto = document.getElementById("conselho-mestre")?.innerText || "Boa montagem!";
+    if (!setupAtual || setupAtual.length === 0) {
+        alert("⚠️ Monte seu PC primeiro!");
+        return;
+    }
+
+    // Pega o valor calcula e exibir na tela
+    const totalCalculado = document.getElementById("preco-total-calculado")?.innerText || "R$ 0,00";
 
     const dadosSetup = {
-        setup: setupAtual, // Certifique-se que esta variável global foi preenchida na função de montar
-        total_estimado: precoTexto,
-        objetivo: objetivoTexto,
-        conselho_mestre: conselhoTexto
+        setup: setupAtual,
+        total_estimado: totalCalculado, // Envia o total somado pelo JS
+        objetivo: respostas["uso"] || "Uso Geral",
+        conselho_mestre: "Mantenha a calma e organize os parafusos!"
     };
 
-    // Mensagem visual para o usuário saber que está gerando
-    const btnPdf = document.querySelector(".btn-pdf");
-    if(btnPdf) btnPdf.innerText = "⏳ Gerando PDF...";
+    const btnPdf = document.querySelector("button[onclick='gerarPDF()']");
+    const textoOriginal = btnPdf.innerHTML;
+    btnPdf.innerHTML = `<i class="fas fa-spinner fa-spin"></i> GERANDO...`;
+    btnPdf.disabled = true;
 
     fetch("/gerar-pdf", {
         method: "POST",
@@ -209,23 +223,21 @@ function gerarPDF() {
         body: JSON.stringify(dadosSetup)
     })
     .then(response => {
-        if (!response.ok) throw new Error("Erro no servidor ao gerar PDF");
+        if (!response.ok) throw new Error();
         return response.blob();
     })
     .then(blob => {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
-        a.style.display = 'none';
         a.href = url;
         a.download = "Guia_Montagem_KitPC.pdf";
         document.body.appendChild(a);
         a.click();
         window.URL.revokeObjectURL(url);
-        if(btnPdf) btnPdf.innerText = "📄 Gerar Relatório PDF";
     })
-    .catch(error => {
-        console.error("Erro:", error);
-        alert("Ops! Houve um erro ao gerar o seu manual.");
-        document.getElementById("area-acoes-pos-montagem").style.display = "block";
+    .catch(() => alert("Erro ao gerar PDF no servidor."))
+    .finally(() => {
+        btnPdf.innerHTML = textoOriginal;
+        btnPdf.disabled = false;
     });
 }

@@ -248,6 +248,13 @@
     <button onclick="baixarPDF()" class="btn-gerar-pdf">
         📄 Baixar Meu Guia de Montagem (PDF)
     </button>
+     <div class="mt-5 p-4 text-center card-peca"
+                    style="border: 2px solid #3CC9E4; border-radius: 15px; background: rgba(60, 201, 228, 0.05);">
+                    <h2 class="h4 mb-3 text-info">Ficou com alguma dúvida?</h2>
+                    <p class="text-light opacity-75">clique em saiba mais para aprender mais sobre cada componente do
+                        seu computador!</p>
+                    <a href="{{ url_for('guia_pecas') }}" class="btn btn-info fw-bold text-dark">SAIBA MAIS</a>
+                </div>
 </div>
     <div id="notification-bell-container" style="position: fixed; bottom: 20px; left: 20px; z-index: 9999;">
         <div id="notification-bell" onclick="toggleSininho()"
