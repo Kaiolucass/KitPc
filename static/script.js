@@ -101,7 +101,7 @@ function finalizar() {
                          style="border: 2px solid #3CC9E4; border-radius: 15px; background: rgba(60, 201, 228, 0.05);">
                         <h2 class="h4 mb-3 text-info">Ficou com alguma dúvida?</h2>
                         <p class="text-light opacity-75">Clique em saiba mais para aprender mais sobre cada componente do seu computador!</p>
-                        <a href="/guia-pecas" class="btn btn-outline-info fw-bold">SAIBA MAIS</a>
+                        <a href="/educacao/guia-de-pecas" class="btn btn-outline-info fw-bold">SAIBA MAIS</a>
                     </div>
                 </div>
             </div>
