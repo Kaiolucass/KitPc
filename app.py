@@ -864,34 +864,42 @@ def montar_setup():
 def gerar_pdf():
     try:
         dados = request.get_json()
+        if not dados:
+            return jsonify({"error": "Dados não recebidos"}), 400
+
         setup = dados.get("setup", [])
         total = dados.get("total_estimado", "R$ 0,00")
         objetivo = dados.get("objetivo", "Uso Geral")
         conselho = dados.get("conselho_mestre", "Boa sorte na montagem!")
 
-        # --- LÓGICA DE DETECÇÃO DE PEÇAS ---
-        tem_gpu = any(item['componente'] == 'Placa de Vídeo' for item in setup)
-        tem_ssd = any(item['componente'] in ['Armazenamento', 'SSD'] for item in setup)
-        tem_cooler = any('Cooler' in item['nome'] for item in setup)
-        
-        # Identificar se o PC é potente para a explicação
-        preco_total_num = float(total.replace('R$', '').replace('.', '').replace(',', '.').strip())
+        # --- TRATAMENTO SEGURO DO PREÇO TOTAL ---
+        try:
+            # Remove R$, pontos de milhar e troca vírgula por ponto
+            limpo = total.replace('R$', '').replace('.', '').replace(',', '.').strip()
+            preco_total_num = float(limpo)
+        except:
+            preco_total_num = 0.0
+
+        # --- LÓGICA DE DETECÇÃO USANDO .GET() ---
+        tem_gpu = any(item.get('componente') == 'Placa de Vídeo' for item in setup)
+        # Verifica SSD ou Armazenamento de forma mais abrangente
+        tem_ssd = any(item.get('componente') in ['Armazenamento', 'SSD', 'SSD M.2'] for item in setup)
+        tem_cooler = any('Cooler' in str(item.get('nome', '')) for item in setup)
         
         pdf = FPDF()
         pdf.set_auto_page_break(auto=True, margin=15)
         pdf.add_page()
 
-        # --- 1. CABEÇALHO COM LOGO E TÍTULO ---
+        # --- 1. CABEÇALHO ---
         caminho_logo = os.path.join('static', 'Imagens', 'logo.png')
         if os.path.exists(caminho_logo):
             pdf.image(caminho_logo, 10, 8, 30)
         
         pdf.set_font("Arial", 'B', 18)
-        pdf.set_text_color(33, 37, 41)
         pdf.cell(0, 15, "GUIA DE MONTAGEM - KITPC", ln=True, align='R')
         pdf.ln(10)
 
-        # --- 2. EXPLICAÇÃO DO SETUP (ITEM 2 DO SEU PLANO) ---
+        # --- 2. EXPLICAÇÃO ---
         pdf.set_font("Arial", 'B', 12)
         pdf.set_fill_color(240, 240, 240)
         pdf.cell(0, 10, " PARA QUE SERVE ESTE COMPUTADOR?", ln=True, fill=True)
@@ -899,57 +907,62 @@ def gerar_pdf():
         pdf.set_font("Arial", size=11)
         
         if preco_total_num > 5000:
-            resumo = f"Este setup de {total} é uma máquina de ALTO DESEMPENHO. Ideal para {objetivo}, garantindo fluidez máxima e longevidade para os próximos anos."
+            resumo = f"Este setup de {total} e uma maquina de ALTO DESEMPENHO. Ideal para {objetivo}."
         elif tem_gpu:
-            resumo = f"Este é um PC Gamer Equilibrado. Perfeito para {objetivo}, com foco em estabilidade gráfica e ótimo custo-benefício."
+            resumo = f"Este e um PC Gamer Equilibrado. Perfeito para {objetivo}."
         else:
-            resumo = f"Setup focado em Eficiência e Velocidade. Excelente para {objetivo}, estudos e produtividade diária."
+            resumo = f"Setup focado em Eficiencia e Velocidade para {objetivo}."
         
+        # O encode('latin-1', 'ignore') no final resolve o problema dos acentos
         pdf.multi_cell(0, 7, resumo)
         pdf.ln(5)
 
-        # --- 3. LISTA DE PEÇAS ESCOLHIDAS ---
+        # --- 3. LISTA DE PEÇAS ---
         pdf.set_font("Arial", 'B', 12)
         pdf.cell(0, 10, " SEU HARDWARE SELECIONADO:", ln=True)
         pdf.set_font("Arial", size=10)
         
         for item in setup:
+            comp = item.get('componente', 'Peca')
+            nome = item.get('nome', 'Nao informado')
+            preco = item.get('preco_estimado', 'R$ 0,00')
+            
             pdf.set_font("Arial", 'B', 10)
-            pdf.cell(40, 8, f"{item['componente']}:", ln=False)
+            pdf.cell(45, 8, f"{comp}:", ln=False)
             pdf.set_font("Arial", size=10)
-            pdf.cell(0, 8, f"{item['nome']} ({item['preco_estimado']})", ln=True)
+            pdf.cell(0, 8, f"{nome} ({preco})", ln=True)
         
-        pdf.ln(2)
+        pdf.ln(5)
         pdf.set_font("Arial", 'B', 11)
         pdf.cell(0, 10, f"TOTAL INVESTIDO: {total}", ln=True, align='R')
-        pdf.ln(5)
 
-        # --- 4. MANUAL DE MONTAGEM INTELIGENTE (ITEM 3 DO SEU PLANO) ---
+        # --- 4. MANUAL INTELIGENTE ---
+        pdf.ln(5)
         pdf.set_font("Arial", 'B', 12)
-        pdf.set_fill_color(0, 102, 204) # Azul KitPC
+        pdf.set_fill_color(0, 102, 204) 
         pdf.set_text_color(255, 255, 255)
         pdf.cell(0, 10, " PASSO A PASSO PERSONALIZADO", ln=True, fill=True)
         pdf.ln(4)
         pdf.set_text_color(0, 0, 0)
-        pdf.set_font("Arial", size=10)
 
-        passos = []
-        passos.append("Coloque a placa-mãe sobre a caixa dela e instale o processador com cuidado (alinhe a seta).")
-        passos.append("Encaixe os pentes de memória RAM nos slots até ouvir o clique de travamento.")
+        passos = [
+            "Coloque a placa-mae sobre a caixa dela e instale o processador.",
+            "Encaixe a memoria RAM nos slots ate ouvir o clique."
+        ]
         
         if tem_ssd:
-            passos.append("Instale o SSD no slot M.2 da placa-mãe e prenda com o parafuso de fixação.")
+            passos.append("Instale o SSD no slot M.2 e prenda com o parafuso.")
         
-        passos.append("Instale o espelho traseiro no gabinete e depois parafuse a placa-mãe nos espaçadores.")
+        passos.append("Instale o espelho traseiro e parafuse a placa-mae no gabinete.")
 
         if tem_gpu:
-            passos.append("Abra a trava do slot PCIe e instale a Placa de Vídeo, parafusando-a na traseira do gabinete.")
+            passos.append("Instale a Placa de Video no slot PCIe e parafuse no gabinete.")
 
         if tem_cooler:
-            passos.append("Instale o cooler sobre o processador. Verifique se precisa aplicar pasta térmica.")
+            passos.append("Instale o cooler e verifique a pasta termica.")
 
-        passos.append("Conecte os cabos de energia da fonte (24 pinos placa-mãe e 4/8 pinos CPU).")
-        passos.append("Ligue o PC e pressione DEL ou F2 para configurar a BIOS e ativar o perfil de memória (XMP).")
+        passos.append("Conecte os cabos de energia (24p e 4/8p CPU).")
+        passos.append("Ligue o PC e pressione DEL ou F2 para entrar na BIOS.")
 
         for i, texto in enumerate(passos, 1):
             pdf.set_font("Arial", 'B', 10)
@@ -958,18 +971,13 @@ def gerar_pdf():
             pdf.multi_cell(0, 7, texto)
             pdf.ln(1)
 
-        # --- 5. RODAPÉ E CONSELHO ---
-        pdf.ln(10)
-        pdf.set_font("Arial", 'I', 10)
-        pdf.set_text_color(100, 100, 100)
-        pdf.multi_cell(0, 7, f"Dica do Mestre: {conselho}")
-        
+        # --- RODAPE ---
         pdf.set_y(-20)
         pdf.set_font("Arial", 'B', 8)
-        pdf.cell(0, 10, "Gerado por KitPC - Seu guia inteligente de hardware", align='C', ln=True)
+        pdf.cell(0, 10, "Gerado por KitPC - Seu guia inteligente de hardware", align='C')
 
-        # Retornar o PDF para o navegador
         output = io.BytesIO()
+        # 'ignore' remove caracteres que a FPDF não consegue processar (como emojis ou símbolos raros)
         pdf_output = pdf.output(dest='S').encode('latin-1', 'ignore')
         output.write(pdf_output)
         output.seek(0)
@@ -977,9 +985,8 @@ def gerar_pdf():
         return send_file(output, as_attachment=True, download_name="manual_kitpc.pdf", mimetype="application/pdf")
 
     except Exception as e:
-        print(f"Erro ao gerar PDF: {e}")
-        return jsonify({"error": "Erro interno ao gerar o arquivo"}), 500
-
+        print(f"ERRO NO PDF: {str(e)}")
+        return jsonify({"error": str(e)}), 500
 
 # --- SETUP DO BANCO ---
 

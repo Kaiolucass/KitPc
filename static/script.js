@@ -1,4 +1,5 @@
 const respostas = {};
+let setupAtual = [];
 
 function setAnswer(campo, valor, event) {
     event.preventDefault();
@@ -43,6 +44,7 @@ function finalizar() {
         }
 
         // SALVA OS DADOS PARA O PDF PODER USAR DEPOIS
+        setupAtual = data.setup;
         localStorage.setItem('ia_last_response_data', JSON.stringify(data));
 
         // MONTA O HTML DAS PEÇAS
