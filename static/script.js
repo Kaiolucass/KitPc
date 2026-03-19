@@ -186,7 +186,7 @@ messaging.onMessage((payload) => {
     });
 });
 
-function KitPC_PDF() {
+function gerarPDF() {
     // 1. Captura os dados da tela
     const precoTexto = document.getElementById("total-preco")?.innerText || "R$ 0,00";
     const objetivoTexto = document.getElementById("objetivo-selecionado")?.value || "Uso Geral";
