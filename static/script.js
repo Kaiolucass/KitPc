@@ -82,7 +82,7 @@ function finalizar() {
                     </div>
                     <div class="text-center mt-4">
                         <button class="btn btn-outline-info" onclick="gerarPDF()">
-                            <i class="fas fa-file-pdf"></i> Baixar Relatório para Leigos (PDF)
+                            <i class="fas fa-file-pdf"></i> Baixar Meu Guia de Montagem (PDF)
                         </button>
                     </div>
                 </div>
@@ -186,7 +186,7 @@ messaging.onMessage((payload) => {
     });
 });
 
-function gerarPDF() {
+function KitPC_PDF() {
     // 1. Captura os dados da tela
     const precoTexto = document.getElementById("total-preco")?.innerText || "R$ 0,00";
     const objetivoTexto = document.getElementById("objetivo-selecionado")?.value || "Uso Geral";
