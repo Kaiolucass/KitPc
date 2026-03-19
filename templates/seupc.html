@@ -392,140 +392,28 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-                return new bootstrap.Tooltip(tooltipTriggerEl);
-            });
+    // inicialização dos balões de dica (Tooltips)
+    document.addEventListener("DOMContentLoaded", function () {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
         });
-    </script>
+    });
 
-    <script>
-        // Função para marcar a resposta e mudar a cor do botão selecionado
-        function setAnswer(categoria, valor, event) {
-            // Impede que o clique no botão feche o card (toggleQuestion)
-            event.stopPropagation();
-
-            // Atualiza o texto da resposta no <span>
-            document.getElementById(categoria).innerText = valor;
-
-            // Remove a classe 'btn-info' (azul preenchido) de todos os botões daquele grupo
-            const parent = event.target.closest('.answers') || event.target.closest('.d-flex');
-            const botoes = parent.querySelectorAll('.btn');
-            botoes.forEach(btn => {
-                btn.classList.remove('btn-info', 'text-dark');
-                btn.classList.add('btn-outline-info');
-            });
-
-            // Adiciona a cor de selecionado ao botão clicado
-            event.target.classList.remove('btn-outline-info');
-            event.target.classList.add('btn-info', 'text-dark');
+    // clique do sininho se ele não estiver no seu arquivo externo
+    function handleBellClick() {
+        const notifyBox = document.getElementById("notify-box");
+        const jaInscrito = localStorage.getItem('userEmail');
+        if (jaInscrito) {
+            alert("Você já está inscrito com: " + jaInscrito);
+        } else {
+            notifyBox.style.display = (notifyBox.style.display === "none") ? "block" : "none";
         }
+    }
+</script>
 
-        // Função para abrir/fechar as perguntas (sanfona)
-        function toggleQuestion(element) {
-            // Você pode usar isso para esconder as respostas e mostrar só quando clicar
-            // Se preferir deixar tudo aberto, pode deixar a função vazia
-        }
-        async function finalizar() {
-            // 1. Pega as respostas que estão nos <span> do seu HTML
-            const dados = {
-                preco: document.getElementById('preco').innerText,
-                tipo: document.getElementById('tipo').innerText,
-                uso: document.getElementById('uso').innerText,
-                gpu: document.getElementById('gpu').innerText,
-                processador: document.getElementById('processador').innerText,
-                laptop: document.getElementById('laptop').innerText
-            };
-
-            // Validação simples
-            if (dados.preco === "Nenhuma") {
-                alert("Por favor, selecione ao menos o orçamento!");
-                return;
-            }
-
-            // 2. Prepara a tela (mostra loading e esconde resultados antigos)
-            const loading = document.getElementById('loading');
-            const listaPecas = document.getElementById('lista-peças');
-            const justificativaDiv = document.getElementById('justificativa-container');
-
-            loading.classList.remove('d-none');
-            listaPecas.innerHTML = '';
-            justificativaDiv.classList.add('d-none');
-
-            try {
-                // 3. Chama a sua rota do Flask
-                const response = await fetch('/consultoria-ia', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(dados)
-                });
-
-                const data = await response.json();
-
-                if (data.erro) {
-                    alert("Erro: " + data.erro);
-                } else {
-                    // 4. Monta os cards dinamicamente
-                    data.setup.forEach(peca => {
-                        const card = `
-                    <div class="col-md-4">
-                        <div class="card h-100 bg-dark border-secondary shadow-sm card-hover">
-                            <img src="${peca.imagem_url}" class="card-img-top p-3" alt="${peca.nome}" 
-                                 onerror="this.src='/static/Imagens/processador.png'">
-                            <div class="card-body d-flex flex-column">
-                                <h6 class="text-info uppercase small fw-bold">${peca.componente}</h6>
-                                <h5 class="card-title text-white h6">${peca.nome}</h5>
-                                <p class="card-text text-secondary small flex-grow-1">${peca.justificativa}</p>
-                                <hr class="border-secondary">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="text-success fw-bold">${peca.preco_estimado || ''}</span>
-                                    <a href="${peca.link_loja || '#'}" target="_blank" class="btn btn-sm btn-outline-info">Ver Loja</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                        listaPecas.innerHTML += card;
-                    });
-
-                    // 5. Mostra o conselho da IA
-                    document.getElementById('texto-justificativa').innerText = data.conselho_mestre || data.justificativa_geral;
-                    justificativaDiv.classList.remove('d-none');
-                }
-            } catch (error) {
-                console.error("Erro ao montar PC:", error);
-                alert("Ocorreu um erro ao conectar com a IA.");
-            } finally {
-                loading.classList.add('d-none');
-                // Rola a tela para o resultado
-                document.getElementById('resultado').scrollIntoView({ behavior: 'smooth' });
-            }
-        }
-    </script>
-
-    <script>
-        //script para o sininho de notificações do blog
-        function handleBellClick() {
-            const notifyBox = document.getElementById("notify-box");
-            const jaInscrito = localStorage.getItem('userEmail');
-
-            if (jaInscrito) {
-                // Se o navegador já conhece o e-mail dele
-                alert("Você já está inscrito com: " + jaInscrito);
-            } else {
-                // Se é a primeira vez, mostra ou esconde a caixinha
-                if (notifyBox.style.display === "none") {
-                    notifyBox.style.display = "block";
-                } else {
-                    notifyBox.style.display = "none";
-                }
-            }
-        }
-    </script>
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
+<script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 
 </html>
