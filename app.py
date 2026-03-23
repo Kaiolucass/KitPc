@@ -727,6 +727,11 @@ def excluir_comentario(id):
     db.session.commit()
     return redirect(url_for('exibir_post', slug=post_slug))
 
+@app.route("/post/<slug>")
+def redirecionar_post_legado(slug):
+    # O código 301 avisa o Google: "Mudei de endereço para sempre, atualize seu índice"
+    return redirect(url_for('exibir_post', slug=slug), code=301)
+
 # --- LÓGICA DO MONTADOR E SETUP BANCO MANTIDOS COMO ESTÃO ---
 
 def get_total(preco_label):
