@@ -650,6 +650,7 @@ def ver_mensagens():
 def arquivo():
     posts = Post.query.order_by(Post.data_postagem.desc()).all()
     return render_template("arquivo.html", posts=posts)
+
 @app.route("/blog/<slug>")
 def exibir_post(slug):
     # 1. Busca o post principal pelo slug
@@ -660,26 +661,30 @@ def exibir_post(slug):
                           .order_by(Post.views.desc())\
                           .limit(3).all()
 
-    # 3. Busca os COMENTÁRIOS (Do mais novo para o mais antigo)
-    # Importamos o modelo dentro da função para evitar erros de importação circular
+    # 3. Busca os COMENTÁRIOS
     from models import Comentario
     comentarios = Comentario.query.filter_by(post_id=post.id)\
                                   .order_by(Comentario.data_postagem.desc())\
                                   .all()
     
-    # 4. Lógica de contagem de visualizações
-    if not post.views:
-        post.views = 0
-    post.views += 1
-    
-    try:
-        db.session.commit()
-    except Exception as e:
-        db.session.rollback()
-        # Se o seu logger não estiver configurado, pode usar print(e) para testar
-        print(f"Erro ao atualizar views: {e}")
+    # --- LOGICA DE VISUALIZAÇÕES COM TRAVA DE ADMIN ---
+    # Só conta visualização se o usuário NÃO for admin
+    if not session.get('is_admin'):
+        if post.views is None:
+            post.views = 0
         
-    # 5. Enviamos tudo para o HTML (agora com a variável 'comentarios')
+        post.views += 1
+        
+        try:
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            logger.error(f"Erro ao atualizar views: {e}")
+    else:
+        # Log apenas para você saber que a trava funcionou no console
+        logger.info(f"Visualização de Admin detectada para '{post.titulo}'. Contador ignorado.")
+        
+    # 5. Enviamos tudo para o HTML
     return render_template("blog_post.html", 
                            post=post, 
                            sugestoes=sugestoes, 
