@@ -5,6 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sobre Nós - KitPc</title>
+     <meta name="description" content="Conheça a história do KitPC, nossa missão e os valores que nos guiam. Saiba como nossa equipe apaixonada por tecnologia trabalha para ajudar você a montar o computador dos seus sonhos, oferecendo guias, recomendações e suporte para todas as suas necessidades de hardware. Junte-se à comunidade KitPC e transforme sua experiência de montagem de PC em algo simples, acessível e confiável.">
+<link rel="canonical" href="https://kitpc.com.br/sobre">
     <link rel="icon" href="{{ url_for('static', filename='Imagens/favicon.png') }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -134,19 +136,29 @@
     </div>
 
     <section class="container mt-5">
-        <div class="row align-items-center">
-            <div class="col-md-6 col-sm-12">
-                <h1 class="display-5 fw-bold">Conheça o KitPC por dentro</h1>
-                <p>Ajudamos você a montar o computador dos seus sonhos, sem complicação. Oferecemos guias e
-                    recomendações de peças para todos os tipos de necessidades e orçamentos, seja para jogos, trabalho
-                    ou uso diário. Montar seu PC nunca foi tão fácil!</p>
-            </div>
-            <div class="col-md-6 col-sm-12 text-center">
-                <img src="{{ url_for('static', filename='Imagens/computadorMontado.png') }}" alt="Imagem KitPc"
-                    class="img-fluid rounded shadow-lg">
-            </div>
+   <section class="container mt-5">
+    <div class="row align-items-center">
+        <div class="col-md-6 col-sm-12">
+            <h1 class="display-5 fw-bold" style="font-family: 'Orbitron', sans-serif; color: #3CC9E4;">Conheça o KitPC por dentro</h1>
+            <p class="mt-3">
+                O <strong>KitPC</strong> nasceu da necessidade de tornar o universo do hardware acessível. Em um mercado cheio de termos técnicos e peças que mudam a cada mês, nossa missão é ser o seu guia definitivo. 
+            </p>
+            <p>
+                Diferente de blogs comuns, unimos a paixão por hardware com tecnologia de ponta. Nosso <strong>Montador de PC com IA</strong> analisa compatibilidade e orçamentos em tempo real, garantindo que você monte um setup equilibrado sem desperdiçar recursos.
+            </p>
+            <p>
+                Para quem quer aprender, criamos um ecossistema completo: nosso <strong>Blog</strong> traz as últimas tendências, enquanto o <strong>Guia de Peças</strong> detalha cada componente. Para os iniciantes, a <strong>Trilha de Aprendizado</strong> oferece um passo a passo seguro para transformar o medo em domínio técnico na hora da montagem.
+            </p>
+            <p>
+                Seja você um gamer buscando o máximo de FPS ou um profissional que precisa de uma workstation confiável, o KitPC oferece o caminho mais curto entre a sua dúvida e o PC ligado.
+            </p>
         </div>
-    </section>
+        <div class="col-md-6 col-sm-12 text-center">
+            <img src="{{ url_for('static', filename='Imagens/computadorMontado.png') }}" alt="Equipe KitPC montando computador"
+                class="img-fluid rounded shadow-lg border-info" style="border: 2px solid #3CC9E4;">
+        </div>
+    </div>
+</section>
 
     <section class="container mt-5">
         <h2 class="text-center section-title fw-bold mb-5">O que nos move?</h2>
@@ -179,24 +191,28 @@
     </section>
 
     <section class="container text-center py-5">
-        <h2 class="fw-bold mb-4">Nossa equipe de desenvolvedores</h2>
-        <p class="mb-5">
-            Essa é a equipe que deu início a este projeto, unindo conhecimentos e dedicação para transformar ideias em
-            realidade.
-        </p>
-        <div class="row justify-content-center">
-            <div class="col-md-4">
-                <div class="team-member">
-                    <img src="{{ url_for('static', filename='Imagens/kaio.png') }}" alt="Kaio"
-                        class="profile-pic rounded-circle mb-3"
-                        style="width: 150px; height: 150px; object-fit: cover; border: 3px solid #0dcaf0;">
-                   <a href="https://kaiolucass.com.br/" target="_blank" class="link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">
-                    <h5 class="mb-0">Kaio Lucas</h5>
-                   </a>
-                </div>
+    <h2 class="fw-bold mb-4" style="font-family: 'Orbitron', sans-serif; color: #3CC9E4;">Nossa equipe de desenvolvedores</h2>
+    <p class="mb-5 opacity-75">
+        O KitPC nasceu da união entre tecnologia e paixão por hardware, focado em simplificar a montagem de computadores para todos.
+    </p>
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-4">
+            <div class="team-member p-4 rounded" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(60, 201, 228, 0.2);">
+                <img src="{{ url_for('static', filename='Imagens/kaio.png') }}" alt="Kaio Lucas"
+                    class="profile-pic rounded-circle mb-3 shadow-lg"
+                    style="width: 150px; height: 150px; object-fit: cover; border: 3px solid #3CC9E4;">
+                
+                <a href="https://kaiolucass.com.br/" target="_blank" class="text-decoration-none">
+                    <h5 class="mb-1 text-info" style="font-family: 'Orbitron', sans-serif;">Kaio Lucas</h5>
+                </a>
+                <p class="text-purple small fw-bold mb-2" style="color: #9216FD;">Fundador & Desenvolvedor Full Stack</p>
+                <p class="small text-light opacity-75">
+                    Entusiasta de hardware com anos de experiência em montagem de setups. Criou o KitPC para traduzir o "tecniquês" e ajudar usuários a montarem máquinas equilibradas com auxílio de IA.
+                </p>
             </div>
         </div>
-    </section>
+    </div>
+</section>
     <div vw class="enabled">
         <div vw-access-button class="active"></div>
         <div vw-plugin-wrapper>

@@ -737,6 +737,12 @@ def redirecionar_post_legado(slug):
     # O código 301 avisa o Google: "Mudei de endereço para sempre, atualize seu índice"
     return redirect(url_for('exibir_post', slug=slug), code=301)
 
+@app.route("/blog")
+def redirecionar_blog():
+    # O 'arquivo' aqui deve ser o nome da FUNÇÃO que abre a sua página de lista de posts
+    # O '301' avisa ao Google que essa mudança é permanente (bom para o SEO)
+    return redirect(url_for('arquivo')), 301
+
 # --- LÓGICA DO MONTADOR E SETUP BANCO MANTIDOS COMO ESTÃO ---
 
 def get_total(preco_label):

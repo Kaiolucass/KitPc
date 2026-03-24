@@ -8,20 +8,59 @@ body {
     min-height: 100vh;
 }
 
-/* Navbar Customizada para combinar com o resto do site */
-.navbar {
-    border-bottom: 2px solid #3CC9E4;
-    background-color: rgba(5, 0, 28, 0.95);
-    backdrop-filter: blur(10px);
+/* Abas de Login/Cadastrar */
+.nav-tabs .nav-link {
+    border: none !important;
+    color: #666 !important;
+    background: transparent !important;
+    transition: 0.3s;
 }
 
+.nav-tabs .nav-link:hover {
+    color: #3CC9E4 !important;
+    background-color: rgba(60, 201, 228, 0.05) !important;
+}
+
+.nav-tabs .nav-link.active {
+    background-color: transparent !important;
+    color: #3CC9E4 !important;
+    border-bottom: 3px solid #3CC9E4 !important;
+}
+
+/* --- LOGO E TIPOGRAFIA --- */
+
 .logo-kitpc {
-    max-width: 50px; /* Ajustado para não ficar gigante */
+    width: 80px;
     height: auto;
 }
 
+h1 {
+    color: transparent;                    
+    -webkit-text-stroke: 1px #3CC9E4;
+    text-shadow: 0 0 10px rgba(60, 201, 228, 0.2);
+}
+
+h2 {
+    color: #3CC9E4;
+    text-transform: uppercase;
+}
+
+h5 {
+    color: #3CC9E4;
+    font-weight: bold;
+    margin-top: 15px;
+}
+
+/* --- NAVBAR --- */
+
+.navbar {
+    border-bottom: 2px solid #3CC9E4;
+    padding: 10px 0;
+    background-color: rgba(5, 0, 28, 0.95);
+}
+
 .nav-link {
-    color: #e0e0e0 !important;
+    color: #9216FD !important;
     font-weight: 600;
     transition: 0.3s;
 }
@@ -30,6 +69,15 @@ body {
     color: #3CC9E4 !important;
     text-shadow: 0 0 8px #3CC9E4;
 }
+
+.navbar-toggler {
+    border: 1px solid #3CC9E4;
+}
+
+.navbar-toggler-icon {
+    filter: invert(54%) sepia(86%) saturate(497%) hue-rotate(163deg) brightness(92%) contrast(89%);
+}
+
 
 /* O "Coração" da página: O Box de Conteúdo */
 .content-box {

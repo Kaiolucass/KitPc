@@ -4,7 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ post.titulo }} - KitPc</title>
+
+    <title>{{ post.titulo }} | KitPC</title>
+    <meta name="description" content="{{ post.subtitulo }}">
+    <link rel="canonical" href="https://kitpc.com.br/blog/{{ post.slug }}">
     <link rel="icon" href="{{ url_for('static', filename='Imagens/favicon.png') }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -12,6 +15,30 @@
         crossorigin="anonymous"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='CSS/blog.css') }}">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "{{ post.titulo }}",
+  "description": "{{ post.subtitulo }}",
+  "author": {
+    "@type": "Person",
+    "name": "Equipe KitPC" 
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "KitPC",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://kitpc.com.br/static/Imagens/favicon.png"
+    }
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://kitpc.com.br/blog/{{ post.slug }}"
+  }
+}
+</script>
 </head>
 
 <body>
@@ -150,9 +177,16 @@
                             {{ post.titulo }}
                         </h1>
                         <p class="lead" style="color: #9216FD; font-weight: bold;">{{ post.subtitulo }}</p>
-                        <div class="small text-light opacity-75">
-                            <i class="far fa-calendar-alt"></i> Publicado em: {{ post.data_postagem.strftime('%d/%m/%Y')
-                            }}
+
+                        <div class="blog-byline mt-4 opacity-75 text-light small">
+                            <span class="me-3">
+                                <i class="fas fa-user-edit text-info"></i> Artigo escrito por <strong>Kaio
+                                    Lucas</strong>
+                            </span>
+                            <span>
+                                <i class="far fa-calendar-alt text-info"></i> Publicado em: {{
+                                post.data_postagem.strftime('%d/%m/%Y') }}
+                            </span>
                         </div>
                     </header>
 
@@ -298,111 +332,111 @@
         </div>
     </div>
 
-   
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-messaging-compat.js"></script>
 
-<script>
-    // 2. Configurações vindas do Flask
-    const firebaseConfig = {
-        apiKey: "{{ fb.apiKey }}",
-        authDomain: "{{ fb.authDomain }}",
-        projectId: "{{ fb.projectId }}",
-        storageBucket: "{{ fb.storageBucket }}",
-        messagingSenderId: "{{ fb.messagingSenderId }}",
-        appId: "{{ fb.appId }}"
-    };
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-messaging-compat.js"></script>
 
-    // 3. INICIALIZAÇÃO OBRIGATÓRIA (Nesta ordem exata)
-    firebase.initializeApp(firebaseConfig);
-    const messaging = firebase.messaging(); // Agora o messaging é criado DEPOIS do app estar pronto
+    <script>
+        // 2. Configurações vindas do Flask
+        const firebaseConfig = {
+            apiKey: "{{ fb.apiKey }}",
+            authDomain: "{{ fb.authDomain }}",
+            projectId: "{{ fb.projectId }}",
+            storageBucket: "{{ fb.storageBucket }}",
+            messagingSenderId: "{{ fb.messagingSenderId }}",
+            appId: "{{ fb.appId }}"
+        };
 
-    // 4. Registro do Service Worker
-    if ('serviceWorker' in navigator) {
-        // Usamos o caminho que você definiu na pasta static
-        navigator.serviceWorker.register("{{ url_for('static', filename='firebase-messaging-sw.js') }}")
-            .then(function (reg) {
-                console.log('✅ Service Worker registrado com sucesso!');
-            })
-            .catch(function (err) {
-                console.error('❌ Erro ao registrar Service Worker:', err);
-            });
-    }
+        // 3. INICIALIZAÇÃO OBRIGATÓRIA (Nesta ordem exata)
+        firebase.initializeApp(firebaseConfig);
+        const messaging = firebase.messaging(); // Agora o messaging é criado DEPOIS do app estar pronto
 
-    // --- FUNÇÕES DO SININHO ---
+        // 4. Registro do Service Worker
+        if ('serviceWorker' in navigator) {
+            // Usamos o caminho que você definiu na pasta static
+            navigator.serviceWorker.register("{{ url_for('static', filename='firebase-messaging-sw.js') }}")
+                .then(function (reg) {
+                    console.log('✅ Service Worker registrado com sucesso!');
+                })
+                .catch(function (err) {
+                    console.error('❌ Erro ao registrar Service Worker:', err);
+                });
+        }
 
-    function toggleSininho() {
-        const box = document.getElementById("notify-box");
-        const status = localStorage.getItem('sinoAtivo');
-        
-        if (status === 'sim') {
-            alert("🔔 As notificações reais já estão ativas!");
-        } else {
-            // Alterna entre block e none
-            if (box.style.display === "none" || box.style.display === "") {
-                box.style.display = "block";
+        // --- FUNÇÕES DO SININHO ---
+
+        function toggleSininho() {
+            const box = document.getElementById("notify-box");
+            const status = localStorage.getItem('sinoAtivo');
+
+            if (status === 'sim') {
+                alert("🔔 As notificações reais já estão ativas!");
             } else {
-                box.style.display = "none";
+                // Alterna entre block e none
+                if (box.style.display === "none" || box.style.display === "") {
+                    box.style.display = "block";
+                } else {
+                    box.style.display = "none";
+                }
             }
         }
-    }
 
-    async function ativarNotificacaoReal() {
-        try {
-            // Pede permissão ao usuário
-            const permission = await Notification.requestPermission();
-            
-            if (permission === "granted") {
-                // Espera o Service Worker estar pronto
-                const registration = await navigator.serviceWorker.ready;
-                
-                // Pede o Token ao Firebase usando a sua VAPID KEY
-                const token = await messaging.getToken({ 
-                    vapidKey: "{{ fb.vapidKey }}", // Usando a chave do seu .env
-                    serviceWorkerRegistration: registration 
-                });
+        async function ativarNotificacaoReal() {
+            try {
+                // Pede permissão ao usuário
+                const permission = await Notification.requestPermission();
 
-                if (token) {
-                    // Envia para a rota do seu Flask (app.py)
-                    const res = await fetch('/salvar-token', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ token: token })
+                if (permission === "granted") {
+                    // Espera o Service Worker estar pronto
+                    const registration = await navigator.serviceWorker.ready;
+
+                    // Pede o Token ao Firebase usando a sua VAPID KEY
+                    const token = await messaging.getToken({
+                        vapidKey: "{{ fb.vapidKey }}", // Usando a chave do seu .env
+                        serviceWorkerRegistration: registration
                     });
 
-                    if (res.ok) {
-                        localStorage.setItem('sinoAtivo', 'sim');
-                        aplicarEstiloAtivo();
-                        document.getElementById("notify-box").style.display = "none";
-                        alert("🚀 Notificações configuradas com sucesso!");
-                    } else {
-                        alert("Erro ao salvar token no servidor.");
+                    if (token) {
+                        // Envia para a rota do seu Flask (app.py)
+                        const res = await fetch('/salvar-token', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ token: token })
+                        });
+
+                        if (res.ok) {
+                            localStorage.setItem('sinoAtivo', 'sim');
+                            aplicarEstiloAtivo();
+                            document.getElementById("notify-box").style.display = "none";
+                            alert("🚀 Notificações configuradas com sucesso!");
+                        } else {
+                            alert("Erro ao salvar token no servidor.");
+                        }
                     }
+                } else {
+                    alert("Você bloqueou as notificações. Ative-as nas configurações do navegador (ícone de cadeado).");
                 }
-            } else {
-                alert("Você bloqueou as notificações. Ative-as nas configurações do navegador (ícone de cadeado).");
+            } catch (error) {
+                console.error("Erro detalhado:", error);
+                alert("Erro ao recuperar assinatura. Tente novamente.");
             }
-        } catch (error) {
-            console.error("Erro detalhado:", error);
-            alert("Erro ao recuperar assinatura. Tente novamente.");
         }
-    }
 
-    function aplicarEstiloAtivo() {
-        const sino = document.getElementById("notification-bell");
-        if (sino) {
-            sino.style.background = "#3CC9E4";
-            sino.style.boxShadow = "0 0 20px #3CC9E4";
+        function aplicarEstiloAtivo() {
+            const sino = document.getElementById("notification-bell");
+            if (sino) {
+                sino.style.background = "#3CC9E4";
+                sino.style.boxShadow = "0 0 20px #3CC9E4";
+            }
         }
-    }
 
-    // Mantém o estado visual ao carregar a página
-    document.addEventListener("DOMContentLoaded", function () {
-        if (localStorage.getItem('sinoAtivo') === 'sim') {
-            aplicarEstiloAtivo();
-        }
-    });
-</script>
+        // Mantém o estado visual ao carregar a página
+        document.addEventListener("DOMContentLoaded", function () {
+            if (localStorage.getItem('sinoAtivo') === 'sim') {
+                aplicarEstiloAtivo();
+            }
+        });
+    </script>
 
 
     <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
@@ -411,13 +445,13 @@
 
     </script>
 
-<footer>
-     <p>&copy; 2026 KitPC - Todos os direitos reservados</p>
-   <a href="{{ url_for('privacidade') }}">Privacidade</a>
+    <footer>
+        <p>&copy; 2026 KitPC - Todos os direitos reservados</p>
+        <a href="{{ url_for('privacidade') }}">Privacidade</a>
         <a href="{{ url_for('termos') }}">Termos de Uso</a>
         <a href="{{ url_for('cookies') }}">Política de Cookies</a>
         <a href="{{ url_for('contato') }}">Fale Conosco</a>
-  </footer>
+    </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
