@@ -123,6 +123,9 @@ h5 {
     border-left: 5px solid #3CC9E4 !important;
 }
 
+.container, .container-fluid {
+    overflow: hidden; 
+}
 /* Rodapé */
 footer {
     border-top: 2px solid #3CC9E4;

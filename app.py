@@ -1414,7 +1414,7 @@ def fale_conosco():
             return render_template('fale-conosco.html', erro="Ocorreu um erro técnico. Tente novamente mais tarde.")
 
     # Se for GET, apenas mostra a página limpa
-    return render_template('fale-conosco.html')
+    return render_template('contato.html')
 
     
 @app.route("/privacidade")
