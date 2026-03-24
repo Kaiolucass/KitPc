@@ -7,7 +7,7 @@
     <title>KitPc</title>
     <meta name="description"
         content="O KitPC é um Guia prático para quem nunca montou um PC e tem medo de errar, aprenda sobre hardware.Aprenda a montar seu setup do zero com compatibilidade e confiança garantida.">
-    <link rel="icon" href="{{ url_for('static', filename='Imagens/favicon.png') }}">
+    <link rel="icon" href="{{ url_for('static', filename='Imagens/favicon.webp') }}" type="image/webp">
     <meta property="og:title" content="KitPC - O Guia prático para quem nunca montou um PC e tem medo de errar.">
     <meta property="og:description"
         content="aprenda a montar seu setup do zero com compatibilidade e confiança garantida.">
@@ -23,7 +23,7 @@
     <nav class="navbar navbar-expand-lg">
         <div class="container-fluid">
             <div class="d-flex align-items-center">
-                <img src="{{ url_for('static', filename='Imagens/Logo KitPc.png') }}" alt="logo-kitpc"
+                <img src="{{ url_for('static', filename='Imagens/Logo KitPc.webp') }}" alt="logo-kitpc"
                     class="logo-kitpc">
                 <h1 class="h4 mb-0 ms-2 text-light" style="font-family: 'Orbitron', sans-serif;">KitPC</h1>
             </div>
@@ -103,7 +103,7 @@
                         </form>
                         <a href="{{ url_for('login_google') }}" class="btn-google-custom">
                             <div class="google-icon-wrapper">
-                                <img src="{{ url_for('static', filename='Imagens/Logo-google-icon-PNG.png') }}"
+                                <img src="{{ url_for('static', filename='Imagens/Logo-google-icon-PNG.webp') }}"
                                     alt="Google">
                             </div>
                             <span class="google-text">Continuar com Google</span>
@@ -164,7 +164,7 @@
         </div>
         <div class="col-md-6 text-center">
             <div class="image-glow">
-                <img src="{{ destaque.imagem_url or url_for('static', filename='Imagens/pc gamer.png') }}"
+                <img src="{{ destaque.imagem_url or url_for('static', filename='Imagens/pc gamer.webp') }}"
                     alt="Imagem Destaque" class="img-fluid rounded border-neon">
             </div>
         </div>
@@ -179,7 +179,7 @@
         <div class="col-md-4 mb-4">
             <div class="card-blog-menor p-3">
                 <div class="image-glow-sm">
-                    <img src="{{ post.imagem_url or url_for('static', filename='Imagens/pc-padrao.png') }}"
+                    <img src="{{ post.imagem_url or url_for('static', filename='Imagens/pc-padrao.webp') }}"
                         class="img-fluid rounded border-neon-sm" alt="{{ post.titulo }}"
                         style="height: 180px; width: 100%; object-fit: cover;">
                 </div>
@@ -214,7 +214,7 @@
             <a href="{{ url_for('montagem') }}" class="btn btn-outline-info fw-bold btn-lg px-4">START</a>
         </div>
         <div class="col-md-6 text-center">
-            <img src="{{ url_for('static', filename='Imagens/pc gamer.png') }}" alt="Imagem KitPC"
+            <img src="{{ url_for('static', filename='Imagens/pc gamer.webp') }}" alt="Imagem KitPC"
                 class="img-fluid rounded">
         </div>
     </div>
@@ -237,28 +237,28 @@
     <div class="row justify-content-center">
         <div class="col-6 col-sm-6 col-md-3 mb-4 text-center">
             <div class="card-peca">
-                <img src="{{ url_for('static', filename='Imagens/processador.png') }}" alt="Processador"
+                <img src="{{ url_for('static', filename='Imagens/processador.webp') }}" alt="Processador"
                     class="img-fluid mb-2">
             </div>
             <p class="paragrafo2 fw-bold m-0">Processador</p>
         </div>
         <div class="col-6 col-sm-6 col-md-3 mb-4 text-center">
             <div class="card-peca">
-                <img src="{{ url_for('static', filename='Imagens/placa de video.png') }}" alt="Placa de vídeo"
+                <img src="{{ url_for('static', filename='Imagens/placa de video.webp') }}" alt="Placa de vídeo"
                     class="img-fluid mb-2">
             </div>
             <p class="paragrafo2 fw-bold m-0">Placa de vídeo</p>
         </div>
         <div class="col-6 col-sm-6 col-md-3 mb-4 text-center">
             <div class="card-peca">
-                <img src="{{ url_for('static', filename='Imagens/gabinete.png') }}" alt="Gabinete"
+                <img src="{{ url_for('static', filename='Imagens/gabinete.webp') }}" alt="Gabinete"
                     class="img-fluid mb-2">
             </div>
             <p class="paragrafo2 fw-bold m-0">Gabinete</p>
         </div>
         <div class="col-6 col-sm-6 col-md-3 mb-4 text-center">
             <div class="card-peca">
-                <img src="{{ url_for('static', filename='Imagens/placa mae.png') }}" alt="Placa Mãe"
+                <img src="{{ url_for('static', filename='Imagens/placa mae.webp') }}" alt="Placa Mãe"
                     class="img-fluid mb-2">
             </div>
             <p class="paragrafo2 fw-bold m-0">Placa Mãe</p>

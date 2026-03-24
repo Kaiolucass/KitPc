@@ -8,7 +8,7 @@
     <title>{{ post.titulo }} | KitPC</title>
     <meta name="description" content="{{ post.subtitulo }}">
     <link rel="canonical" href="https://kitpc.com.br/blog/{{ post.slug }}">
-    <link rel="icon" href="{{ url_for('static', filename='Imagens/favicon.png') }}">
+    <link rel="icon" href="{{ url_for('static', filename='Imagens/favicon.webp') }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3396569889908907"
@@ -30,7 +30,7 @@
     "name": "KitPC",
     "logo": {
       "@type": "ImageObject",
-      "url": "https://kitpc.com.br/static/Imagens/favicon.png"
+      "url": "https://kitpc.com.br/static/Imagens/favicon.webp"
     }
   },
   "mainEntityOfPage": {
@@ -46,7 +46,7 @@
         <nav class="navbar navbar-expand-lg">
             <div class="container-fluid">
                 <div class="d-flex align-items-center">
-                    <img src="{{ url_for('static', filename='Imagens/Logo KitPc.png') }}" alt="Logo KitPc"
+                    <img src="{{ url_for('static', filename='Imagens/Logo KitPc.webp') }}" alt="Logo KitPc"
                         class="logo-kitpc">
                     <h1 class="h4 mb-0 ms-2 text-light" style="font-family: 'Orbitron', sans-serif;">Blog</h1>
                 </div>
@@ -125,7 +125,7 @@
                             </form>
                             <a href="{{ url_for('login_google') }}" class="btn-google-custom">
                                 <div class="google-icon-wrapper">
-                                    <img src="{{ url_for('static', filename='Imagens/Logo-google-icon-PNG.png') }}"
+                                    <img src="{{ url_for('static', filename='Imagens/Logo-google-icon-PNG.webp') }}"
                                         alt="Google">
                                 </div>
                                 <span class="google-text">Continuar com Google</span>
@@ -192,7 +192,7 @@
 
                     <div class="text-center mb-5">
                         <div class="image-glow">
-                            <img src="{{ post.imagem_url or url_for('static', filename='Imagens/pc gamer.png') }}"
+                            <img src="{{ post.imagem_url or url_for('static', filename='Imagens/pc gamer.webp') }}"
                                 alt="{{ post.titulo }}" class="img-fluid rounded border-neon shadow-lg"
                                 style="max-height: 500px; width: 100%; object-fit: cover; border: 2px solid #3CC9E4;">
                         </div>
@@ -231,7 +231,7 @@
                             <div class="card-blog-menor p-3">
                                 <a href="{{ url_for('exibir_post', slug=sugestao.slug) }}"
                                     style="text-decoration: none; color: inherit;">
-                                    <img src="{{ sugestao.imagem_url or url_for('static', filename='Imagens/pc-padrao.png') }}"
+                                    <img src="{{ sugestao.imagem_url or url_for('static', filename='Imagens/pc-padrao.webp') }}"
                                         class="img-fluid rounded border-neon-sm" alt="{{ sugestao.titulo }}"
                                         style="height: 180px; width: 100%; object-fit: cover;">
                                     <h5 class="mt-2">{{ sugestao.titulo }}</h5>
