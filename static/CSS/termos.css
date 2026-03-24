@@ -124,7 +124,9 @@ h5 {
 }
 
 .container, .container-fluid {
-    overflow: hidden; 
+    padding-right: 15px !important;
+    padding-left: 15px !important;
+    overflow: hidden;
 }
 /* Rodapé */
 footer {

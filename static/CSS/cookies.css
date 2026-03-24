@@ -50,8 +50,11 @@ h5 {
     font-weight: bold;
     margin-top: 15px;
 }
+/* Garante que o container não deixe nada vazar */
 .container, .container-fluid {
-    overflow: hidden; 
+    padding-right: 15px !important;
+    padding-left: 15px !important;
+    overflow: hidden;
 }
 
 /* --- NAVBAR --- */

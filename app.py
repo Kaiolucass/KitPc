@@ -1406,12 +1406,12 @@ def fale_conosco():
             print(f"✅ Nova mensagem de {nome} salva com sucesso!")
             
             # Retorna a página com uma variável de sucesso para mostrar o alerta
-            return render_template('fale-conosco.html', sucesso=True)
+            return render_template('contato.html', sucesso=True)
 
         except Exception as e:
             db.session.rollback()
             print(f"❌ Erro ao salvar mensagem: {e}")
-            return render_template('fale-conosco.html', erro="Ocorreu um erro técnico. Tente novamente mais tarde.")
+            return render_template('contato.html', erro="Ocorreu um erro técnico. Tente novamente mais tarde.")
 
     # Se for GET, apenas mostra a página limpa
     return render_template('contato.html')

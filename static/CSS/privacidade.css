@@ -123,8 +123,11 @@ h5 {
     border-left: 5px solid #3CC9E4 !important;
 }
 
+/* Garante que o container não deixe nada vazar */
 .container, .container-fluid {
-    overflow: hidden; 
+    padding-right: 15px !important;
+    padding-left: 15px !important;
+    overflow: hidden;
 }
 
 /* Rodapé */

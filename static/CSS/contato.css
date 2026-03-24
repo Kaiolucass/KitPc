@@ -78,8 +78,11 @@ h5 {
     filter: invert(54%) sepia(86%) saturate(497%) hue-rotate(163deg) brightness(92%) contrast(89%);
 }
 
+/* Garante que o container não deixe nada vazar */
 .container, .container-fluid {
-    overflow: hidden; 
+    padding-right: 15px !important;
+    padding-left: 15px !important;
+    overflow: hidden;
 }
 
 /* O "Coração" da página: O Box de Conteúdo */
