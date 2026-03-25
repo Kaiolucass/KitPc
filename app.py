@@ -1377,44 +1377,52 @@ def sitemap():
     
     # --- Fale Conosco ---
 
-@app.route('/fale-conosco', methods=['GET', 'POST'])
+@app.route("/fale-conosco", methods=["POST"])
 def fale_conosco():
-    if request.method == 'POST':
-        # 1. Pegar os dados do formulário
-        nome = request.form.get('nome')
-        email = request.form.get('email')
-        assunto = request.form.get('assunto')
-        texto = request.form.get('mensagem')
+    # Pega os dados do formulário HTML (Verifique os 'names' no seu HTML!)
+    nome = request.form.get("nome")
+    email_usuario = request.form.get("email")
+    mensagem_texto = request.form.get("mensagem")
 
-        # 2. Validação simples
-        if not nome or not email or not texto:
-            return render_template('fale-conosco.html', erro="Por favor, preencha todos os campos obrigatórios.")
+    # Se você tiver um campo 'assunto' no HTML, pode pegar também:
+    assunto_form = request.form.get("assunto", "Novo Contato")
 
-        try:
-            # 3. Criar o objeto da mensagem (conforme o modelo que criamos antes)
-            nova_mensagem = MensagemContato(
-                nome=nome,
-                email=email,
-                assunto=assunto,
-                mensagem=texto
-            )
-            
-            # 4. Salvar no Banco de Dados
-            db.session.add(nova_mensagem)
-            db.session.commit()
-            
-            print(f"✅ Nova mensagem de {nome} salva com sucesso!")
-            
-            # Retorna a página com uma variável de sucesso para mostrar o alerta
-            return render_template('contato.html', sucesso=True)
+    if not nome or not email_usuario or not mensagem_texto:
+        flash("Por favor, preencha todos os campos obrigatórios.", "danger")
+        return redirect(url_for('sobre_nos'))
 
-        except Exception as e:
-            db.session.rollback()
-            print(f"❌ Erro ao salvar mensagem: {e}")
-            return render_template('contato.html', erro="Ocorreu um erro técnico. Tente novamente mais tarde.")
+    try:
+        # 1. SALVAR NO BANCO
+        nova_msg = MensagemContato(
+            nome=nome,
+            email=email_usuario,
+            mensagem=mensagem_texto,
+            data_envio=datetime.now()
+        )
+        db.session.add(nova_msg)
+        db.session.commit()
 
-    # Se for GET, apenas mostra a página limpa
-    return render_template('contato.html')
+        # 2. ENVIAR E-MAIL (Vai para o contato@kitpc.com.br do Cloudflare)
+        msg = Message(
+            subject=f"📩 {assunto_form} - de {nome}",
+            sender=("Sistema KitPC", app.config['MAIL_USERNAME']),
+            recipients=['contato@kitpc.com.br'],
+            reply_to=email_usuario,
+            body=f"Nova mensagem recebida no site KitPC!\n\nNome: {nome}\nE-mail: {email_usuario}\n\nMensagem:\n{mensagem_texto}"
+        )
+        
+        # Disparo sem travar o site
+        thread = threading.Thread(target=send_async_email, args=(app._get_current_object(), msg))
+        thread.start()
+
+        flash("✅ Sua mensagem foi enviada com sucesso! Responderemos em breve.", "success")
+        return redirect(url_for('sobre_nos'))
+
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Erro na rota fale-conosco: {e}")
+        flash("❌ Erro técnico ao enviar. Tente novamente mais tarde.", "danger")
+        return redirect(url_for('sobre_nos'))
 
     
 @app.route("/privacidade")
