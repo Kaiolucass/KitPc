@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,39 +10,50 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='CSS/admin.css') }}">
     <link href="https://cdn.jsdelivr.net/npm/quill@2.0.0/dist/quill.snow.css" rel="stylesheet">
-    
+
 </head>
+
 <body class="bg-dark text-white">
 
     <div class="container my-5">
         <div class="row justify-content-center">
             <div class="col-md-11">
-                
+
                 <div class="text-center mb-4">
-                    <h1 class="display-5" style="font-family: 'Orbitron', sans-serif; color: #00f2ff; text-shadow: 0 0 10px #00f2ff;">PAINEL ADM</h1>
+                    <h1 class="display-5"
+                        style="font-family: 'Orbitron', sans-serif; color: #00f2ff; text-shadow: 0 0 10px #00f2ff;">
+                        PAINEL ADM</h1>
                     <p class="text-info">GERENCIAMENTO DE CONTEÚDO CLOUD</p>
                 </div>
 
                 <div class="card shadow" style="background: rgba(15, 15, 15, 0.95); border: 1px solid #00f2ff;">
                     <div class="card-header text-center py-3" style="background: #00f2ff; color: #000;">
                         <h3 class="mb-0 fw-bold">
-                            {% if edit_post %} MODO EDIÇÃO: {{ edit_post.titulo }} {% else %} CONSOLE DE PUBLICAÇÃO {% endif %}
+                            {% if edit_post %} MODO EDIÇÃO: {{ edit_post.titulo }} {% else %} CONSOLE DE PUBLICAÇÃO {%
+                            endif %}
                         </h3>
                     </div>
-                    
+
                     <div class="card-body p-4">
                         <div class="section-post mb-5">
-                            <h4 class="text-info mb-4">{% if edit_post %} <i class="fas fa-edit"></i> ATUALIZAR ARTIGO {% else %} <i class="fas fa-pen-nib"></i> ESCREVER NOVO ARTIGO {% endif %}</h4>
-                            
-                            <form id="postForm" action="{{ url_for('salvar_post', id=edit_post.id if edit_post else None) }}" method="POST" enctype="multipart/form-data">
+                            <h4 class="text-info mb-4">{% if edit_post %} <i class="fas fa-edit"></i> ATUALIZAR ARTIGO
+                                {% else %} <i class="fas fa-pen-nib"></i> ESCREVER NOVO ARTIGO {% endif %}</h4>
+
+                            <form id="postForm"
+                                action="{{ url_for('salvar_post', id=edit_post.id if edit_post else None) }}"
+                                method="POST" enctype="multipart/form-data">
                                 <div class="row">
                                     <div class="col-md-8 mb-3">
                                         <label class="form-label text-info">Título</label>
-                                        <input type="text" name="titulo" class="form-control bg-dark text-white border-secondary" value="{{ edit_post.titulo if edit_post else '' }}" required>
+                                        <input type="text" name="titulo"
+                                            class="form-control bg-dark text-white border-secondary"
+                                            value="{{ edit_post.titulo if edit_post else '' }}" required>
                                     </div>
                                     <div class="col-md-4 mb-3">
                                         <label class="form-label text-info">Resumo</label>
-                                        <input type="text" name="subtitulo" class="form-control bg-dark text-white border-secondary" value="{{ edit_post.subtitulo if edit_post else '' }}">
+                                        <input type="text" name="subtitulo"
+                                            class="form-control bg-dark text-white border-secondary"
+                                            value="{{ edit_post.subtitulo if edit_post else '' }}">
                                     </div>
                                 </div>
 
@@ -50,10 +62,15 @@
                                         <label class="form-label text-info">Capa da Matéria</label>
                                         <div class="drop-zone" id="drop-zone">
                                             <span id="file-name" class="text-secondary">
-                                                {% if edit_post %} <span class="text-info">Imagem atual carregada.</span> Clique para trocar. {% else %} Selecione a imagem principal {% endif %}
+                                                {% if edit_post %} <span class="text-info">Imagem atual
+                                                    carregada.</span> Clique para trocar. {% else %} Selecione a imagem
+                                                principal {% endif %}
                                             </span>
-                                            <input type="file" name="arquivo_imagem" id="file-upload" class="d-none" accept="image/*">
-                                            <img id="preview-img" src="{{ edit_post.imagem_url if edit_post else '#' }}" alt="Preview" class="{{ 'mt-3' if edit_post else 'd-none mt-3' }}" style="max-height: 120px; border-radius: 5px;">
+                                            <input type="file" name="arquivo_imagem" id="file-upload" class="d-none"
+                                                accept="image/*">
+                                            <img id="preview-img" src="{{ edit_post.imagem_url if edit_post else '#' }}"
+                                                alt="Preview" class="{{ 'mt-3' if edit_post else 'd-none mt-3' }}"
+                                                style="max-height: 120px; border-radius: 5px;">
                                         </div>
                                     </div>
                                 </div>
@@ -69,7 +86,8 @@
                                         {% if edit_post %} SALVAR ALTERAÇÕES {% else %} PUBLICAR NO KITPC {% endif %}
                                     </button>
                                     {% if edit_post %}
-                                        <a href="{{ url_for('admin') }}" class="btn btn-outline-secondary mt-2">CANCELAR EDIÇÃO</a>
+                                    <a href="{{ url_for('admin') }}" class="btn btn-outline-secondary mt-2">CANCELAR
+                                        EDIÇÃO</a>
                                     {% endif %}
                                 </div>
                             </form>
@@ -93,19 +111,23 @@
                                         <tr style="opacity: {{ '0.5' if p.arquivado else '1' }};">
                                             <td>{{ p.titulo }}</td>
                                             <td>
-                                                <span class="badge {{ 'bg-secondary' if p.arquivado else 'bg-success' }}">
+                                                <span
+                                                    class="badge {{ 'bg-secondary' if p.arquivado else 'bg-success' }}">
                                                     {{ 'ARQUIVADO' if p.arquivado else 'PÚBLICO' }}
                                                 </span>
                                             </td>
                                             <td class="text-center">
                                                 <div class="d-flex justify-content-center gap-2">
-                                                    <a href="{{ url_for('editar_post', id=p.id) }}" class="btn btn-warning btn-sm">EDITAR</a>
-                                                    <form action="{{ url_for('arquivar_post', id=p.id) }}" method="POST">
+                                                    <a href="{{ url_for('editar_post', id=p.id) }}"
+                                                        class="btn btn-warning btn-sm">EDITAR</a>
+                                                    <form action="{{ url_for('arquivar_post', id=p.id) }}"
+                                                        method="POST">
                                                         <button type="submit" class="btn btn-outline-info btn-sm">
                                                             {{ 'DESARQUIVAR' if p.arquivado else 'ARQUIVAR' }}
                                                         </button>
                                                     </form>
-                                                    <form action="{{ url_for('deletar_post', id=p.id) }}" method="POST" onsubmit="return confirm('Excluir permanentemente?')">
+                                                    <form action="{{ url_for('deletar_post', id=p.id) }}" method="POST"
+                                                        onsubmit="return confirm('Excluir permanentemente?')">
                                                         <button type="submit" class="btn btn-danger btn-sm">X</button>
                                                     </form>
                                                 </div>
@@ -124,20 +146,31 @@
                             <div class="table-responsive">
                                 <table class="table table-dark table-hover border-secondary">
                                     <thead class="table-info text-dark">
-                                        <tr><th>Nome</th><th>E-mail</th><th>Status</th><th class="text-center">Ações</th></tr>
+                                        <tr>
+                                            <th>Nome</th>
+                                            <th>E-mail</th>
+                                            <th>Status</th>
+                                            <th class="text-center">Ações</th>
+                                        </tr>
                                     </thead>
                                     <tbody>
                                         {% for user in usuarios | default([]) %}
                                         <tr>
                                             <td>{{ user.nome }}</td>
                                             <td>{{ user.email }}</td>
-                                            <td><span class="badge {{ 'bg-success' if user.confirmado else 'bg-warning text-dark' }}">{{ 'ATIVO' if user.confirmado else 'PENDENTE' }}</span></td>
+                                            <td><span
+                                                    class="badge {{ 'bg-success' if user.confirmado else 'bg-warning text-dark' }}">{{
+                                                    'ATIVO' if user.confirmado else 'PENDENTE' }}</span></td>
                                             <td class="text-center">
                                                 <div class="d-flex justify-content-center gap-2">
                                                     {% if not user.confirmado %}
-                                                    <form action="{{ url_for('confirmar_usuario_admin', id=user.id) }}" method="POST"><button type="submit" class="btn btn-success btn-sm">ATIVAR</button></form>
+                                                    <form action="{{ url_for('confirmar_usuario_admin', id=user.id) }}"
+                                                        method="POST"><button type="submit"
+                                                            class="btn btn-success btn-sm">ATIVAR</button></form>
                                                     {% endif %}
-                                                    <form action="{{ url_for('deletar_usuario_admin', id=user.id) }}" method="POST"><button type="submit" class="btn btn-outline-danger btn-sm">APAGAR</button></form>
+                                                    <form action="{{ url_for('deletar_usuario_admin', id=user.id) }}"
+                                                        method="POST"><button type="submit"
+                                                            class="btn btn-outline-danger btn-sm">APAGAR</button></form>
                                                 </div>
                                             </td>
                                         </tr>
@@ -153,75 +186,81 @@
         </div>
     </div>
 
-<section class="container mt-5 pt-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="section-title" style="color: #3CC9E4;">MENSAGENS RECEBIDAS</h2>
-        <a href="{{ url_for('admin') }}" class="btn btn-outline-secondary btn-sm">Voltar ao Painel</a>
-    </div>
+    <section class="container mt-5 pt-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="section-title" style="color: #3CC9E4;">MENSAGENS RECEBIDAS</h2>
+            <a href="{{ url_for('admin') }}" class="btn btn-outline-secondary btn-sm">Atualizar Lista</a>
+        </div>
 
-    <div class="card-blog-menor p-3 border-neon">
-        <div class="table-responsive">
-            <table class="table table-dark table-hover align-middle">
-                <thead class="text-info">
-                    <tr>
-                        <th>Data</th>
-                        <th>Nome</th>
-                        <th>Assunto</th>
-                        <th>Mensagem</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for msg in mensagens %}
-                    <tr>
-                        <td class="small">{{ msg.data_envio.strftime('%d/%m/%y %H:%M') }}</td>
-                        <td>
-                            <div class="fw-bold">{{ msg.nome }}</div>
-                            <div class="small text-secondary">{{ msg.email }}</div>
-                        </td>
-                        <td><span class="badge bg-info text-dark">{{ msg.assunto }}</span></td>
-                        <td>
-                            <div class="text-truncate" style="max-width: 300px;" title="{{ msg.mensagem }}">
-                                {{ msg.mensagem }}
-                            </div>
-                        </td>
-                        <td>
-                            <button class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#modalMsg{{ msg.id }}">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                        </td>
-                    </tr>
+        <div class="card-blog-menor p-3 border-neon"
+            style="background: rgba(15, 15, 15, 0.95); border: 1px solid #3CC9E4;">
+            <div class="table-responsive">
+                <table class="table table-dark table-hover align-middle">
+                    <thead class="text-info">
+                        <tr>
+                            <th>Data</th>
+                            <th>Nome</th>
+                            <th>Assunto</th>
+                            <th>Mensagem</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for msg in mensagens %}
+                        <tr>
+                            <td class="small">{{ msg.data_envio.strftime('%d/%m/%y %H:%M') if msg.data_envio else '--'
+                                }}</td>
+                            <td>
+                                <div class="fw-bold">{{ msg.nome }}</div>
+                                <div class="small text-secondary">{{ msg.email }}</div>
+                            </td>
+                            <td><span class="badge bg-info text-dark">{{ msg.assunto }}</span></td>
+                            <td>
+                                <div class="text-truncate" style="max-width: 300px;" title="{{ msg.mensagem }}">
+                                    {{ msg.mensagem }}
+                                </div>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-info" data-bs-toggle="modal"
+                                    data-bs-target="#modalMsg{{ msg.id }}">
+                                    <i class="fas fa-eye"></i> Ver
+                                </button>
+                            </td>
+                        </tr>
 
-                    <div class="modal fade" id="modalMsg{{ msg.id }}" tabindex="-1" aria-hidden="true">
-                        <div class="modal-dialog modal-dialog-centered">
-                            <div class="modal-content bg-dark border-info">
-                                <div class="modal-header border-info">
-                                    <h5 class="modal-title text-info">{{ msg.assunto }}</h5>
-                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <p class="text-secondary small">De: <strong>{{ msg.nome }}</strong> ({{ msg.email }})</p>
-                                    <hr class="border-secondary">
-                                    <p style="white-space: pre-wrap;">{{ msg.mensagem }}</p>
-                                </div>
-                                <div class="modal-footer border-info">
-                                    <a href="mailto:{{ msg.email }}" class="btn btn-info w-100 fw-bold">RESPONDER VIA E-MAIL</a>
+                        <div class="modal fade" id="modalMsg{{ msg.id }}" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content bg-dark border-info">
+                                    <div class="modal-header border-info">
+                                        <h5 class="modal-title text-info">{{ msg.assunto }}</h5>
+                                        <button type="button" class="btn-close btn-close-white"
+                                            data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p class="text-secondary small">De: <strong>{{ msg.nome }}</strong> ({{
+                                            msg.email }})</p>
+                                        <hr class="border-secondary">
+                                        <p style="white-space: pre-wrap;">{{ msg.mensagem }}</p>
+                                    </div>
+                                    <div class="modal-footer border-info">
+                                        <a href="mailto:{{ msg.email }}" class="btn btn-info w-100 fw-bold">RESPONDER
+                                            VIA E-MAIL</a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    {% else %}
-                    <tr>
-                        <td colspan="5" class="text-center text-secondary py-4">Nenhuma mensagem recebida ainda. 📭</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center text-secondary py-4">Nenhuma mensagem recebida ainda. 📭
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
-    </div>
-</section>
-{% endblock %}
-    
+    </section>
+
     <div class="d-grid gap-2 mt-5 p-5">
         <a href="/" class="btn btn-outline-secondary">SAIR E VOLTAR PARA A HOME</a>
     </div>
@@ -240,7 +279,7 @@
                     ['bold', 'italic', 'underline'],
                     ['link', 'image', 'video'],
                     ['table'], // Botão de tabela adicionado aqui
-                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                    [{ 'list': 'ordered' }, { 'list': 'bullet' }],
                     ['clean']
                 ]
             },
@@ -249,32 +288,32 @@
 
         // CARREGA CONTEÚDO NA EDIÇÃO COM SEGURANÇA
         {% if edit_post and edit_post.conteudo %}
-            quill.root.innerHTML = {{ edit_post.conteudo | tojson | safe }};
+        quill.root.innerHTML = {{ edit_post.conteudo | tojson | safe }};
         {% endif %}
 
         // UPLOAD DE IMAGEM NO CORPO
         var toolbar = quill.getModule('toolbar');
-        toolbar.addHandler('image', function() {
+        toolbar.addHandler('image', function () {
             var input = document.createElement('input');
             input.setAttribute('type', 'file');
             input.setAttribute('accept', 'image/*');
             input.click();
-            input.onchange = function() {
+            input.onchange = function () {
                 var file = input.files[0];
                 var formData = new FormData();
                 formData.append('image', file);
                 fetch('/admin/upload-imagem-corpo', { method: 'POST', body: formData })
-                .then(r => r.json()).then(res => {
-                    if (res.url) {
-                        var range = quill.getSelection();
-                        quill.insertEmbed(range.index, 'image', res.url);
-                    }
-                });
+                    .then(r => r.json()).then(res => {
+                        if (res.url) {
+                            var range = quill.getSelection();
+                            quill.insertEmbed(range.index, 'image', res.url);
+                        }
+                    });
             };
         });
 
         // Envia o HTML do Quill para o input hidden antes de postar
-        document.getElementById('postForm').onsubmit = function() {
+        document.getElementById('postForm').onsubmit = function () {
             document.getElementById('conteudo_hidden').value = quill.root.innerHTML;
         };
 
@@ -283,17 +322,18 @@
         const previewImg = document.getElementById('preview-img');
         const fileName = document.getElementById('file-name');
         document.getElementById('drop-zone').onclick = () => fileInput.click();
-        fileInput.onchange = function() {
+        fileInput.onchange = function () {
             if (this.files && this.files[0]) {
                 const reader = new FileReader();
                 fileName.innerText = "Novo arquivo: " + this.files[0].name;
-                reader.onload = e => { 
-                    previewImg.src = e.target.result; 
-                    previewImg.classList.remove('d-none'); 
+                reader.onload = e => {
+                    previewImg.src = e.target.result;
+                    previewImg.classList.remove('d-none');
                 }
                 reader.readAsDataURL(this.files[0]);
             }
         };
     </script>
 </body>
+
 </html>
