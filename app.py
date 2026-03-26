@@ -637,7 +637,7 @@ def deletar_usuario_admin(id):
         
     return redirect(url_for('admin'))
 
-@app.route('/admin/mensagens')
+@app.route('/admin')
 def ver_mensagens():
     if not session.get('is_admin'):
         return redirect(url_for('home'))
