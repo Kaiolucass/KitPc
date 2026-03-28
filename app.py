@@ -493,12 +493,19 @@ def admin():
     if not session.get('is_admin'):
         return redirect(url_for('login'))
     
-    # Busca usuários e posts para alimentar as tabelas do admin.html
+    # 1. Busca usuários e posts
     usuarios_lista = Usuario.query.all()
     posts_lista = Post.query.order_by(Post.data_postagem.desc()).all()
     
-    # Importante: enviamos edit_post=None para o formulário saber que é uma NOVA postagem
-    return render_template("admin.html", usuarios=usuarios_lista, posts=posts_lista, edit_post=None)
+    # 2. BUSCA AS MENSAGENS (O que estava faltando aqui!)
+    mensagens_lista = MensagemContato.query.order_by(MensagemContato.data_envio.desc()).all()
+    
+    # 3. Envia TUDO para o admin.html
+    return render_template("admin.html", 
+                           usuarios=usuarios_lista, 
+                           posts=posts_lista, 
+                           mensagens=mensagens_lista, # Variável que o HTML espera
+                           edit_post=None)
 
 @app.route("/admin/editar-post/<int:id>")
 def editar_post(id):
@@ -637,13 +644,25 @@ def deletar_usuario_admin(id):
         
     return redirect(url_for('admin'))
 
-@app.route('/admin')
-def ver_mensagens():
+# ROTA PARA DELETAR MENSAGEM DE CONTATO (ADICIONADA PARA COMPLETAR A TABELA DE MENSAGENS NO ADMIN)
+
+@app.route("/admin/deletar-mensagem/<int:id>", methods=["POST"])
+def deletar_mensagem(id):
     if not session.get('is_admin'):
-        return redirect(url_for('home'))
+        return redirect(url_for('login'))
         
-    mensagens = MensagemContato.query.order_by(MensagemContato.data_envio.desc()).all()
-    return render_template('admin_mensagens.html', mensagens=mensagens)
+    mensagem = MensagemContato.query.get_or_404(id)
+    
+    try:
+        db.session.delete(mensagem)
+        db.session.commit()
+        flash("Mensagem removida com sucesso!")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Erro ao deletar mensagem: {e}")
+        
+    return redirect(url_for('admin'))
+
 # ---  ARQUIVOS DO BLOG ---
 
 @app.route("/arquivo")
