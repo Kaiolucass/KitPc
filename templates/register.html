@@ -23,6 +23,7 @@
     {% endwith %}
 
     <form method="POST" action="/register">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <input type="text" name="nome" placeholder="Nome Completo" required>
 
       <input type="email" name="email" placeholder="E-mail" required>

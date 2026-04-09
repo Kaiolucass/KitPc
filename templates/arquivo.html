@@ -75,6 +75,7 @@
         <div class="tab-content">
           <div class="tab-pane fade show active" id="login">
             <form action="{{ url_for('login') }}" method="POST">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
               <div class="mb-3">
                 <label class="form-label text-info">Email</label>
                 <input type="email" name="email" class="form-control bg-transparent text-white border-info" required>
@@ -166,7 +167,7 @@
       </div>
 
       <div class="mt-5 text-center text-secondary small border-top border-secondary pt-4">
-        Total de matérias no banco KitPC: <span class="text-info fw-bold">{{ posts|length }}</span>
+        Total de matérias no KitPC: <span class="text-info fw-bold">{{ posts|length }}</span>
       </div>
     </div>
   </div>

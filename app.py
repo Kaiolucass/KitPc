@@ -26,7 +26,9 @@ import threading
 from fpdf import FPDF
 from flask import send_file, request, jsonify
 import io
-import os
+from flask_talisman import Talisman
+from flask_wtf.csrf import CSRFProtect
+
 
 # 1. Configuração de Logging
 logging.basicConfig(
@@ -54,6 +56,26 @@ def inject_firebase():
             "vapidKey": os.getenv("FIREBASE_VAPID_KEY")
         }
     }
+# Ativa a armadura de cabeçalhos (Talisman)
+Talisman(
+    app,
+    force_https=True,
+    content_security_policy={
+        'default-src': '\'self\'',
+        'script-src': ['\'self\'', 'https://cdn.jsdelivr.net', 'https://cdnjs.cloudflare.com', 'https://code.jquery.com'],
+        'style-src': ['\'self\'', 'https://cdn.jsdelivr.net', 'https://cdnjs.cloudflare.com', 'https://fonts.googleapis.com'],
+        'font-src': ['\'self\'', 'https://fonts.gstatic.com', 'https://cdnjs.cloudflare.com'],
+        'img-src': ['\'self\'', 'data:', 'https://*'], # Permite carregar imagens de outros sites/firebase
+        'object-src': '\'none\'', # Bloqueia plugins antigos (ajuda a diminuir alertas)
+    },
+    session_cookie_http_only=True,
+    x_content_type_options=True,
+    x_xss_protection=True
+)
+
+# Ativa a proteção contra sequestro de formulários (SeaSurf)
+csrf = CSRFProtect(app)
+
 # IA do gemini para ajudar no montador
 import google.generativeai as genai
 
@@ -660,6 +682,22 @@ def deletar_mensagem(id):
     except Exception as e:
         db.session.rollback()
         flash(f"Erro ao deletar mensagem: {e}")
+        
+    return redirect(url_for('admin'))
+
+@app.route('/admin/limpar-todas-mensagens', methods=['POST'])
+def limpar_todas_mensagens():
+    if not session.get('is_admin'):
+        return redirect(url_for('login'))
+        
+    try:
+        # Apaga todos os registros da tabela MensagemContato de uma vez
+        MensagemContato.query.delete()
+        db.session.commit()
+        flash("Todas as mensagens foram removidas com sucesso!", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Erro ao limpar mensagens: {e}", "danger")
         
     return redirect(url_for('admin'))
 

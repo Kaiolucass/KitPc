@@ -87,6 +87,7 @@
                     <div class="tab-content" id="authTabsContent">
                         <div class="tab-pane fade show active" id="login" role="tabpanel">
                             <form action="{{ url_for('login') }}" method="POST">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                 <div class="mb-3">
                                     <label class="form-label text-info">Email</label>
                                     <input type="email" name="email"
@@ -109,6 +110,7 @@
                         </div>
                         <div class="tab-pane fade" id="register" role="tabpanel">
                             <form action="{{ url_for('register') }}" method="POST">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                 <div class="mb-3">
                                     <label class="form-label" style="color: #9216FD;">Nome Completo</label>
                                     <input type="text" name="nome" class="form-control bg-transparent text-white"

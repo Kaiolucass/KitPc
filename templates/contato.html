@@ -94,6 +94,7 @@
 
             <div class="col-md-6 ps-md-4 mt-4 mt-md-0">
                 <form action="{{ url_for('fale_conosco') }}" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <div class="mb-3">
                         <label class="form-label text-info">Seu Nome</label>
                         <input type="text" name="nome" class="form-control bg-transparent text-white border-secondary"

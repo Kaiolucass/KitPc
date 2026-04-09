@@ -89,6 +89,7 @@
                 <div class="tab-content" id="authTabsContent">
                     <div class="tab-pane fade show active" id="login" role="tabpanel">
                         <form action="{{ url_for('login') }}" method="POST">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <div class="mb-3">
                                 <label class="form-label text-info">Email</label>
                                 <input type="email" name="email"
@@ -111,6 +112,7 @@
                     </div>
                     <div class="tab-pane fade" id="register" role="tabpanel">
                         <form action="{{ url_for('register') }}" method="POST">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <div class="mb-3">
                                 <label class="form-label" style="color: #9216FD;">Nome Completo</label>
                                 <input type="text" name="nome" class="form-control bg-transparent text-white"
@@ -154,6 +156,7 @@
                     {% if session['is_admin'] %}
                     <form action="{{ url_for('deletar_post', id=destaque.id) }}" method="POST"
                         onsubmit="return confirm('Tem certeza que deseja apagar o post principal?')">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <button type="submit" class="btn btn-danger btn-lg px-3">
                             <i class="fas fa-trash-alt"></i>
                         </button>
@@ -191,6 +194,7 @@
                         <a href="/blog/{{ post.slug }}" class="btn btn-sm btn-outline-info fw-bold">LER MAIS</a>
                         {% if session['is_admin'] %}
                         <form action="{{ url_for('deletar_post', id=post.id) }}" method="POST">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <button type="submit" class="btn btn-sm btn-outline-danger">
                                 <i class="fas fa-trash"></i>
                             </button>

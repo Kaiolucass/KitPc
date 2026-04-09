@@ -111,6 +111,7 @@
                     <div class="tab-content" id="authTabsContent">
                         <div class="tab-pane fade show active" id="login" role="tabpanel">
                             <form action="{{ url_for('login') }}" method="POST">
+                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                 <div class="mb-3">
                                     <label class="form-label text-info">Email</label>
                                     <input type="email" name="email"
@@ -134,6 +135,7 @@
                         </div>
                         <div class="tab-pane fade" id="register" role="tabpanel">
                             <form action="{{ url_for('register') }}" method="POST">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                 <div class="mb-3">
                                     <label class="form-label" style="color: #9216FD;">Nome Completo</label>
                                     <input type="text" name="nome" class="form-control bg-transparent text-white"
@@ -285,6 +287,7 @@
                         {% if session.get('usuario_id') %}
                         <h4 class="text-light h5 mb-3">Deixe sua opinião:</h4>
                         <form action="{{ url_for('comentar', post_id=post.id) }}" method="POST">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <textarea name="conteudo_comentario" rows="3"
                                 class="form-control bg-dark text-white border-info"
                                 placeholder="O que você achou dessa matéria?" required style="resize: none;"></textarea>

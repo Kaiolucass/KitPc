@@ -43,6 +43,7 @@
                             <form id="postForm"
                                 action="{{ url_for('salvar_post', id=edit_post.id if edit_post else None) }}"
                                 method="POST" enctype="multipart/form-data">
+                                <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
                                 <div class="row">
                                     <div class="col-md-8 mb-3">
                                         <label class="form-label text-info">Título</label>
@@ -123,12 +124,14 @@
                                                         class="btn btn-warning btn-sm">EDITAR</a>
                                                     <form action="{{ url_for('arquivar_post', id=p.id) }}"
                                                         method="POST">
+                                                        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
                                                         <button type="submit" class="btn btn-outline-info btn-sm">
                                                             {{ 'DESARQUIVAR' if p.arquivado else 'ARQUIVAR' }}
                                                         </button>
                                                     </form>
                                                     <form action="{{ url_for('deletar_post', id=p.id) }}" method="POST"
                                                         onsubmit="return confirm('Excluir permanentemente?')">
+                                                        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
                                                         <button type="submit" class="btn btn-danger btn-sm">X</button>
                                                     </form>
                                                 </div>
@@ -168,10 +171,12 @@
                                                     <form action="{{ url_for('confirmar_usuario_admin', id=user.id) }}"
                                                         method="POST"><button type="submit"
                                                             class="btn btn-success btn-sm">ATIVAR</button></form>
+                                                            <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
                                                     {% endif %}
                                                     <form action="{{ url_for('deletar_usuario_admin', id=user.id) }}"
                                                         method="POST"><button type="submit"
                                                             class="btn btn-outline-danger btn-sm">APAGAR</button></form>
+                                                            <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
                                                 </div>
                                             </td>
                                         </tr>
@@ -186,6 +191,18 @@
             </div>
         </div>
     </div>
+
+<div class="d-flex justify-content-end mb-3">
+    <form action="{{ url_for('limpar_mensagens') }}" method="POST" 
+          onsubmit="return confirm('⚠️ ALERTA: Você está prestes a apagar TODAS as mensagens do banco de dados. Deseja continuar?')">
+        
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+        
+        <button type="submit" class="btn btn-danger shadow-sm">
+            <i class="fas fa-eraser"></i> LIMPAR SPAM (APAGAR TUDO)
+        </button>
+    </form>
+</div>
 
     <section class="container mt-5 pt-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
@@ -231,8 +248,9 @@
 
                                     <form action="{{ url_for('deletar_mensagem', id=msg.id) }}" method="POST"
                                         onsubmit="return confirm('Deseja apagar esta mensagem?')">
+                                        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
                                         <button type="submit" class="btn btn-sm btn-outline-danger">
-                                          <i class="fa-solid fa-trash"></i>
+                                            <i class="fa-solid fa-trash"></i>
                                         </button>
                                     </form>
                                 </div>
@@ -260,6 +278,9 @@
 
                                         <form action="{{ url_for('deletar_mensagem', id=msg.id) }}" method="POST"
                                             onsubmit="return confirm('Tem certeza que deseja excluir esta mensagem?')">
+
+                                           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
                                             <button type="submit" class="btn btn-danger">
                                                 <i class="fas fa-trash-alt"></i> APAGAR
                                             </button>
