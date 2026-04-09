@@ -193,7 +193,7 @@
     </div>
 
 <div class="d-flex justify-content-end mb-3">
-    <form action="{{ url_for('limpar_mensagens') }}" method="POST" 
+    <form action="{{ url_for('limpar-todas-mensagens') }}" method="POST" 
           onsubmit="return confirm('⚠️ ALERTA: Você está prestes a apagar TODAS as mensagens do banco de dados. Deseja continuar?')">
         
         <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">

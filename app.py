@@ -62,15 +62,34 @@ Talisman(
     force_https=True,
     content_security_policy={
         'default-src': '\'self\'',
-        'script-src': ['\'self\'', 'https://cdn.jsdelivr.net', 'https://cdnjs.cloudflare.com', 'https://code.jquery.com'],
-        'style-src': ['\'self\'', 'https://cdn.jsdelivr.net', 'https://cdnjs.cloudflare.com', 'https://fonts.googleapis.com'],
+        'script-src': [
+            '\'self\'',
+            '\'unsafe-inline\'', # Libera scripts dentro do HTML (necessário para o sino e firebase)
+            'https://cdn.jsdelivr.net',
+            'https://cdnjs.cloudflare.com',
+            'https://code.jquery.com',
+            'https://pagead2.googlesyndication.com', # Google Ads
+            'https://www.gstatic.com', # Firebase
+            'https://www.googletagmanager.com',
+            'https://vlibras.gov.br' # VLibras
+        ],
+        'style-src': [
+            '\'self\'',
+            '\'unsafe-inline\'', # Libera style="color: ..." que você usa muito
+            'https://cdn.jsdelivr.net',
+            'https://cdnjs.cloudflare.com',
+            'https://fonts.googleapis.com'
+        ],
+        'img-src': ['\'self\'', 'data:', 'https://*', 'https://pagead2.googlesyndication.com'],
         'font-src': ['\'self\'', 'https://fonts.gstatic.com', 'https://cdnjs.cloudflare.com'],
-        'img-src': ['\'self\'', 'data:', 'https://*'], # Permite carregar imagens de outros sites/firebase
-        'object-src': '\'none\'', # Bloqueia plugins antigos (ajuda a diminuir alertas)
-    },
-    session_cookie_http_only=True,
-    x_content_type_options=True,
-    x_xss_protection=True
+        'connect-src': [
+            '\'self\'', 
+            'https://fcmregistrations.googleapis.com', # Notificações Firebase
+            'https://firebaseinstallations.googleapis.com',
+            'https://*.firebaseio.com'
+        ],
+        'frame-src': ['\'self\'', 'https://googleads.g.doubleclick.net', 'https://www.google.com'],
+    }
 )
 
 # Ativa a proteção contra sequestro de formulários (SeaSurf)
