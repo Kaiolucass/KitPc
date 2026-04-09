@@ -192,23 +192,23 @@
         </div>
     </div>
 
-<div class="d-flex justify-content-end mb-3">
-    <form action="{{ url_for('limpar_todas_mensagens') }}" method="POST" 
-          onsubmit="return confirm('⚠️ ALERTA: Você está prestes a apagar TODAS as mensagens do banco de dados. Deseja continuar?')">
-        
-        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
-        
-        <button type="submit" class="btn btn-danger shadow-sm">
-            <i class="fas fa-eraser"></i> LIMPAR SPAM (APAGAR TUDO)
-        </button>
-    </form>
-</div>
 
-    <section class="container mt-5 pt-5">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="section-title" style="color: #3CC9E4;">MENSAGENS RECEBIDAS</h2>
+<section class="container mt-5 pt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="section-title" style="color: #3CC9E4; margin-bottom: 0;">MENSAGENS RECEBIDAS</h2>
+        
+        <div class="d-flex gap-2">
+            <form action="{{ url_for('limpar_todas_mensagens') }}" method="POST" 
+                  onsubmit="return confirm('⚠️ ALERTA: Você está prestes a apagar TODAS as mensagens. Deseja continuar?')">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-danger btn-sm shadow-sm">
+                    <i class="fas fa-eraser"></i> LIMPAR SPAM
+                </button>
+            </form>
+
             <a href="{{ url_for('admin') }}" class="btn btn-outline-secondary btn-sm">Atualizar Lista</a>
         </div>
+    </div>
 
         <div class="card-blog-menor p-3 border-neon"
             style="background: rgba(15, 15, 15, 0.95); border: 1px solid #3CC9E4;">
