@@ -59,18 +59,18 @@ def inject_firebase():
 # Ativa a armadura de cabeçalhos (Talisman)
 Talisman(
     app,
-    force_https=True,
+    force_https=is_prod,
     content_security_policy={
         'default-src': '\'self\'',
         'script-src': [
             '\'self\'',
             '\'unsafe-inline\'',
+            '\'unsafe-eval\'', # ALGUNS EDITORES PRECISAM DISSO
             'https://cdn.jsdelivr.net',
             'https://cdnjs.cloudflare.com',
             'https://code.jquery.com',
             'https://pagead2.googlesyndication.com',
             'https://www.gstatic.com',
-            'https://www.googletagmanager.com',
             'https://vlibras.gov.br'
         ],
         'style-src': [
@@ -82,9 +82,10 @@ Talisman(
         ],
         'img-src': [
             '\'self\'', 
-            'data:', 
-            'https://*', # Permite imagens de qualquer site HTTPS
-            'https://res.cloudinary.com' # LIBERAÇÃO ESPECÍFICA DO CLOUDINARY
+            'data:',  # PERMITE IMAGENS EM BASE64
+            'blob:',  # PERMITE PRÉVIAS DE EDITORES (BLOB)
+            'https://*', 
+            'https://res.cloudinary.com'
         ],
         'font-src': ['\'self\'', 'https://fonts.gstatic.com', 'https://cdnjs.cloudflare.com'],
         'connect-src': [
