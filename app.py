@@ -60,10 +60,10 @@ is_prod = 'RENDER' in os.environ
 # Ativa a armadura de cabeçalhos (Talisman)
 Talisman(
     app,
-    force_https=is_prod, # Só força HTTPS se estiver no ar (evita erro no localhost)
-    content_security_policy=None, # Desativa o bloqueio chato que quebra as imagens
+    force_https=is_prod,
+    content_security_policy=None,  # Mantemos desativado para suas imagens funcionarem
     session_cookie_secure=True,
-    session_cookie_httponly=True
+    session_cookie_http_only=True  # CORRIGIDO: adicionado o underline aqui
 )
 
 # Ativa a proteção contra sequestro de formulários (SeaSurf)
