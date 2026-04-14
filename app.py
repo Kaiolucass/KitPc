@@ -59,7 +59,7 @@ def inject_firebase():
 # Ativa a armadura de cabeçalhos (Talisman)
 Talisman(
     app,
-    force_https=is_prod,
+    force_https=True,
     content_security_policy={
         'default-src': '\'self\'',
         'script-src': [
