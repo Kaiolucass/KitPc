@@ -602,13 +602,18 @@ def arquivar_post(id):
 @app.route("/admin/upload-imagem-corpo", methods=["POST"])
 def upload_imagem_corpo():
     if not session.get('is_admin'):
-        return jsonify({"error": "Acesso negado"}), 403
+        return {"error": "Não autorizado"}, 403
     
-    file = request.files.get('image')
+    file = request.files.get('image') # O nome aqui deve ser 'image' igual no JS
     if file:
-        upload_result = cloudinary.uploader.upload(file, folder="kitpc_corpo_posts")
-        return jsonify({"url": upload_result.get('secure_url')})
-    return jsonify({"error": "Falha no upload"}), 400
+        try:
+            upload_result = cloudinary.uploader.upload(file, folder="corpo_posts")
+            return {"url": upload_result.get("secure_url")}
+        except Exception as e:
+            return {"error": str(e)}, 500
+    return {"error": "Nenhum arquivo enviado"}, 400
+
+
 
 @app.route("/admin/deletar-post/<int:id>", methods=["POST"])
 def deletar_post(id):
