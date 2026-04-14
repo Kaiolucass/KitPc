@@ -56,47 +56,14 @@ def inject_firebase():
             "vapidKey": os.getenv("FIREBASE_VAPID_KEY")
         }
     }
+is_prod = 'RENDER' in os.environ
 # Ativa a armadura de cabeçalhos (Talisman)
 Talisman(
     app,
-    force_https=True,
-    content_security_policy={
-        'default-src': '\'self\'',
-        'script-src': [
-            '\'self\'',
-            '\'unsafe-inline\'',
-            '\'unsafe-eval\'', # ALGUNS EDITORES PRECISAM DISSO
-            'https://cdn.jsdelivr.net',
-            'https://cdnjs.cloudflare.com',
-            'https://code.jquery.com',
-            'https://pagead2.googlesyndication.com',
-            'https://www.gstatic.com',
-            'https://vlibras.gov.br'
-        ],
-        'style-src': [
-            '\'self\'',
-            '\'unsafe-inline\'', 
-            'https://cdn.jsdelivr.net',
-            'https://cdnjs.cloudflare.com',
-            'https://fonts.googleapis.com'
-        ],
-        'img-src': [
-            '\'self\'', 
-            'data:',  # PERMITE IMAGENS EM BASE64
-            'blob:',  # PERMITE PRÉVIAS DE EDITORES (BLOB)
-            'https://*', 
-            'https://res.cloudinary.com'
-        ],
-        'font-src': ['\'self\'', 'https://fonts.gstatic.com', 'https://cdnjs.cloudflare.com'],
-        'connect-src': [
-            '\'self\'', 
-            'https://fcmregistrations.googleapis.com',
-            'https://firebaseinstallations.googleapis.com',
-            'https://*.firebaseio.com',
-            'https://res.cloudinary.com' # Importante caso você use upload via JS
-        ],
-        'frame-src': ['\'self\'', 'https://googleads.g.doubleclick.net', 'https://www.google.com'],
-    }
+    force_https=is_prod, # Só força HTTPS se estiver no ar (evita erro no localhost)
+    content_security_policy=None, # Desativa o bloqueio chato que quebra as imagens
+    session_cookie_secure=True,
+    session_cookie_httponly=True
 )
 
 # Ativa a proteção contra sequestro de formulários (SeaSurf)
