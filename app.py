@@ -59,34 +59,40 @@ def inject_firebase():
 # Ativa a armadura de cabeçalhos (Talisman)
 Talisman(
     app,
-    force_https=True,
+    force_https=is_prod,
     content_security_policy={
         'default-src': '\'self\'',
         'script-src': [
             '\'self\'',
-            '\'unsafe-inline\'', # Libera scripts dentro do HTML (necessário para o sino e firebase)
+            '\'unsafe-inline\'',
             'https://cdn.jsdelivr.net',
             'https://cdnjs.cloudflare.com',
             'https://code.jquery.com',
-            'https://pagead2.googlesyndication.com', # Google Ads
-            'https://www.gstatic.com', # Firebase
+            'https://pagead2.googlesyndication.com',
+            'https://www.gstatic.com',
             'https://www.googletagmanager.com',
-            'https://vlibras.gov.br' # VLibras
+            'https://vlibras.gov.br'
         ],
         'style-src': [
             '\'self\'',
-            '\'unsafe-inline\'', # Libera style="color: ..." que você usa muito
+            '\'unsafe-inline\'', 
             'https://cdn.jsdelivr.net',
             'https://cdnjs.cloudflare.com',
             'https://fonts.googleapis.com'
         ],
-        'img-src': ['\'self\'', 'data:', 'https://*', 'https://pagead2.googlesyndication.com'],
+        'img-src': [
+            '\'self\'', 
+            'data:', 
+            'https://*', # Permite imagens de qualquer site HTTPS
+            'https://res.cloudinary.com' # LIBERAÇÃO ESPECÍFICA DO CLOUDINARY
+        ],
         'font-src': ['\'self\'', 'https://fonts.gstatic.com', 'https://cdnjs.cloudflare.com'],
         'connect-src': [
             '\'self\'', 
-            'https://fcmregistrations.googleapis.com', # Notificações Firebase
+            'https://fcmregistrations.googleapis.com',
             'https://firebaseinstallations.googleapis.com',
-            'https://*.firebaseio.com'
+            'https://*.firebaseio.com',
+            'https://res.cloudinary.com' # Importante caso você use upload via JS
         ],
         'frame-src': ['\'self\'', 'https://googleads.g.doubleclick.net', 'https://www.google.com'],
     }
