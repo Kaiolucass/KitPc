@@ -8,44 +8,73 @@
     <title>{{ post.titulo }} | KitPC</title>
     <meta name="description" content="{{ post.subtitulo }}">
     <link rel="canonical" href="https://kitpc.com.br/blog/{{ post.slug }}">
+
+    <!-- Open Graph (WhatsApp, Facebook, Discord) -->
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="{{ post.titulo }}">
+    <meta property="og:description" content="{{ post.subtitulo }}">
+    <meta property="og:url" content="https://kitpc.com.br/blog/{{ post.slug }}">
+    <meta property="og:image" content="{{ post.imagem_url }}">
+    <meta property="og:site_name" content="KitPC">
+    <meta property="og:locale" content="pt_BR">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ post.titulo }}">
+    <meta name="twitter:description" content="{{ post.subtitulo }}">
+    <meta name="twitter:image" content="{{ post.imagem_url }}">
+
     <link rel="icon" href="{{ url_for('static', filename='Imagens/favicon.ico') }}">
+
+    <!-- CSS crítico primeiro -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/blog.css') }}">
+
+    <!-- Fonte com display=swap (não bloqueia renderização) -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
+
+    <!-- Google Ads -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3396569889908907"
         crossorigin="anonymous"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/blog.css') }}">
+
+    <!-- Schema.org BlogPosting — com datePublished e imagem adicionados -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "BlogPosting",
-  "headline": "{{ post.titulo }}",
-  "description": "{{ post.subtitulo }}",
-  "author": {
-    "@type": "Person",
-    "name": "Equipe KitPC" 
-  },
-  "publisher": {
-    "@type": "Organization",
-    "name": "KitPC",
-    "logo": {
-      "@type": "ImageObject",
-      "url": "https://kitpc.com.br/static/Imagens/favicon.ico"
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "{{ post.titulo }}",
+      "description": "{{ post.subtitulo }}",
+      "image": "{{ post.imagem_url }}",
+      "datePublished": "{{ post.data_postagem.strftime('%Y-%m-%d') }}",
+      "dateModified": "{{ post.data_postagem.strftime('%Y-%m-%d') }}",
+      "author": {
+        "@type": "Person",
+        "name": "Kaio Lucas"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "KitPC",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://kitpc.com.br/static/Imagens/Logo KitPc.webp"
+        }
+      },
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://kitpc.com.br/blog/{{ post.slug }}"
+      }
     }
-  },
-  "mainEntityOfPage": {
-    "@type": "WebPage",
-    "@id": "https://kitpc.com.br/blog/{{ post.slug }}"
-  }
-}
-</script>
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-D5JVX6TY9Y"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-D5JVX6TY9Y');
-</script>
+    </script>
+
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-D5JVX6TY9Y"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-D5JVX6TY9Y');
+    </script>
 </head>
 
 <body>
@@ -66,6 +95,7 @@
                     <ul class="navbar-nav ms-auto align-items-center">
                         <li class="nav-item"><a class="nav-link" href="{{ url_for('home') }}">Início</a></li>
                         <li class="nav-item"><a class="nav-link" href="{{ url_for('montagem') }}">Montagem</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('arquivo') }}">Blog</a></li>
                         <li class="nav-item"><a class="nav-link" href="{{ url_for('educacao') }}">Educação</a></li>
                         <li class="nav-item"><a class="nav-link" href="{{ url_for('sobre_nos') }}">Sobre Nós</a></li>
 

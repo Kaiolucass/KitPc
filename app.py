@@ -555,7 +555,11 @@ def salvar_post(id=None):
 
         file = request.files.get('arquivo_imagem') 
         if file and file.filename != '':
-            upload_result = cloudinary.uploader.upload(file, folder="kitpc_blog")
+            upload_result = cloudinary.uploader.upload(file, folder="kitpc_blog",
+  transformation=[
+    {"width": 900, "crop": "limit"},
+    {"fetch_format": "auto", "quality": "auto"}
+  ])
             post.imagem_url = upload_result.get('secure_url')
 
         # Gerar Slug
@@ -1413,7 +1417,7 @@ def sitemap():
         posts = Post.query.filter_by(arquivado=False).all() 
         for post in posts:
             # Garanta que o caminho aqui seja exatamente como o da sua rota de post
-            url = f"https://kitpc.com.br/post/{post.slug}" # ou /blog/ dependendo da sua rota
+            url = f"https://kitpc.com.br/blog/{post.slug}" # ou /blog/ dependendo da sua rota
             pages.append([url, now])
 
         # Remove duplicatas se houver
