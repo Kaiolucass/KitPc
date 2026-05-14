@@ -5,65 +5,83 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Blog - KitPc</title>
+
+  <!-- SEO básico da página de arquivo -->
+  <meta name="description" content="Todos os artigos do KitPC sobre hardware, montagem de PC, diagnóstico e temperatura. Guias completos para iniciantes e avançados.">
+  <link rel="canonical" href="https://kitpc.com.br/arquivo">
+
   <link rel="icon" href="{{ url_for('static', filename='Imagens/favicon.ico') }}">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3396569889908907"
-    crossorigin="anonymous"></script>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='CSS/arquivo.css') }}">
+
+  <!-- Google Ads -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3396569889908907"
+    crossorigin="anonymous"></script>
+
+  <!-- Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-D5JVX6TY9Y"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-D5JVX6TY9Y');
-</script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-D5JVX6TY9Y');
+  </script>
 </head>
 
-<nav class="navbar navbar-expand-lg">
-  <div class="container-fluid">
-    <div class="d-flex align-items-center">
-      <img src="{{ url_for('static', filename='Imagens/Logo KitPc.webp') }}" alt="Logo KitPc" class="logo-kitpc">
-      <h1 class="h4 mb-0 ms-2 text-light" style="font-family: 'Orbitron', sans-serif;">Artigos do blog</h1>
+<body>
+
+<header>
+  <nav class="navbar navbar-expand-lg">
+    <div class="container-fluid">
+      <div class="d-flex align-items-center">
+        <!-- ✅ CORRIGIDO: adicionado width e height na logo -->
+        <img src="{{ url_for('static', filename='Imagens/Logo KitPc.webp') }}"
+             alt="Logo KitPc"
+             class="logo-kitpc"
+             width="80"
+             height="80">
+        <h1 class="h4 mb-0 ms-2 text-light" style="font-family: 'Orbitron', sans-serif;">Artigos do blog</h1>
+      </div>
+
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto align-items-center">
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('home') }}">Início</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('montagem') }}">Montagem</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('arquivo') }}">Blog</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('educacao') }}">Educação</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('sobre_nos') }}">Sobre Nós</a></li>
+
+          {% if session['nome'] %}
+          <li class="nav-item d-flex align-items-center gap-2 ms-lg-3 mt-3 mt-lg-0">
+            <span class="text-info fw-bold">
+              <i class="fas fa-user-circle"></i> {{ session['nome'].split(' ')[0] }}
+            </span>
+            <div class="d-flex gap-2">
+              {% if session['is_admin'] %}
+              <a class="btn btn-outline-warning btn-sm" href="{{ url_for('admin') }}">ADM</a>
+              {% endif %}
+              <a class="btn btn-sm btn-outline-danger" href="{{ url_for('logout') }}">
+                <i class="fas fa-sign-out-alt"></i>
+              </a>
+            </div>
+          </li>
+          {% else %}
+          <li class="nav-item ms-lg-3 mt-3 mt-lg-0">
+            <button class="btn btn-outline-info btn-sm fw-bold" data-bs-toggle="modal" data-bs-target="#modalAcesso">
+              <i class="fa-solid fa-arrow-right-to-bracket"></i> Entrar
+            </button>
+          </li>
+          {% endif %}
+        </ul>
+      </div>
     </div>
-
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav ms-auto align-items-center">
-        <li class="nav-item"><a class="nav-link" href="{{ url_for('home') }}">Início</a></li>
-        <li class="nav-item"><a class="nav-link" href="{{ url_for('montagem') }}">Montagem</a></li>
-        <li class="nav-item"><a class="nav-link" href="{{ url_for('arquivo') }}">Blog</a></li>
-        <li class="nav-item"><a class="nav-link" href="{{ url_for('educacao') }}">Educação</a></li>
-        <li class="nav-item"><a class="nav-link" href="{{ url_for('sobre_nos') }}">Sobre Nós</a></li>
-
-        {% if session['nome'] %}
-        <li class="nav-item d-flex align-items-center gap-2 ms-lg-3 mt-3 mt-lg-0">
-          <span class="text-info fw-bold">
-            <i class="fas fa-user-circle"></i> {{ session['nome'].split(' ')[0] }}
-          </span>
-          <div class="d-flex gap-2">
-            {% if session['is_admin'] %}
-            <a class="btn btn-outline-warning btn-sm" href="{{ url_for('admin') }}">ADM</a>
-            {% endif %}
-            <a class="btn btn-sm btn-outline-danger" href="{{ url_for('logout') }}"><i
-                class="fas fa-sign-out-alt"></i></a>
-          </div>
-        </li>
-        {% else %}
-        <li class="nav-item ms-lg-3 mt-3 mt-lg-0">
-          <button class="btn btn-outline-info btn-sm fw-bold" data-bs-toggle="modal" data-bs-target="#modalAcesso">
-            <i class="fa-solid fa-arrow-right-to-bracket"></i> Entrar
-          </button>
-        </li>
-        {% endif %}
-      </ul>
-    </div>
-  </div>
-</nav>
+  </nav>
 </header>
 
 <div class="modal fade" id="modalAcesso" tabindex="-1" aria-hidden="true">
@@ -71,10 +89,14 @@
     <div class="modal-content bg-dark border-info">
       <div class="modal-header border-bottom border-info">
         <ul class="nav nav-tabs card-header-tabs w-100" id="authTabs" role="tablist">
-          <li class="nav-item"><button class="nav-link active fw-bold" data-bs-toggle="tab" data-bs-target="#login"
-              type="button" style="color: #3CC9E4;">LOGIN</button></li>
-          <li class="nav-item"><button class="nav-link fw-bold" data-bs-toggle="tab" data-bs-target="#register"
-              type="button" style="color: #9216FD;">CADASTRAR</button></li>
+          <li class="nav-item">
+            <button class="nav-link active fw-bold" data-bs-toggle="tab" data-bs-target="#login"
+              type="button" style="color: #3CC9E4;">LOGIN</button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link fw-bold" data-bs-toggle="tab" data-bs-target="#register"
+              type="button" style="color: #9216FD;">CADASTRAR</button>
+          </li>
         </ul>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
@@ -95,13 +117,17 @@
             </form>
             <a href="{{ url_for('login_google') }}" class="btn-google-custom">
               <div class="google-icon-wrapper">
-                <img src="{{ url_for('static', filename='Imagens/Logo-google-icon-PNG.webp') }}" alt="Google">
+                <img src="{{ url_for('static', filename='Imagens/Logo-google-icon-PNG.webp') }}"
+                     alt="Google"
+                     width="20"
+                     height="20">
               </div>
               <span class="google-text">Continuar com Google</span>
             </a>
           </div>
           <div class="tab-pane fade" id="register">
             <form action="{{ url_for('register') }}" method="POST">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
               <div class="mb-3">
                 <label class="form-label" style="color: #9216FD;">Nome Completo</label>
                 <input type="text" name="nome" class="form-control bg-transparent text-white"
@@ -117,8 +143,8 @@
                 <input type="password" name="senha" class="form-control bg-transparent text-white"
                   style="border: 1px solid #9216FD;" required>
               </div>
-              <button type="submit" class="btn w-100 fw-bold" style="background-color: #9216FD; color: white;">CRIAR
-                CONTA</button>
+              <button type="submit" class="btn w-100 fw-bold"
+                style="background-color: #9216FD; color: white;">CRIAR CONTA</button>
             </form>
           </div>
         </div>
@@ -140,11 +166,29 @@
         <div class="col">
           <div class="card h-100 card-post">
             <div class="capa-container position-relative">
+
               {% if post.imagem_url %}
-              <img src="{{ post.imagem_url }}" class="capa-blog" alt="{{ post.titulo }}">
+              <!-- ✅ CORRIGIDO: Cloudinary otimizado + lazy loading + width/height -->
+              <!-- f_auto = entrega WebP automaticamente -->
+              <!-- q_auto = comprime sem perda visual -->
+              <!-- w_600 = redimensiona para o tamanho real no card -->
+              <img
+                src="{{ post.imagem_url | replace('/upload/', '/upload/f_auto,q_auto,w_600/') }}"
+                class="capa-blog"
+                alt="{{ post.titulo }}"
+                loading="lazy"
+                width="600"
+                height="338">
               {% else %}
-              <img src="{{ url_for('static', filename='Imagens/default-post.webp') }}" class="capa-blog" alt="Sem capa">
+              <img
+                src="{{ url_for('static', filename='Imagens/default-post.webp') }}"
+                class="capa-blog"
+                alt="Sem capa"
+                loading="lazy"
+                width="600"
+                height="338">
               {% endif %}
+
               <div class="position-absolute top-0 end-0 p-2">
                 <span class="data-badge">{{ post.data_postagem.strftime('%d/%m/%Y') }}</span>
               </div>
@@ -157,7 +201,8 @@
                 <span class="text-secondary small">
                   <i class="far fa-eye text-info"></i> {{ post.views or 0 }} visualizações
                 </span>
-                <a href="{{ url_for('exibir_post', slug=post.slug) }}" class="btn btn-sm btn-outline-info fw-bold">
+                <a href="{{ url_for('exibir_post', slug=post.slug) }}"
+                   class="btn btn-sm btn-outline-info fw-bold">
                   LER MATÉRIA <i class="fas fa-arrow-right ms-1"></i>
                 </a>
               </div>
@@ -195,8 +240,7 @@
 
   <div id="notify-box"
     style="display: none; position: absolute; bottom: 75px; left: 0; background: #0b052d; border: 2px solid #3CC9E4; padding: 20px; border-radius: 15px; width: 260px; box-shadow: 0 0 25px rgba(0, 242, 255, 0.4);">
-    <h4 style="color: #3CC9E4; font-family: 'Orbitron', sans-serif; font-size: 15px; margin: 0 0 10px 0;">NOTIFICAÇÕES
-    </h4>
+    <h4 style="color: #3CC9E4; font-family: 'Orbitron', sans-serif; font-size: 15px; margin: 0 0 10px 0;">NOTIFICAÇÕES</h4>
     <p style="font-size: 13px; color: white; margin-bottom: 15px; line-height: 1.4;">
       Deseja receber avisos reais de novos posts no seu celular ou PC?
     </p>
@@ -207,12 +251,10 @@
   </div>
 </div>
 
-
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-messaging-compat.js"></script>
 
 <script>
-  // 2. Configurações vindas do Flask
   const firebaseConfig = {
     apiKey: "{{ fb.apiKey }}",
     authDomain: "{{ fb.authDomain }}",
@@ -222,78 +264,50 @@
     appId: "{{ fb.appId }}"
   };
 
-  // 3. INICIALIZAÇÃO OBRIGATÓRIA (Nesta ordem exata)
   firebase.initializeApp(firebaseConfig);
-  const messaging = firebase.messaging(); // Agora o messaging é criado DEPOIS do app estar pronto
+  const messaging = firebase.messaging();
 
-  // 4. Registro do Service Worker
   if ('serviceWorker' in navigator) {
-    // Usamos o caminho que você definiu na pasta static
     navigator.serviceWorker.register("{{ url_for('static', filename='firebase-messaging-sw.js') }}")
-      .then(function (reg) {
-        console.log('✅ Service Worker registrado com sucesso!');
-      })
-      .catch(function (err) {
-        console.error('❌ Erro ao registrar Service Worker:', err);
-      });
+      .then(reg => console.log('✅ Service Worker registrado!'))
+      .catch(err => console.error('❌ Erro SW:', err));
   }
-
-  // --- FUNÇÕES DO SININHO ---
 
   function toggleSininho() {
     const box = document.getElementById("notify-box");
     const status = localStorage.getItem('sinoAtivo');
-
     if (status === 'sim') {
       alert("🔔 As notificações reais já estão ativas!");
     } else {
-      // Alterna entre block e none
-      if (box.style.display === "none" || box.style.display === "") {
-        box.style.display = "block";
-      } else {
-        box.style.display = "none";
-      }
+      box.style.display = (box.style.display === "none" || box.style.display === "") ? "block" : "none";
     }
   }
 
   async function ativarNotificacaoReal() {
     try {
-      // Pede permissão ao usuário
       const permission = await Notification.requestPermission();
-
       if (permission === "granted") {
-        // Espera o Service Worker estar pronto
         const registration = await navigator.serviceWorker.ready;
-
-        // Pede o Token ao Firebase usando a sua VAPID KEY
         const token = await messaging.getToken({
-          vapidKey: "{{ fb.vapidKey }}", // Usando a chave do seu .env
+          vapidKey: "{{ fb.vapidKey }}",
           serviceWorkerRegistration: registration
         });
-
         if (token) {
-          // Envia para a rota do seu Flask (app.py)
           const res = await fetch('/salvar-token', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ token: token })
           });
-
           if (res.ok) {
             localStorage.setItem('sinoAtivo', 'sim');
             aplicarEstiloAtivo();
             document.getElementById("notify-box").style.display = "none";
             alert("🚀 Notificações configuradas com sucesso!");
-          } else {
-            alert("Erro ao salvar token no servidor.");
           }
         }
-      } else {
-        alert("Você bloqueou as notificações. Ative-as nas configurações do navegador (ícone de cadeado).");
       }
     } catch (error) {
-      console.error("Erro detalhado:", error);
-      alert("Erro ao recuperar assinatura. Tente novamente.");
+      console.error("Erro:", error);
     }
   }
 
@@ -305,50 +319,24 @@
     }
   }
 
-  // Mantém o estado visual ao carregar a página
   document.addEventListener("DOMContentLoaded", function () {
-    if (localStorage.getItem('sinoAtivo') === 'sim') {
-      aplicarEstiloAtivo();
-    }
+    if (localStorage.getItem('sinoAtivo') === 'sim') aplicarEstiloAtivo();
   });
 </script>
 
 <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
-<script>
-  new window.VLibras.Widget('https://vlibras.gov.br/app');
-
-</script>
+<script>new window.VLibras.Widget('https://vlibras.gov.br/app');</script>
 
 <footer>
-   <p>&copy; 2026 KitPC - Todos os direitos reservados</p>
-   <a href="{{ url_for('privacidade') }}">Privacidade</a>
-        <a href="{{ url_for('termos') }}">Termos de Uso</a>
-        <a href="{{ url_for('cookies') }}">Política de Cookies</a>
-        <a href="{{ url_for('contato') }}">Fale Conosco</a>
-  </footer>
+  <p>&copy; 2026 KitPC - Todos os direitos reservados</p>
+  <a href="{{ url_for('privacidade') }}">Privacidade</a>
+  <a href="{{ url_for('termos') }}">Termos de Uso</a>
+  <a href="{{ url_for('cookies') }}">Política de Cookies</a>
+  <a href="{{ url_for('contato') }}">Fale Conosco</a>
+</footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-<script>
-  //script para o sininho de notificações do blog
-  function handleBellClick() {
-    const notifyBox = document.getElementById("notify-box");
-    const jaInscrito = localStorage.getItem('userEmail');
-
-    if (jaInscrito) {
-      // Se o navegador já conhece o e-mail dele
-      alert("Você já está inscrito com: " + jaInscrito);
-    } else {
-      // Se é a primeira vez, mostra ou esconde a caixinha
-      if (notifyBox.style.display === "none") {
-        notifyBox.style.display = "block";
-      } else {
-        notifyBox.style.display = "none";
-      }
-    }
-  }
-</script>
 <script src="{{ url_for('static', filename='script.js') }}"></script>
-</body>
 
+</body>
 </html>
