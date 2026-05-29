@@ -1504,9 +1504,8 @@ def ping():
     return "KitPC Online!", 200
 
 @app.route('/ads.txt')
-def ads_txt():
-    conteudo = "google.com, pub-3396569889908907, DIRECT, f08c47fec0942fa0"
-    return conteudo, 200, {'Content-Type': 'text/plain'}
+def servir_ads_txt():
+    return send_from_directory(os.path.join(app.root_path, 'static'), 'ads.txt')
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
