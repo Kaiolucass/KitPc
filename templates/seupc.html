@@ -6,21 +6,52 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Montagem - KitPc</title>
     <meta name="description" content="Monte o seu pc dos sonhos com o nosso montador com ajuda do KitPc e da nossa IA para montagem.">
-  <link rel="canonical" href="https://kitpc.com.br/seuPc">
+    <link rel="canonical" href="https://kitpc.com.br/seuPc">
     <link rel="icon" href="{{ url_for('static', filename='Imagens/favicon.ico') }}" type="image/x-icon">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <!-- Preconnect -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <!-- CSS local primeiro -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/seuPc.css') }}">
+
+    <!-- Bootstrap — não bloqueia -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    </noscript>
+
+    <!-- Font Awesome — não bloqueia -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+          media="print" onload="this.media='all'">
+    <noscript>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    </noscript>
+
+    <!-- Orbitron — não bloqueia -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap"
+          rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
+    </noscript>
+
+    <!-- Google Ads -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3396569889908907"
         crossorigin="anonymous"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/seuPc.css') }}">
+
+    <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-D5JVX6TY9Y"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-D5JVX6TY9Y');
-</script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-D5JVX6TY9Y');
+    </script>
 </head>
 
 <body>
@@ -29,7 +60,7 @@
             <div class="container-fluid">
                 <div class="d-flex align-items-center">
                     <img src="{{ url_for('static', filename='Imagens/Logo KitPc.webp') }}" alt="logo-kitpc"
-                        class="logo-kitpc">
+                        class="logo-kitpc" width="80" height="80">
                     <h1 class="h4 mb-0 ms-2 text-light" style="font-family: 'Orbitron', sans-serif;">Montagem</h1>
                 </div>
 
@@ -72,27 +103,25 @@
         </nav>
     </header>
 
-    <div class="modal fade" id="modalAcesso" tabindex="-1" aria-labelledby="modalAcessoLabel" aria-hidden="true">
+    <div class="modal fade" id="modalAcesso" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content bg-dark border-info">
                 <div class="modal-header border-bottom border-info">
-                    <ul class="nav nav-tabs card-header-tabs w-100" id="authTabs" role="tablist">
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link active fw-bold" id="login-tab" data-bs-toggle="tab"
-                                data-bs-target="#login" type="button" role="tab" style="color: #3CC9E4;">LOGIN</button>
+                    <ul class="nav nav-tabs card-header-tabs w-100" role="tablist">
+                        <li class="nav-item">
+                            <button class="nav-link active fw-bold" data-bs-toggle="tab"
+                                data-bs-target="#login" type="button" style="color: #3CC9E4;">LOGIN</button>
                         </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link fw-bold" id="register-tab" data-bs-toggle="tab"
-                                data-bs-target="#register" type="button" role="tab"
-                                style="color: #9216FD;">CADASTRAR</button>
+                        <li class="nav-item">
+                            <button class="nav-link fw-bold" data-bs-toggle="tab"
+                                data-bs-target="#register" type="button" style="color: #9216FD;">CADASTRAR</button>
                         </li>
                     </ul>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                        aria-label="Close"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-4">
-                    <div class="tab-content" id="authTabsContent">
-                        <div class="tab-pane fade show active" id="login" role="tabpanel">
+                    <div class="tab-content">
+                        <div class="tab-pane fade show active" id="login">
                             <form action="{{ url_for('login') }}" method="POST">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                 <div class="mb-3">
@@ -110,12 +139,12 @@
                             <a href="{{ url_for('login_google') }}" class="btn-google-custom">
                                 <div class="google-icon-wrapper">
                                     <img src="{{ url_for('static', filename='Imagens/Logo-google-icon-PNG.webp') }}"
-                                        alt="Google">
+                                        alt="Google" width="20" height="20">
                                 </div>
                                 <span class="google-text">Continuar com Google</span>
                             </a>
                         </div>
-                        <div class="tab-pane fade" id="register" role="tabpanel">
+                        <div class="tab-pane fade" id="register">
                             <form action="{{ url_for('register') }}" method="POST">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                 <div class="mb-3">
@@ -136,7 +165,6 @@
                                 <button type="submit" class="btn w-100 fw-bold mt-2"
                                     style="background-color: #9216FD; color: white;">CRIAR CONTA</button>
                             </form>
-                            </a>
                         </div>
                     </div>
                 </div>
@@ -145,7 +173,11 @@
     </div>
 
     <main class="container mt-5">
-        <div class="question p-4 mb-4 border rounded shadow-sm" onclick="toggleQuestion(this)">
+
+        <!-- ✅ REMOVIDO onclick="toggleQuestion(this)" das divs — era o que causava o erro -->
+        <!-- As perguntas ficam sempre visíveis, sem necessidade de toggle -->
+
+        <div class="question p-4 mb-4 border rounded shadow-sm">
             <h2 class="text-center mb-3"><i class="fa-solid fa-money-bill-1-wave"></i> Seu orçamento?</h2>
             <div class="d-flex justify-content-center flex-wrap gap-3">
                 <button class="btn btn-outline-info fw-bold" onclick="setAnswer('preco', 'Um PC OK', event)">
@@ -166,11 +198,10 @@
             </div>
         </div>
 
-        <div class="question p-4 mb-4 border rounded shadow-sm" onclick="toggleQuestion(this)">
+        <div class="question p-4 mb-4 border rounded shadow-sm">
             <h2 class="text-center"><i class="fa-solid fa-gear"></i> Montagem ou Reforma?</h2>
             <div class="answers d-flex justify-content-center flex-wrap gap-2 mt-3">
-                <button class="btn btn-outline-info" onclick="setAnswer('tipo','Montar do Zero',event)">Montar do
-                    zero</button>
+                <button class="btn btn-outline-info" onclick="setAnswer('tipo','Montar do Zero',event)">Montar do zero</button>
                 <button class="btn btn-outline-info" onclick="setAnswer('tipo','Reformar', event)">Reformar</button>
             </div>
             <div class="text-center mt-3">
@@ -178,24 +209,20 @@
             </div>
         </div>
 
-        <div class="question p-4 mb-4 border rounded shadow-sm" onclick="toggleQuestion(this)">
+        <div class="question p-4 mb-4 border rounded shadow-sm">
             <h2 class="text-center"><i class="fa-solid fa-desktop"></i> Para qual uso?</h2>
             <div class="answers d-flex justify-content-center flex-wrap gap-2 mt-3">
-                <button class="btn btn-outline-info" onclick="setAnswer('uso', 'Jogo', event)" data-bs-toggle="tooltip"
-                    title="Ideal para alta performance e gráficos">Jogo</button>
-                <button class="btn btn-outline-info" onclick="setAnswer('uso', 'Trabalho', event)"
-                    data-bs-toggle="tooltip" title="Edição, design ou multitarefa">Trabalho</button>
-                <button class="btn btn-outline-info" onclick="setAnswer('uso', 'Estudos', event)"
-                    data-bs-toggle="tooltip" title="Pesquisas e videoaulas">Estudos</button>
-                <button class="btn btn-outline-info" onclick="setAnswer('uso', 'Uso geral', event)"
-                    data-bs-toggle="tooltip" title="Tarefas básicas do dia a dia">Uso geral</button>
+                <button class="btn btn-outline-info" onclick="setAnswer('uso', 'Jogo', event)">Jogo</button>
+                <button class="btn btn-outline-info" onclick="setAnswer('uso', 'Trabalho', event)">Trabalho</button>
+                <button class="btn btn-outline-info" onclick="setAnswer('uso', 'Estudos', event)">Estudos</button>
+                <button class="btn btn-outline-info" onclick="setAnswer('uso', 'Uso geral', event)">Uso geral</button>
             </div>
             <div class="text-center mt-3">
                 <strong>Resposta:</strong> <span id="uso" class="text-info">Nenhuma</span>
             </div>
         </div>
 
-        <div class="question p-4 mb-4 border rounded shadow-sm" onclick="toggleQuestion(this)">
+        <div class="question p-4 mb-4 border rounded shadow-sm">
             <h2 class="text-center"><i class="fa-solid fa-gamepad"></i> Quer placa de vídeo?</h2>
             <div class="answers d-flex justify-content-center flex-wrap gap-2 mt-3">
                 <button class="btn btn-outline-info" onclick="setAnswer('gpu', 'Sim', event)">Sim</button>
@@ -206,7 +233,7 @@
             </div>
         </div>
 
-        <div class="question p-4 mb-4 border rounded shadow-sm" onclick="toggleQuestion(this)">
+        <div class="question p-4 mb-4 border rounded shadow-sm">
             <h2 class="text-center"><i class="fa-solid fa-microchip"></i> Qual processador?</h2>
             <div class="answers d-flex justify-content-center flex-wrap gap-2 mt-3">
                 <button class="btn btn-outline-info" onclick="setAnswer('processador', 'AMD', event)">AMD</button>
@@ -217,13 +244,11 @@
             </div>
         </div>
 
-        <div class="question p-4 mb-4 border rounded shadow-sm" onclick="toggleQuestion(this)">
+        <div class="question p-4 mb-4 border rounded shadow-sm">
             <h2 class="text-center"><i class="fa-solid fa-laptop"></i> Notebook te ajuda?</h2>
             <div class="answers d-flex justify-content-center flex-wrap gap-2 mt-3">
-                <button class="btn btn-outline-info" onclick="setAnswer('laptop', 'Sim', event)">Sim,
-                    mobilidade!</button>
-                <button class="btn btn-outline-info" onclick="setAnswer('laptop', 'Não', event)">Não, prefiro
-                    fixo</button>
+                <button class="btn btn-outline-info" onclick="setAnswer('laptop', 'Sim', event)">Sim, mobilidade!</button>
+                <button class="btn btn-outline-info" onclick="setAnswer('laptop', 'Não', event)">Não, prefiro fixo</button>
             </div>
             <div class="text-center mt-3">
                 <strong>Resposta:</strong> <span id="laptop" class="text-info">Nenhuma</span>
@@ -231,8 +256,9 @@
         </div>
 
         <div class="text-center my-5">
-            <button class="btn btn-info btn-lg fw-bold text-dark shadow" onclick="finalizar()">🔧 Montar meu computador
-                ⚙️</button>
+            <button class="btn btn-info btn-lg fw-bold text-dark shadow" onclick="finalizar()">
+                🔧 Montar meu computador ⚙️
+            </button>
         </div>
 
         <div id="resultado" class="mt-5">
@@ -240,43 +266,41 @@
                 <div class="spinner-border text-info" style="width: 3rem; height: 3rem;" role="status"></div>
                 <p class="text-info mt-3 fw-bold">A IA está escolhendo as melhores peças no banco de dados...</p>
             </div>
-
             <div id="lista-peças" class="row g-4"></div>
-
             <div id="justificativa-container" class="mt-4 p-4 border border-info rounded bg-dark d-none">
                 <h4 class="text-info"><i class="fa-solid fa-robot"></i> Dica do Especialista KitPC:</h4>
                 <p id="texto-justificativa" class="text-white mb-0"></p>
             </div>
         </div>
     </main>
+
     <div vw class="enabled">
         <div vw-access-button class="active"></div>
         <div vw-plugin-wrapper>
             <div class="vw-plugin-top-wrapper"></div>
         </div>
     </div>
+
     <div id="container-acoes" style="display:none; text-align: center; margin-top: 20px;">
-    <button onclick="baixarPDF()" class="btn-gerar-pdf">
-        📄 Baixar Meu Guia de Montagem (PDF)
-    </button>
-     <div class="mt-5 p-4 text-center card-peca"
-                    style="border: 2px solid #3CC9E4; border-radius: 15px; background: rgba(60, 201, 228, 0.05);">
-                    <h2 class="h4 mb-3 text-info">Ficou com alguma dúvida?</h2>
-                    <p class="text-light opacity-75">clique em saiba mais para aprender mais sobre cada componente do
-                        seu computador!</p>
-                    <a href="{{ url_for('guia_pecas') }}" class="btn btn-info fw-bold text-dark">SAIBA MAIS</a>
-                </div>
-</div>
+        <button onclick="baixarPDF()" class="btn-gerar-pdf">
+            📄 Baixar Meu Guia de Montagem (PDF)
+        </button>
+        <div class="mt-5 p-4 text-center card-peca"
+            style="border: 2px solid #3CC9E4; border-radius: 15px; background: rgba(60, 201, 228, 0.05);">
+            <h2 class="h4 mb-3 text-info">Ficou com alguma dúvida?</h2>
+            <p class="text-light opacity-75">clique em saiba mais para aprender mais sobre cada componente do seu computador!</p>
+            <a href="{{ url_for('guia_pecas') }}" class="btn btn-info fw-bold text-dark">SAIBA MAIS</a>
+        </div>
+    </div>
+
     <div id="notification-bell-container" style="position: fixed; bottom: 20px; left: 20px; z-index: 9999;">
         <div id="notification-bell" onclick="toggleSininho()"
             style="background: #9216FD; color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 0 20px rgba(146, 34, 253, 0.6); transition: all 0.3s ease;">
             <i class="fa-solid fa-bell" style="font-size: 25px;"></i>
         </div>
-
         <div id="notify-box"
             style="display: none; position: absolute; bottom: 75px; left: 0; background: #0b052d; border: 2px solid #3CC9E4; padding: 20px; border-radius: 15px; width: 260px; box-shadow: 0 0 25px rgba(0, 242, 255, 0.4);">
-            <h4 style="color: #3CC9E4; font-family: 'Orbitron', sans-serif; font-size: 15px; margin: 0 0 10px 0;">
-                NOTIFICAÇÕES</h4>
+            <h4 style="color: #3CC9E4; font-family: 'Orbitron', sans-serif; font-size: 15px; margin: 0 0 10px 0;">NOTIFICAÇÕES</h4>
             <p style="font-size: 13px; color: white; margin-bottom: 15px; line-height: 1.4;">
                 Deseja receber avisos reais de novos posts no seu celular ou PC?
             </p>
@@ -287,118 +311,6 @@
         </div>
     </div>
 
-
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-messaging-compat.js"></script>
-
-    <script>
-        // 2. Configurações vindas do Flask
-        const firebaseConfig = {
-            apiKey: "{{ fb.apiKey }}",
-            authDomain: "{{ fb.authDomain }}",
-            projectId: "{{ fb.projectId }}",
-            storageBucket: "{{ fb.storageBucket }}",
-            messagingSenderId: "{{ fb.messagingSenderId }}",
-            appId: "{{ fb.appId }}"
-        };
-
-        // 3. INICIALIZAÇÃO OBRIGATÓRIA (Nesta ordem exata)
-        firebase.initializeApp(firebaseConfig);
-        const messaging = firebase.messaging(); // Agora o messaging é criado DEPOIS do app estar pronto
-
-        // 4. Registro do Service Worker
-        if ('serviceWorker' in navigator) {
-            // Usamos o caminho que você definiu na pasta static
-            navigator.serviceWorker.register("{{ url_for('static', filename='firebase-messaging-sw.js') }}")
-                .then(function (reg) {
-                    console.log('✅ Service Worker registrado com sucesso!');
-                })
-                .catch(function (err) {
-                    console.error('❌ Erro ao registrar Service Worker:', err);
-                });
-        }
-
-        // --- FUNÇÕES DO SININHO ---
-
-        function toggleSininho() {
-            const box = document.getElementById("notify-box");
-            const status = localStorage.getItem('sinoAtivo');
-
-            if (status === 'sim') {
-                alert("🔔 As notificações reais já estão ativas!");
-            } else {
-                // Alterna entre block e none
-                if (box.style.display === "none" || box.style.display === "") {
-                    box.style.display = "block";
-                } else {
-                    box.style.display = "none";
-                }
-            }
-        }
-
-        async function ativarNotificacaoReal() {
-            try {
-                // Pede permissão ao usuário
-                const permission = await Notification.requestPermission();
-
-                if (permission === "granted") {
-                    // Espera o Service Worker estar pronto
-                    const registration = await navigator.serviceWorker.ready;
-
-                    // Pede o Token ao Firebase usando a sua VAPID KEY
-                    const token = await messaging.getToken({
-                        vapidKey: "{{ fb.vapidKey }}", // Usando a chave do seu .env
-                        serviceWorkerRegistration: registration
-                    });
-
-                    if (token) {
-                        // Envia para a rota do seu Flask (app.py)
-                        const res = await fetch('/salvar-token', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ token: token })
-                        });
-
-                        if (res.ok) {
-                            localStorage.setItem('sinoAtivo', 'sim');
-                            aplicarEstiloAtivo();
-                            document.getElementById("notify-box").style.display = "none";
-                            alert("🚀 Notificações configuradas com sucesso!");
-                        } else {
-                            alert("Erro ao salvar token no servidor.");
-                        }
-                    }
-                } else {
-                    alert("Você bloqueou as notificações. Ative-as nas configurações do navegador (ícone de cadeado).");
-                }
-            } catch (error) {
-                console.error("Erro detalhado:", error);
-                alert("Erro ao recuperar assinatura. Tente novamente.");
-            }
-        }
-
-        function aplicarEstiloAtivo() {
-            const sino = document.getElementById("notification-bell");
-            if (sino) {
-                sino.style.background = "#3CC9E4";
-                sino.style.boxShadow = "0 0 20px #3CC9E4";
-            }
-        }
-
-        // Mantém o estado visual ao carregar a página
-        document.addEventListener("DOMContentLoaded", function () {
-            if (localStorage.getItem('sinoAtivo') === 'sim') {
-                aplicarEstiloAtivo();
-            }
-        });
-    </script>
-
-
-    <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
-    <script>
-        new window.VLibras.Widget('https://vlibras.gov.br/app');
-    </script>
-
     <footer>
         <p>&copy; 2026 KitPC - Todos os direitos reservados</p>
         <a href="{{ url_for('privacidade') }}">Privacidade</a>
@@ -407,31 +319,117 @@
         <a href="{{ url_for('contato') }}">Fale Conosco</a>
     </footer>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-    // inicialização dos balões de dica (Tooltips)
-    document.addEventListener("DOMContentLoaded", function () {
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
+    <!-- Scripts com defer — não bloqueiam a renderização -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
+    <script src="https://vlibras.gov.br/app/vlibras-plugin.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-messaging-compat.js" defer></script>
+    <script src="{{ url_for('static', filename='script.js') }}" defer></script>
+
+    <script defer>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            // Tooltips Bootstrap
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function (el) { return new bootstrap.Tooltip(el); });
+
+            // VLibras
+            if (typeof window.VLibras !== 'undefined') {
+                new window.VLibras.Widget('https://vlibras.gov.br/app');
+            }
+
+            // Firebase
+            if (typeof firebase !== 'undefined') {
+                firebase.initializeApp({
+                    apiKey: "{{ fb.apiKey }}",
+                    authDomain: "{{ fb.authDomain }}",
+                    projectId: "{{ fb.projectId }}",
+                    storageBucket: "{{ fb.storageBucket }}",
+                    messagingSenderId: "{{ fb.messagingSenderId }}",
+                    appId: "{{ fb.appId }}"
+                });
+                window._messaging = firebase.messaging();
+                window._vapidKey = "{{ fb.vapidKey }}";
+
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.register('/firebase-messaging-sw.js')
+                        .then(reg => console.log('✅ SW registrado!'))
+                        .catch(err => console.error('❌ SW erro:', err));
+                }
+            }
+
+            // Sino
+            if (localStorage.getItem('sinoAtivo') === 'sim') aplicarEstiloAtivo();
         });
-    });
 
-    // clique do sininho se ele não estiver no seu arquivo externo
-    function handleBellClick() {
-        const notifyBox = document.getElementById("notify-box");
-        const jaInscrito = localStorage.getItem('userEmail');
-        if (jaInscrito) {
-            alert("Você já está inscrito com: " + jaInscrito);
-        } else {
-            notifyBox.style.display = (notifyBox.style.display === "none") ? "block" : "none";
+        // ✅ CORRIGIDO: toggleQuestion agora está definida
+        // Expande/recolhe o conteúdo da pergunta ao clicar no título
+        function toggleQuestion(el) {
+            const answers = el.querySelector('.answers') || el.querySelector('.d-flex.justify-content-center');
+            const resposta = el.querySelector('.text-center.mt-3');
+            if (answers) answers.classList.toggle('d-none');
+            if (resposta) resposta.classList.toggle('d-none');
         }
-    }
-</script>
 
-<script src="{{ url_for('static', filename='script.js') }}"></script>
+        function setAnswer(id, value, event) {
+            if (event) event.stopPropagation();
+            const el = document.getElementById(id);
+            if (el) el.textContent = value;
+
+            // Destaca o botão selecionado
+            const parent = event.target.closest('.question');
+            if (parent) {
+                parent.querySelectorAll('button').forEach(btn => {
+                    btn.classList.remove('btn-info');
+                    btn.classList.add('btn-outline-info');
+                });
+                event.target.classList.remove('btn-outline-info');
+                event.target.classList.add('btn-info');
+            }
+        }
+
+        function toggleSininho() {
+            const box = document.getElementById("notify-box");
+            if (localStorage.getItem('sinoAtivo') === 'sim') {
+                alert("🔔 As notificações reais já estão ativas!");
+            } else {
+                box.style.display = (box.style.display === "none" || !box.style.display) ? "block" : "none";
+            }
+        }
+
+        async function ativarNotificacaoReal() {
+            try {
+                const permission = await Notification.requestPermission();
+                if (permission === "granted") {
+                    const registration = await navigator.serviceWorker.ready;
+                    const token = await window._messaging.getToken({
+                        vapidKey: window._vapidKey,
+                        serviceWorkerRegistration: registration
+                    });
+                    if (token) {
+                        const res = await fetch('/salvar-token', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ token })
+                        });
+                        if (res.ok) {
+                            localStorage.setItem('sinoAtivo', 'sim');
+                            aplicarEstiloAtivo();
+                            document.getElementById("notify-box").style.display = "none";
+                            alert("🚀 Notificações configuradas!");
+                        }
+                    }
+                }
+            } catch (e) { console.error("Erro:", e); }
+        }
+
+        function aplicarEstiloAtivo() {
+            const sino = document.getElementById("notification-bell");
+            if (sino) { sino.style.background = "#3CC9E4"; sino.style.boxShadow = "0 0 20px #3CC9E4"; }
+        }
+    </script>
+
 </body>
-
 </html>
