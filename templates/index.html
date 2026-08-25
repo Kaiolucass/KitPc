@@ -4,34 +4,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KitPc</title>
+    <title>KitPC — Guia de Montagem de PC e Peças 2026</title>
     <meta name="description"
-        content="O KitPC é um Guia prático para quem nunca montou um PC e tem medo de errar, aprenda sobre hardware.Aprenda a montar seu setup do zero com compatibilidade e confiança garantida.">
+content="O KitPC é um Guia prático para quem nunca montou um PC e tem medo de errar, aprenda sobre hardware.Aprenda a montar seu setup do zero com compatibilidade e confiança garantida.">
+    <link rel="canonical" href="https://kitpc.com.br/">
     <link rel="icon" href="{{ url_for('static', filename='Imagens/favicon.ico') }}" type="image/x-icon">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://kitpc.com.br/">
+    <meta property="og:locale" content="pt_BR">
+    <meta property="og:site_name" content="KitPC">
     <meta property="og:title" content="KitPC - O Guia prático para quem nunca montou um PC e tem medo de errar.">
     <meta property="og:description"
-        content="aprenda a montar seu setup do zero com compatibilidade e confiança garantida.">
+content="aprenda a montar seu setup do zero com compatibilidade e confiança garantida.">
+    <meta property="og:image" content="{{ url_for('static', filename='Imagens/pc gamer.webp', _external=True) }}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="KitPC - O Guia prático para quem nunca montou um PC e tem medo de errar.">
+    <meta name="twitter:description"
+content="aprenda a montar seu setup do zero com compatibilidade e confiança garantida.">
+    <meta name="twitter:image" content="{{ url_for('static', filename='Imagens/pc gamer.webp', _external=True) }}">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "KitPC",
+      "url": "https://kitpc.com.br/",
+      "description": "Guia prático para quem nunca montou um PC e tem medo de errar. Aprenda a montar seu setup do zero com compatibilidade e confiança garantida."
+    }
+    </script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3396569889908907"
-        crossorigin="anonymous"></script>
+crossorigin="anonymous"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='CSS/style.css') }}">
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-D5JVX6TY9Y"></script>
 <script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-D5JVX6TY9Y');
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-D5JVX6TY9Y');
 </script>
 </head>
 
+<body>
 <header>
     <nav class="navbar navbar-expand-lg">
         <div class="container-fluid">
             <div class="d-flex align-items-center">
                 <img src="{{ url_for('static', filename='Imagens/Logo KitPc.webp') }}" alt="logo-kitpc"
-                    class="logo-kitpc">
+class="logo-kitpc">
                 <h1 class="h4 mb-0 ms-2 text-light" style="font-family: 'Orbitron', sans-serif;">KitPC</h1>
             </div>
 
@@ -57,13 +78,13 @@
                             <a class="btn btn-outline-warning btn-sm" href="{{ url_for('admin') }}">ADM</a>
                             {% endif %}
                             <a class="fa-solid fa-arrow-right-from-bracket" style="color: #ff4d4d;"
-                                href="{{ url_for('logout') }}"></a>
+href="{{ url_for('logout') }}"></a>
                         </div>
                     </li>
                     {% else %}
                     <li class="nav-item ms-lg-3 mt-3 mt-lg-0">
                         <button class="btn btn-outline-info btn-sm fw-bold" data-bs-toggle="modal"
-                            data-bs-target="#modalAcesso">
+data-bs-target="#modalAcesso">
                             <i class="fa-solid fa-arrow-right-to-bracket"></i> Entrar
                         </button>
                     </li>
@@ -81,16 +102,16 @@
                 <ul class="nav nav-tabs card-header-tabs w-100" id="authTabs" role="tablist">
                     <li class="nav-item" role="presentation">
                         <button class="nav-link active fw-bold" id="login-tab" data-bs-toggle="tab"
-                            data-bs-target="#login" type="button" role="tab" style="color: #3CC9E4;">LOGIN</button>
+data-bs-target="#login" type="button" role="tab" style="color: #3CC9E4;">LOGIN</button>
                     </li>
                     <li class="nav-item" role="presentation">
                         <button class="nav-link fw-bold" id="register-tab" data-bs-toggle="tab"
-                            data-bs-target="#register" type="button" role="tab"
-                            style="color: #9216FD;">CADASTRAR</button>
+data-bs-target="#register" type="button" role="tab"
+style="color: #9216FD;">CADASTRAR</button>
                     </li>
                 </ul>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                    aria-label="Close"></button>
+aria-label="Close"></button>
             </div>
             <div class="modal-body p-4">
                 <div class="tab-content" id="authTabsContent">
@@ -100,19 +121,19 @@
                             <div class="mb-3">
                                 <label class="form-label text-info">Email</label>
                                 <input type="email" name="email"
-                                    class="form-control bg-transparent text-white border-info" required>
+class="form-control bg-transparent text-white border-info" required>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label text-info">Senha</label>
                                 <input type="password" name="senha"
-                                    class="form-control bg-transparent text-white border-info" required>
+class="form-control bg-transparent text-white border-info" required>
                             </div>
                             <button type="submit" class="btn btn-info w-100 fw-bold mt-2">ACESSAR CONTA</button>
                         </form>
                         <a href="{{ url_for('login_google') }}" class="btn-google-custom">
                             <div class="google-icon-wrapper">
                                 <img src="{{ url_for('static', filename='Imagens/Logo-google-icon-PNG.webp') }}"
-                                    alt="Google">
+alt="Google">
                             </div>
                             <span class="google-text">Continuar com Google</span>
                         </a>
@@ -123,20 +144,20 @@
                             <div class="mb-3">
                                 <label class="form-label" style="color: #9216FD;">Nome Completo</label>
                                 <input type="text" name="nome" class="form-control bg-transparent text-white"
-                                    style="border: 1px solid #9216FD;" required>
+style="border: 1px solid #9216FD;" required>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label" style="color: #9216FD;">Email</label>
                                 <input type="email" name="email" class="form-control bg-transparent text-white"
-                                    style="border: 1px solid #9216FD;" required>
+style="border: 1px solid #9216FD;" required>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label" style="color: #9216FD;">Senha</label>
                                 <input type="password" name="senha" class="form-control bg-transparent text-white"
-                                    style="border: 1px solid #9216FD;" required>
+style="border: 1px solid #9216FD;" required>
                             </div>
                             <button type="submit" class="btn w-100 fw-bold mt-2"
-                                style="background-color: #9216FD; color: white;">CRIAR CONTA</button>
+style="background-color: #9216FD; color: white;">CRIAR CONTA</button>
                         </form>
                         </a>
                         </a>
@@ -162,7 +183,7 @@
 
                     {% if session['is_admin'] %}
                     <form action="{{ url_for('deletar_post', id=destaque.id) }}" method="POST"
-                        onsubmit="return confirm('Tem certeza que deseja apagar o post principal?')">
+onsubmit="return confirm('Tem certeza que deseja apagar o post principal?')">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <button type="submit" class="btn btn-danger btn-lg px-3">
                             <i class="fas fa-trash-alt"></i>
@@ -175,7 +196,7 @@
         <div class="col-md-6 text-center">
             <div class="image-glow">
                 <img src="{{ destaque.imagem_url or url_for('static', filename='Imagens/pc gamer.webp') }}"
-                    alt="Imagem Destaque" class="img-fluid rounded border-neon">
+alt="Imagem Destaque" class="img-fluid rounded border-neon">
             </div>
         </div>
     </div>
@@ -190,8 +211,8 @@
             <div class="card-blog-menor p-3">
                 <div class="image-glow-sm">
                     <img src="{{ post.imagem_url or url_for('static', filename='Imagens/pc-padrao.webp') }}"
-                        class="img-fluid rounded border-neon-sm" alt="{{ post.titulo }}"
-                        style="height: 180px; width: 100%; object-fit: cover;">
+class="img-fluid rounded border-neon-sm" alt="{{ post.titulo }}"
+style="height: 180px; width: 100%; object-fit: cover;">
                 </div>
                 <div class="mt-3">
                     <h3 class="h5 fw-bold text-uppercase" style="color: #3CC9E4;">{{ post.titulo }}</h3>
@@ -226,7 +247,7 @@
         </div>
         <div class="col-md-6 text-center">
             <img src="{{ url_for('static', filename='Imagens/pc gamer.webp') }}" alt="Imagem KitPC"
-                class="img-fluid rounded">
+class="img-fluid rounded">
         </div>
     </div>
 </section>
@@ -249,28 +270,28 @@
         <div class="col-6 col-sm-6 col-md-3 mb-4 text-center">
             <div class="card-peca">
                 <img src="{{ url_for('static', filename='Imagens/processador.webp') }}" alt="Processador"
-                    class="img-fluid mb-2">
+class="img-fluid mb-2">
             </div>
             <p class="paragrafo2 fw-bold m-0">Processador</p>
         </div>
         <div class="col-6 col-sm-6 col-md-3 mb-4 text-center">
             <div class="card-peca">
                 <img src="{{ url_for('static', filename='Imagens/placa-de-video.webp') }}" alt="Placa de vídeo"
-                    class="img-fluid mb-2">
+class="img-fluid mb-2">
             </div>
             <p class="paragrafo2 fw-bold m-0">Placa de vídeo</p>
         </div>
         <div class="col-6 col-sm-6 col-md-3 mb-4 text-center">
             <div class="card-peca">
                 <img src="{{ url_for('static', filename='Imagens/gabinete.webp') }}" alt="Gabinete"
-                    class="img-fluid mb-2">
+class="img-fluid mb-2">
             </div>
             <p class="paragrafo2 fw-bold m-0">Gabinete</p>
         </div>
         <div class="col-6 col-sm-6 col-md-3 mb-4 text-center">
             <div class="card-peca">
                 <img src="{{ url_for('static', filename='Imagens/placa-mae.webp') }}" alt="Placa Mãe"
-                    class="img-fluid mb-2">
+class="img-fluid mb-2">
             </div>
             <p class="paragrafo2 fw-bold m-0">Placa Mãe</p>
         </div>
@@ -287,19 +308,19 @@
 
 <div id="notification-bell-container" style="position: fixed; bottom: 20px; left: 20px; z-index: 9999;">
     <div id="notification-bell" onclick="toggleSininho()"
-        style="background: #9216FD; color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 0 20px rgba(146, 34, 253, 0.6); transition: all 0.3s ease;">
+style="background: #9216FD; color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 0 20px rgba(146, 34, 253, 0.6); transition: all 0.3s ease;">
         <i class="fa-solid fa-bell" style="font-size: 25px;"></i>
     </div>
 
     <div id="notify-box"
-        style="display: none; position: absolute; bottom: 75px; left: 0; background: #0b052d; border: 2px solid #3CC9E4; padding: 20px; border-radius: 15px; width: 260px; box-shadow: 0 0 25px rgba(0, 242, 255, 0.4);">
+style="display: none; position: absolute; bottom: 75px; left: 0; background: #0b052d; border: 2px solid #3CC9E4; padding: 20px; border-radius: 15px; width: 260px; box-shadow: 0 0 25px rgba(0, 242, 255, 0.4);">
         <h4 style="color: #3CC9E4; font-family: 'Orbitron', sans-serif; font-size: 15px; margin: 0 0 10px 0;">
             NOTIFICAÇÕES</h4>
         <p style="font-size: 13px; color: white; margin-bottom: 15px; line-height: 1.4;">
             Deseja receber avisos reais de novos posts no seu celular ou PC?
         </p>
         <button type="button" onclick="ativarNotificacaoReal()"
-            style="width: 100%; background: #3CC9E4; color: #000; border: none; padding: 12px; font-weight: bold; cursor: pointer; border-radius: 8px; text-transform: uppercase; font-size: 11px;">
+style="width: 100%; background: #3CC9E4; color: #000; border: none; padding: 12px; font-weight: bold; cursor: pointer; border-radius: 8px; text-transform: uppercase; font-size: 11px;">
             ATIVAR AGORA
         </button>
     </div>
@@ -309,110 +330,107 @@
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-messaging-compat.js"></script>
 
 <script>
-    // 2. Configurações vindas do Flask
-    const firebaseConfig = {
-        apiKey: "{{ fb.apiKey }}",
-        authDomain: "{{ fb.authDomain }}",
-        projectId: "{{ fb.projectId }}",
-        storageBucket: "{{ fb.storageBucket }}",
-        messagingSenderId: "{{ fb.messagingSenderId }}",
-        appId: "{{ fb.appId }}"
+// 2. Configurações vindas do Flask
+const firebaseConfig = {
+apiKey: "{{ fb.apiKey }}",
+authDomain: "{{ fb.authDomain }}",
+projectId: "{{ fb.projectId }}",
+storageBucket: "{{ fb.storageBucket }}",
+messagingSenderId: "{{ fb.messagingSenderId }}",
+appId: "{{ fb.appId }}"
     };
 
-    // 3. INICIALIZAÇÃO OBRIGATÓRIA (Nesta ordem exata)
+// 3. INICIALIZAÇÃO OBRIGATÓRIA (Nesta ordem exata)
     firebase.initializeApp(firebaseConfig);
-    const messaging = firebase.messaging(); // Agora o messaging é criado DEPOIS do app estar pronto
+const messaging = firebase.messaging(); // Agora o messaging é criado DEPOIS do app estar pronto
 
-    // 4. Registro do Service Worker
-    if ('serviceWorker' in navigator) {
-        // Usamos o caminho que você definiu na pasta static
-        navigator.serviceWorker.register("{{ url_for('static', filename='firebase-messaging-sw.js') }}")
+// 4. Registro do Service Worker
+if ('serviceWorker' in navigator) {
+// Usamos o caminho que você definiu na pasta static
+navigator.serviceWorker.register("{{ url_for('static', filename='firebase-messaging-sw.js') }}")
             .then(function (reg) {
-                console.log('✅ Service Worker registrado com sucesso!');
+console.log('✅ Service Worker registrado com sucesso!');
             })
             .catch(function (err) {
-                console.error('❌ Erro ao registrar Service Worker:', err);
+console.error('❌ Erro ao registrar Service Worker:', err);
             });
     }
 
-    // --- FUNÇÕES DO SININHO ---
+// --- FUNÇÕES DO SININHO ---
 
-    function toggleSininho() {
-        const box = document.getElementById("notify-box");
-        const status = localStorage.getItem('sinoAtivo');
-        
-        if (status === 'sim') {
-            alert("🔔 As notificações reais já estão ativas!");
+function toggleSininho() {
+const box = document.getElementById("notify-box");
+const status = localStorage.getItem('sinoAtivo');
+if (status === 'sim') {
+alert("🔔 As notificações reais já estão ativas!");
         } else {
-            // Alterna entre block e none
-            if (box.style.display === "none" || box.style.display === "") {
-                box.style.display = "block";
+// Alterna entre block e none
+if (box.style.display === "none" || box.style.display === "") {
+box.style.display = "block";
             } else {
-                box.style.display = "none";
+box.style.display = "none";
             }
         }
     }
 
-    async function ativarNotificacaoReal() {
-        try {
-            // Pede permissão ao usuário
-            const permission = await Notification.requestPermission();
-            
-            if (permission === "granted") {
-                // Espera o Service Worker estar pronto
-                const registration = await navigator.serviceWorker.ready;
-                
-                // Pede o Token ao Firebase usando a sua VAPID KEY
-                const token = await messaging.getToken({ 
-                    vapidKey: "{{ fb.vapidKey }}", // Usando a chave do seu .env
-                    serviceWorkerRegistration: registration 
+async function ativarNotificacaoReal() {
+try {
+// Pede permissão ao usuário
+const permission = await Notification.requestPermission();
+if (permission === "granted") {
+// Espera o Service Worker estar pronto
+const registration = await navigator.serviceWorker.ready;
+// Pede o Token ao Firebase usando a sua VAPID KEY
+const token = await messaging.getToken({
+vapidKey: "{{ fb.vapidKey }}", // Usando a chave do seu .env
+serviceWorkerRegistration: registration
                 });
 
-                if (token) {
-                    // Envia para a rota do seu Flask (app.py)
-                    const res = await fetch('/salvar-token', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ token: token })
+if (token) {
+// Envia para a rota do seu Flask (app.py)
+const res = await fetch('/salvar-token', {
+method: 'POST',
+headers: { 'Content-Type': 'application/json' },
+body: JSON.stringify({ token: token })
                     });
 
-                    if (res.ok) {
-                        localStorage.setItem('sinoAtivo', 'sim');
-                        aplicarEstiloAtivo();
-                        document.getElementById("notify-box").style.display = "none";
-                        alert("🚀 Notificações configuradas com sucesso!");
+if (res.ok) {
+localStorage.setItem('sinoAtivo', 'sim');
+aplicarEstiloAtivo();
+document.getElementById("notify-box").style.display = "none";
+alert("🚀 Notificações configuradas com sucesso!");
                     } else {
-                        alert("Erro ao salvar token no servidor.");
+alert("Erro ao salvar token no servidor.");
                     }
                 }
             } else {
-                alert("Você bloqueou as notificações. Ative-as nas configurações do navegador (ícone de cadeado).");
+alert("Você bloqueou as notificações. Ative-as nas configurações do navegador (ícone de cadeado).");
             }
         } catch (error) {
-            console.error("Erro detalhado:", error);
-            alert("Erro ao recuperar assinatura. Tente novamente.");
+console.error("Erro detalhado:", error);
+alert("Erro ao recuperar assinatura. Tente novamente.");
         }
     }
 
-    function aplicarEstiloAtivo() {
-        const sino = document.getElementById("notification-bell");
-        if (sino) {
-            sino.style.background = "#3CC9E4";
-            sino.style.boxShadow = "0 0 20px #3CC9E4";
+function aplicarEstiloAtivo() {
+const sino = document.getElementById("notification-bell");
+if (sino) {
+sino.style.background = "#3CC9E4";
+sino.style.boxShadow = "0 0 20px #3CC9E4";
         }
     }
 
-    // Mantém o estado visual ao carregar a página
-    document.addEventListener("DOMContentLoaded", function () {
-        if (localStorage.getItem('sinoAtivo') === 'sim') {
-            aplicarEstiloAtivo();
+// Mantém o estado visual ao carregar a página
+document.addEventListener("DOMContentLoaded", function () {
+if (localStorage.getItem('sinoAtivo') === 'sim') {
+aplicarEstiloAtivo();
         }
     });
 </script>
 
 <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
 <script>
-    new window.VLibras.Widget('https://vlibras.gov.br/app');
+new window.VLibras.Widget('https://vlibras.gov.br/app');
 
 </script>
 
@@ -427,20 +445,20 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-    //script para o sininho de notificações do blog
-    function handleBellClick() {
-        const notifyBox = document.getElementById("notify-box");
-        const jaInscrito = localStorage.getItem('userEmail');
+//script para o sininho de notificações do blog
+function handleBellClick() {
+const notifyBox = document.getElementById("notify-box");
+const jaInscrito = localStorage.getItem('userEmail');
 
-        if (jaInscrito) {
-            // Se o navegador já conhece o e-mail dele
-            alert("Você já está inscrito com: " + jaInscrito);
+if (jaInscrito) {
+// Se o navegador já conhece o e-mail dele
+alert("Você já está inscrito com: " + jaInscrito);
         } else {
-            // Se é a primeira vez, mostra ou esconde a caixinha
-            if (notifyBox.style.display === "none") {
-                notifyBox.style.display = "block";
+// Se é a primeira vez, mostra ou esconde a caixinha
+if (notifyBox.style.display === "none") {
+notifyBox.style.display = "block";
             } else {
-                notifyBox.style.display = "none";
+notifyBox.style.display = "none";
             }
         }
     }
