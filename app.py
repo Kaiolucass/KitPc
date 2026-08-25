@@ -4,7 +4,7 @@ from flask_cors import CORS
 from dotenv import load_dotenv
 import os
 import logging
-import re 
+import re
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import flash
 from flask_mail import Mail, Message
@@ -41,6 +41,7 @@ load_dotenv()
 
 app = Flask(__name__)
 
+
 @app.context_processor
 def inject_firebase():
     return {
@@ -54,6 +55,7 @@ def inject_firebase():
             "vapidKey": os.getenv("FIREBASE_VAPID_KEY")
         }
     }
+
 
 is_prod = 'RENDER' in os.environ
 
@@ -94,6 +96,7 @@ app.config['MAIL_PASSWORD'] = os.getenv('EMAIL_PASS')
 mail = Mail(app)
 s = URLSafeTimedSerializer(app.secret_key)
 
+
 def send_async_email(app_obj, msg):
     with app_obj.app_context():
         try:
@@ -102,10 +105,11 @@ def send_async_email(app_obj, msg):
         except Exception as e:
             logger.error(f"Erro no envio de e-mail background: {e}")
 
+
 def enviar_confirmacao(usuario_email, token, usuario_nome):
     link = url_for('confirmar_email', token=token, _external=True)
     msg = Message('Confirme sua conta no KitPC! 🚀',
-                  sender=app.config['MAIL_USERNAME'], 
+                  sender=app.config['MAIL_USERNAME'],
                   recipients=[usuario_email])
     msg.body = f'Olá {usuario_nome}! Clique no link para ativar sua conta: {link}'
     msg.html = render_template('email_confirmacao.html', link=link, nome=usuario_nome)
@@ -123,6 +127,7 @@ def get_cleaned_db_uri():
         uri = uri.replace("mysql://", "mysql+pymysql://", 1)
     return uri.strip()
 
+
 db_uri = get_cleaned_db_uri() or "sqlite:///local_test.db"
 app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -131,7 +136,8 @@ app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
     "pool_recycle": 280,
 }
 
-from models import MensagemContato, db, Processador, PlacaMae, MemoriaRAM, PlacaVideo, Armazenamento, Fonte, Gabinete, Post, Usuario, MontagemSalva, Comentario, Notebook
+from models import MensagemContato, db, Processador, PlacaMae, MemoriaRAM, PlacaVideo, Armazenamento, Fonte, Gabinete, Post, Usuario, MontagemSalva, Comentario, Notebook, ProgressoTrilha
+from licoes_trilha import LICOES, get_licao_por_slug
 db.init_app(app)
 
 with app.app_context():
@@ -142,6 +148,7 @@ with app.app_context():
         logger.error(f"Erro ao inicializar banco: {e}")
 
 # --- ROTAS DE NAVEGAÇÃO ---
+
 
 @app.route("/")
 def home():
@@ -162,32 +169,96 @@ def home():
         firebase_data = {}
     return render_template("index.html", posts=posts, fb=firebase_data)
 
+
 @app.route("/seuPc")
 def montagem():
     return render_template("seupc.html")
+
 
 @app.route("/educacao")
 def educacao():
     return render_template("educacao.html")
 
+
 @app.route('/educacao/guia-de-pecas')
 def guia_pecas():
     return render_template('guia_pecas.html')
 
+
 @app.route('/educacao/trilha')
 def trilha_montagem():
-    return render_template('trilha.html')
+    concluidas = set()
+    if session.get('usuario_id'):
+        try:
+            registros = ProgressoTrilha.query.filter_by(usuario_id=session['usuario_id']).all()
+            concluidas = {r.licao_slug for r in registros}
+        except Exception as e:
+            logger.error(f"Erro ao buscar progresso da trilha: {e}")
+    blocos = {}
+    for licao in LICOES:
+        bloco_id = licao['bloco']
+        if bloco_id not in blocos:
+            blocos[bloco_id] = {'nome': licao['bloco_nome'], 'licoes': []}
+        blocos[bloco_id]['licoes'].append({**licao, 'concluida': licao['slug'] in concluidas})
+    blocos_ordenados = [blocos[chave] for chave in sorted(blocos.keys())]
+    return render_template('trilha.html', blocos=blocos_ordenados)
+
+
+@app.route('/educacao/trilha/<slug>')
+def trilha_licao(slug):
+    licao = get_licao_por_slug(slug)
+    if not licao:
+        return redirect(url_for('trilha_montagem'))
+    indice = LICOES.index(licao)
+    anterior = LICOES[indice - 1] if indice > 0 else None
+    proxima = LICOES[indice + 1] if indice < len(LICOES) - 1 else None
+    concluida = False
+    if session.get('usuario_id'):
+        try:
+            concluida = ProgressoTrilha.query.filter_by(
+                usuario_id=session['usuario_id'], licao_slug=slug
+            ).first() is not None
+        except Exception as e:
+            logger.error(f"Erro ao verificar progresso da lição: {e}")
+    return render_template('licao_trilha.html', licao=licao, anterior=anterior, proxima=proxima, concluida=concluida)
+
+
+@app.route('/educacao/trilha/concluir/<slug>', methods=["POST"])
+def concluir_licao(slug):
+    if not session.get('usuario_id'):
+        flash("Você precisa estar logado para salvar seu progresso na trilha!")
+        return redirect(url_for('trilha_licao', slug=slug))
+    licao = get_licao_por_slug(slug)
+    if not licao:
+        return redirect(url_for('trilha_montagem'))
+    try:
+        ja_existe = ProgressoTrilha.query.filter_by(
+            usuario_id=session['usuario_id'], licao_slug=slug
+        ).first()
+        if not ja_existe:
+            novo_progresso = ProgressoTrilha(usuario_id=session['usuario_id'], licao_slug=slug)
+            db.session.add(novo_progresso)
+            db.session.commit()
+            flash("✅ Lição marcada como concluída!")
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Erro ao salvar progresso da trilha: {e}")
+        flash("Erro ao salvar seu progresso. Tente novamente.")
+    return redirect(url_for('trilha_licao', slug=slug))
+
 
 @app.route("/sobre")
 def sobre_nos():
     return render_template("sobre.html")
+
 
 # ✅ CORREÇÃO CRÍTICA: Rota para servir o firebase-messaging-sw.js na RAIZ do site
 # Sem isso o Service Worker não funciona e as notificações push falham
 @app.route('/firebase-messaging-sw.js')
 def firebase_messaging_sw():
     return send_from_directory('static', 'firebase-messaging-sw.js',
-                               mimetype='application/javascript')
+                                mimetype='application/javascript')
+
 
 # --- CONFIGURAÇÃO FIREBASE (NOTIFICAÇÕES) ---
 if not firebase_admin._apps:
@@ -218,6 +289,7 @@ def inscrever():
         logger.error(f"Erro ao salvar e-mail no Firebase: {e}")
         flash("Erro técnico ao se inscrever. Tente novamente em instantes.")
     return redirect(url_for('home'))
+
 
 @app.route("/salvar-token", methods=["POST"])
 @csrf.exempt
@@ -251,6 +323,7 @@ def salvar_token():
         logger.error(f"Erro geral no salvar_token: {e}")
         return jsonify({"erro": "Falha interna"}), 500
 
+
 def enviar_notificacoes_async(app, post_titulo, post_slug):
     with app.app_context():
         try:
@@ -267,6 +340,7 @@ def enviar_notificacoes_async(app, post_titulo, post_slug):
             print("Notificações enviadas com sucesso!")
         except Exception as e:
             print(f"Erro ao enviar notificações: {e}")
+
 
 # --- SISTEMA DE LOGIN E CADASTRO ---
 
@@ -288,10 +362,12 @@ def login():
         return render_template("login.html", erro="E-mail ou senha incorretos!")
     return render_template("login.html")
 
+
 @app.route("/logout")
 def logout():
     session.clear()
     return redirect(url_for('home'))
+
 
 def senha_forte(senha):
     if len(senha) < 8:
@@ -304,6 +380,7 @@ def senha_forte(senha):
         return False
     return True
 
+
 oauth = OAuth(app)
 google = oauth.register(
     name='google',
@@ -313,10 +390,12 @@ google = oauth.register(
     client_kwargs={'scope': 'openid email profile'}
 )
 
+
 @app.route('/login/google')
 def login_google():
     redirect_uri = url_for('authorize_google', _external=True)
     return google.authorize_redirect(redirect_uri)
+
 
 @app.route('/authorize/google')
 def authorize_google():
@@ -344,6 +423,7 @@ def authorize_google():
         logger.error(f"Erro no login Google: {e}")
         flash("Erro ao autenticar com o Google.")
     return redirect(url_for('login'))
+
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -379,6 +459,7 @@ def register():
         return redirect(url_for('login'))
     return render_template("register.html")
 
+
 @app.route("/confirmar-email/<token>")
 def confirmar_email(token):
     try:
@@ -392,6 +473,7 @@ def confirmar_email(token):
         return "<h1>O link expirou! Peça um novo cadastro.</h1>"
     except Exception:
         return "<h1>Token inválido ou corrompido!</h1>"
+
 
 def enviar_notificacoes_thread(app_obj, titulo, slug):
     with app_obj.app_context():
@@ -430,6 +512,7 @@ def enviar_notificacoes_thread(app_obj, titulo, slug):
         except Exception as e:
             logger.error(f"Falha ao enviar push: {e}")
 
+
 # --- ÁREA ADMINISTRATIVA ---
 
 @app.route("/admin")
@@ -440,10 +523,11 @@ def admin():
     posts_lista = Post.query.order_by(Post.data_postagem.desc()).all()
     mensagens_lista = MensagemContato.query.order_by(MensagemContato.data_envio.desc()).all()
     return render_template("admin.html",
-                           usuarios=usuarios_lista,
-                           posts=posts_lista,
-                           mensagens=mensagens_lista,
-                           edit_post=None)
+                            usuarios=usuarios_lista,
+                            posts=posts_lista,
+                            mensagens=mensagens_lista,
+                            edit_post=None)
+
 
 @app.route("/admin/editar-post/<int:id>")
 def editar_post(id):
@@ -453,6 +537,7 @@ def editar_post(id):
     usuarios_lista = Usuario.query.all()
     posts_lista = Post.query.order_by(Post.data_postagem.desc()).all()
     return render_template("admin.html", usuarios=usuarios_lista, posts=posts_lista, edit_post=post)
+
 
 @app.route("/admin/salvar-post", methods=["POST"])
 @app.route("/admin/salvar-post/<int:id>", methods=["POST"])
@@ -506,6 +591,7 @@ def salvar_post(id=None):
         flash(f"❌ Erro ao salvar: {e}")
         return redirect(url_for('admin'))
 
+
 @app.route("/admin/arquivar-post/<int:id>", methods=["POST"])
 def arquivar_post(id):
     if not session.get('is_admin'):
@@ -515,6 +601,7 @@ def arquivar_post(id):
     db.session.commit()
     flash("Status do post atualizado!")
     return redirect(url_for('admin'))
+
 
 @app.route("/admin/upload-imagem-corpo", methods=["POST"])
 def upload_imagem_corpo():
@@ -528,6 +615,7 @@ def upload_imagem_corpo():
         except Exception as e:
             return {"error": str(e)}, 500
     return {"error": "Nenhum arquivo enviado"}, 400
+
 
 @app.route("/admin/deletar-post/<int:id>", methods=["POST"])
 def deletar_post(id):
@@ -543,6 +631,7 @@ def deletar_post(id):
         flash(f"Erro: {e}")
     return redirect(url_for('admin'))
 
+
 @app.route("/admin/confirmar-usuario/<int:id>", methods=["POST"])
 def confirmar_usuario_admin(id):
     if not session.get('is_admin'):
@@ -556,6 +645,7 @@ def confirmar_usuario_admin(id):
         db.session.rollback()
         flash(f"Erro ao ativar: {e}")
     return redirect(url_for('admin'))
+
 
 @app.route("/admin/deletar-usuario/<int:id>", methods=["POST"])
 def deletar_usuario_admin(id):
@@ -571,6 +661,7 @@ def deletar_usuario_admin(id):
         flash(f"Erro ao deletar: {e}")
     return redirect(url_for('admin'))
 
+
 @app.route("/admin/deletar-mensagem/<int:id>", methods=["POST"])
 def deletar_mensagem(id):
     if not session.get('is_admin'):
@@ -585,6 +676,7 @@ def deletar_mensagem(id):
         flash(f"Erro ao deletar mensagem: {e}")
     return redirect(url_for('admin'))
 
+
 @app.route('/admin/limpar-todas-mensagens', methods=['POST'])
 def limpar_todas_mensagens():
     if not session.get('is_admin'):
@@ -598,12 +690,14 @@ def limpar_todas_mensagens():
         flash(f"Erro ao limpar mensagens: {e}", "danger")
     return redirect(url_for('admin'))
 
+
 # --- ARQUIVOS DO BLOG ---
 
 @app.route("/arquivo")
 def arquivo():
     posts = Post.query.order_by(Post.data_postagem.desc()).all()
     return render_template("arquivo.html", posts=posts)
+
 
 @app.route("/blog/<slug>")
 def exibir_post(slug):
@@ -627,9 +721,10 @@ def exibir_post(slug):
     else:
         logger.info(f"Visualização de Admin detectada para '{post.titulo}'. Contador ignorado.")
     return render_template("blog_post.html",
-                           post=post,
-                           sugestoes=sugestoes,
-                           comentarios=comentarios)
+                            post=post,
+                            sugestoes=sugestoes,
+                            comentarios=comentarios)
+
 
 @app.route("/blog/comentar/<int:post_id>", methods=["POST"])
 def comentar(post_id):
@@ -654,6 +749,7 @@ def comentar(post_id):
     post = Post.query.get_or_404(post_id)
     return redirect(url_for('exibir_post', slug=post.slug))
 
+
 @app.route("/excluir-comentario/<int:id>")
 def excluir_comentario(id):
     if not session.get('is_admin'):
@@ -665,13 +761,16 @@ def excluir_comentario(id):
     db.session.commit()
     return redirect(url_for('exibir_post', slug=post_slug))
 
+
 @app.route("/post/<slug>")
 def redirecionar_post_legado(slug):
     return redirect(url_for('exibir_post', slug=slug), code=301)
 
+
 @app.route("/blog")
 def redirecionar_blog():
     return redirect(url_for('arquivo')), 301
+
 
 # --- LÓGICA DO MONTADOR ---
 
@@ -679,10 +778,12 @@ def get_total(preco_label):
     precos = {"Um PC OK": 2000, "Um PC BOM": 3000, "Um PC MUITO BOM": 5000, "Até a NASA quer": 10000}
     return precos.get(preco_label, 2000)
 
+
 def distribuir_orcamento(total, quer_gpu):
     if quer_gpu:
         return {"cpu": total*0.22, "placa_mae": total*0.12, "ram": total*0.12, "gpu": total*0.30, "ssd": total*0.10, "fonte": total*0.08, "gabinete": total*0.06}
     return {"cpu": total*0.40, "placa_mae": total*0.15, "ram": total*0.15, "gpu": 0, "ssd": total*0.15, "fonte": total*0.10, "gabinete": total*0.05}
+
 
 @app.route("/montar-setup", methods=["POST"])
 @csrf.exempt
@@ -758,6 +859,7 @@ def montar_setup():
     except Exception as e:
         return jsonify({"erro": str(e)}), 500
 
+
 class KitPC_PDF(FPDF):
     def header(self):
         self.set_font('Arial', 'B', 60)
@@ -788,6 +890,7 @@ class KitPC_PDF(FPDF):
         self.cell(0, 8, f"  FASE {numero}: {titulo}", ln=True, fill=True)
         self.ln(2)
         self.set_text_color(0, 0, 0)
+
 
 @app.route("/gerar-pdf", methods=["POST"])
 @csrf.exempt
@@ -888,6 +991,7 @@ def gerar_pdf():
         print(f"ERRO NO PDF: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
+
 @app.route("/setup-db-kaio")
 def setup_db_kaio():
     try:
@@ -896,6 +1000,7 @@ def setup_db_kaio():
     except Exception as e:
         db.session.rollback()
         return f"❌ Erro ao atualizar banco: {e}"
+
 
 @app.route("/consultoria-ia", methods=["POST"])
 @csrf.exempt
@@ -960,8 +1065,8 @@ def consultoria_ia():
                 ram = MemoriaRAM.query.filter(MemoriaRAM.tipo == tipo_memoria_escolhida).order_by(MemoriaRAM.preco.asc()).first()
         if not ram:
             ram = MemoriaRAM.query.filter(MemoriaRAM.preco <= orcamento.get("ram", 0)).order_by(MemoriaRAM.preco.desc()).first()
-            if not ram:
-                ram = MemoriaRAM.query.order_by(MemoriaRAM.preco.asc()).first()
+        if not ram:
+            ram = MemoriaRAM.query.order_by(MemoriaRAM.preco.asc()).first()
         if ram:
             custo_total += float(ram.preco)
             setup.append({"componente": "Memória RAM", "nome": ram.nome, "imagem_url": ram.imagem_url, "link_loja": ram.link_loja, "preco": float(ram.preco), "preco_estimado": f"R$ {float(ram.preco):,.2f}".replace(",", "X").replace(".", ",").replace("X", "."), "justificativa": f"É aqui que os programas abertos ficam. Esta {tipo_memoria_escolhida} garante agilidade."})
@@ -986,8 +1091,8 @@ def consultoria_ia():
         fonte = Fonte.query.filter(Fonte.potencia >= tdp_necessario, Fonte.preco <= orcamento.get("fonte", 0)).order_by(Fonte.preco.desc()).first()
         if not fonte:
             fonte = Fonte.query.filter(Fonte.potencia >= tdp_necessario).order_by(Fonte.preco.asc()).first()
-            if not fonte:
-                fonte = Fonte.query.order_by(Fonte.preco.desc()).first()
+        if not fonte:
+            fonte = Fonte.query.order_by(Fonte.preco.desc()).first()
         if fonte:
             custo_total += float(fonte.preco)
             potencia_fonte = getattr(fonte, 'potencia', '?')
@@ -999,8 +1104,8 @@ def consultoria_ia():
         gab = query_gab.order_by(Gabinete.preco.desc()).first()
         if not gab:
             gab = Gabinete.query.filter(Gabinete.tamanho_suportado.ilike(f"%{tamanho_mobo}%")).order_by(Gabinete.preco.asc()).first()
-            if not gab:
-                gab = Gabinete.query.order_by(Gabinete.preco.asc()).first()
+        if not gab:
+            gab = Gabinete.query.order_by(Gabinete.preco.asc()).first()
         if gab:
             custo_total += float(gab.preco)
             setup.append({"componente": "Gabinete", "nome": gab.nome, "imagem_url": gab.imagem_url, "link_loja": gab.link_loja, "preco": float(gab.preco), "preco_estimado": f"R$ {float(gab.preco):,.2f}".replace(",", "X").replace(".", ",").replace("X", "."), "justificativa": f"As peças ficarão protegidas. Ele tem espaço suficiente para o modelo {tamanho_mobo} da placa-mãe."})
@@ -1025,6 +1130,7 @@ def consultoria_ia():
         erro_str = traceback.format_exc()
         logger.error(f"Erro no Algoritmo do Montador:\n{erro_str}")
         return jsonify({"erro": f"Ops, ocorreu um erro! Detalhe técnico: {str(e)}"}), 500
+
 
 # --- SITEMAP ---
 @app.route('/sitemap.xml', methods=['GET'])
@@ -1057,6 +1163,7 @@ def sitemap():
         print(f"Erro ao gerar sitemap: {e}")
         return str(e), 500
 
+
 @app.route('/fale-conosco', methods=['GET', 'POST'])
 def fale_conosco():
     if request.method == 'POST':
@@ -1078,37 +1185,47 @@ def fale_conosco():
             return render_template('contato.html', erro=f"Erro técnico: {str(e)}")
     return render_template('contato.html')
 
+
 @app.route("/privacidade")
 def privacidade():
     return render_template("privacidade.html")
+
 
 @app.route("/termos")
 def termos():
     return render_template("termos.html")
 
+
 @app.route('/cookies')
 def cookies():
     return render_template('cookies.html')
 
+
 @app.route('/contato')
 def contato():
     return render_template('contato.html')
+
 
 @app.route('/robots.txt')
 def robots_txt():
     conteudo = "User-agent: *\nDisallow: /admin\nDisallow: /setup-db-kaio\nSitemap: https://kitpc.com.br/sitemap.xml"
     return conteudo, 200, {'Content-Type': 'text/plain'}
 
+
 @app.route("/health")
-def health(): return "OK", 200
+def health():
+    return "OK", 200
+
 
 @app.route('/ping')
 def ping():
     return "KitPC Online!", 200
 
+
 @app.route('/ads.txt')
 def servir_ads_txt():
     return send_from_directory(os.path.join(app.root_path, 'static'), 'ads.txt')
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)

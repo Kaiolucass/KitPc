@@ -163,7 +163,7 @@ class Notebook(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(255), nullable=False)
     preco = db.Column(db.Float, nullable=False)
-    uso_sugerido = db.Column(db.String(100))  # Ex: Gamer, Escritório, Edição
+    uso_sugerido = db.Column(db.String(100))
     link_loja = db.Column(db.String(500))
     imagem_url = db.Column(db.String(500), default="https://res.cloudinary.com/seu_user/image/upload/v1/kitpc/notebook_default.png")
 
@@ -176,8 +176,6 @@ class MontagemSalva(db.Model):
     __tablename__ = 'montagens_salvas'
     id = db.Column(db.Integer, primary_key=True)
     usuario_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False)
-    
-    # Detalhes do PC salvo
     nome_setup = db.Column(db.String(100), default="Meu Setup Gamer")
     processador = db.Column(db.String(100))
     placa_mae = db.Column(db.String(100))
@@ -187,11 +185,10 @@ class MontagemSalva(db.Model):
     fonte = db.Column(db.String(100))
     gabinete = db.Column(db.String(100))
     preco_total = db.Column(db.Numeric(10, 2))
-    
     data_criacao = db.Column(db.DateTime, default=datetime.utcnow)
 
 class Comentario(db.Model):
-    __tablename__ = 'comentarios' # Coloquei no plural para seguir seu padrão
+    __tablename__ = 'comentarios'
     id = db.Column(db.Integer, primary_key=True)
     conteudo = db.Column(db.Text, nullable=False)
     data_postagem = db.Column(db.DateTime, default=datetime.utcnow)
@@ -200,14 +197,13 @@ class Comentario(db.Model):
     autor = db.relationship('Usuario', backref=db.backref('meus_comentarios', lazy=True))
     post_rel = db.relationship('Post', backref=db.backref('comentarios_do_post', lazy=True))
 
-    # --- TABELAS DE NOTIFICAÇÕES ---
+# --- TABELAS DE NOTIFICAÇÕES ---
 
 class PushToken(db.Model):
     __tablename__ = 'push_tokens'
     id = db.Column(db.Integer, primary_key=True)
     token_valor = db.Column(db.String(255), unique=True, nullable=False)
     data_criacao = db.Column(db.DateTime, default=datetime.utcnow)
-    # Opcional: Vincular o token a um usuário se ele estiver logado
     usuario_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=True)
 
     def __repr__(self):
@@ -222,3 +218,19 @@ class MensagemContato(db.Model):
     mensagem = db.Column(db.Text, nullable=False)
     data_envio = db.Column(db.DateTime, default=datetime.utcnow)
     lida = db.Column(db.Boolean, default=False)
+
+# --- TABELA DE PROGRESSO DA TRILHA DE APRENDIZADO ---
+
+class ProgressoTrilha(db.Model):
+    __tablename__ = 'progresso_trilha'
+    id = db.Column(db.Integer, primary_key=True)
+    usuario_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False)
+    licao_slug = db.Column(db.String(100), nullable=False)
+    data_conclusao = db.Column(db.DateTime, default=datetime.utcnow)
+
+    __table_args__ = (
+        db.UniqueConstraint('usuario_id', 'licao_slug', name='uq_usuario_licao'),
+    )
+
+    def __repr__(self):
+        return f'<ProgressoTrilha usuario={self.usuario_id} licao={self.licao_slug}>'

@@ -4,14 +4,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Trilha de Montagem | KitPC Educação</title>
-  <meta name="description" content="Tutoriais, passo a passo sobre montagem de computadores para deixar voce mais confiante na hora de montar seu primeiro pc.">
-<link rel="canonical" href="https://kitpc.com.br/educacao/trilha">
+  <title>{{ licao.titulo }} | Trilha KitPC</title>
+  <meta name="description" content="{{ licao.resumo }}">
+<link rel="canonical" href="https://kitpc.com.br/educacao/trilha/{{ licao.slug }}">
   <link rel="icon" href="{{ url_for('static', filename='Imagens/favicon.ico') }}" type="image/x-icon">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3396569889908907"
-crossorigin="anonymous"></script>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='CSS/trilha.css') }}">
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-D5JVX6TY9Y"></script>
@@ -136,41 +134,63 @@ style="background-color: #9216FD; color: white;">CRIAR CONTA</button>
     </div>
   </div>
 
-  <main class="trilha-container">
-    <div class="text-center mb-5">
-      <h1 class="display-4 fw-bold text-purple" style="font-family: 'Orbitron';">TRILHA KIT PC</h1>
-      <p class="lead text-secondary">A jornada do zero ao primeiro boot. Siga a ordem e domine seu hardware.</p>
-      {% if not session['nome'] %}
-      <p class="text-info small">
-        <i class="fa-solid fa-circle-info"></i>
-        Faça login pra salvar seu progresso entre visitas.
-      </p>
+  <main class="container mt-5" style="max-width: 800px;">
+    <nav aria-label="breadcrumb" class="mb-4">
+      <a href="{{ url_for('trilha_montagem') }}" class="text-info text-decoration-none">
+        <i class="fa-solid fa-arrow-left"></i> Voltar pra Trilha
+      </a>
+    </nav>
+
+    <div class="licao-header mb-4">
+      <span class="badge bg-info text-dark mb-2">Lição {{ licao.numero }} · {{ licao.bloco_nome }}</span>
+      <h1 class="fw-bold" style="font-family: 'Orbitron', sans-serif;">{{ licao.titulo }}</h1>
+      <p class="text-secondary lead">{{ licao.resumo }}</p>
+    </div>
+
+    <div class="licao-corpo p-4 rounded" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(60,201,228,0.2);">
+      {% for paragrafo in licao.paragrafos %}
+      <p class="text-light" style="line-height: 1.7;">{{ paragrafo|safe }}</p>
+      {% endfor %}
+    </div>
+
+    <div class="mt-4 text-center">
+      {% if concluida %}
+      <div class="alert alert-success d-inline-flex align-items-center gap-2">
+        <i class="fa-solid fa-circle-check"></i> Você já concluiu essa lição!
+      </div>
+      {% elif session['nome'] %}
+      <form action="{{ url_for('concluir_licao', slug=licao.slug) }}" method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn btn-info fw-bold text-dark px-4">
+          <i class="fa-solid fa-check"></i> Marcar como concluída
+        </button>
+      </form>
+      {% else %}
+      <button class="btn btn-outline-info fw-bold" data-bs-toggle="modal" data-bs-target="#modalAcesso">
+        <i class="fa-solid fa-arrow-right-to-bracket"></i> Faça login para salvar seu progresso
+      </button>
       {% endif %}
     </div>
 
-    {% for bloco in blocos %}
-    <div class="bloco-trilha mt-5">
-      <h3 class="bloco-titulo"><span class="badge-numero">{{ loop.index }}</span> {{ bloco.nome }}</h3>
-      <div class="lista-passos">
-        {% for licao in bloco.licoes %}
-        <a href="{{ url_for('trilha_licao', slug=licao.slug) }}" class="passo-item{{ loop.parent.index }}">
-          <div class="passo-status">
-            {% if licao.concluida %}
-            <i class="fas fa-check-circle text-success"></i>
-            {% else %}
-            <i class="far fa-circle"></i>
-            {% endif %}
-          </div>
-          <div class="passo-info{{ loop.parent.index }}">
-            <h5>{{ licao.numero }}. {{ licao.titulo }}</h5>
-            <small>{{ licao.resumo }}</small>
-          </div>
-          <i class="fas fa-chevron-right arrow"></i>
-        </a>
-        {% endfor %}
-      </div>
+    <div class="d-flex justify-content-between align-items-center mt-5 pt-4 border-top border-secondary">
+      {% if anterior %}
+      <a href="{{ url_for('trilha_licao', slug=anterior.slug) }}" class="btn btn-outline-secondary">
+        <i class="fa-solid fa-arrow-left"></i> {{ anterior.titulo }}
+      </a>
+      {% else %}
+      <span></span>
+      {% endif %}
+
+      {% if proxima %}
+      <a href="{{ url_for('trilha_licao', slug=proxima.slug) }}" class="btn btn-info fw-bold text-dark">
+        {{ proxima.titulo }} <i class="fa-solid fa-arrow-right"></i>
+      </a>
+      {% else %}
+      <a href="{{ url_for('trilha_montagem') }}" class="btn btn-info fw-bold text-dark">
+        Voltar pra Trilha <i class="fa-solid fa-flag-checkered"></i>
+      </a>
+      {% endif %}
     </div>
-    {% endfor %}
   </main>
 
   <div vw class="enabled">
@@ -180,122 +200,7 @@ style="background-color: #9216FD; color: white;">CRIAR CONTA</button>
     </div>
   </div>
 
-  <div id="notification-bell-container" style="position: fixed; bottom: 20px; left: 20px; z-index: 9999;">
-    <div id="notification-bell" onclick="toggleSininho()"
-style="background: #9216FD; color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 0 20px rgba(146, 34, 253, 0.6); transition: all 0.3s ease;">
-      <i class="fa-solid fa-bell" style="font-size: 25px;"></i>
-    </div>
-
-    <div id="notify-box"
-style="display: none; position: absolute; bottom: 75px; left: 0; background: #0b052d; border: 2px solid #3CC9E4; padding: 20px; border-radius: 15px; width: 260px; box-shadow: 0 0 25px rgba(0, 242, 255, 0.4);">
-      <h4 style="color: #3CC9E4; font-family: 'Orbitron', sans-serif; font-size: 15px; margin: 0 0 10px 0;">NOTIFICAÇÕES
-      </h4>
-      <p style="font-size: 13px; color: white; margin-bottom: 15px; line-height: 1.4;">
-        Deseja receber avisos reais de novos posts no seu celular ou PC?
-      </p>
-      <button type="button" onclick="ativarNotificacaoReal()"
-style="width: 100%; background: #3CC9E4; color: #000; border: none; padding: 12px; font-weight: bold; cursor: pointer; border-radius: 8px; text-transform: uppercase; font-size: 11px;">
-        ATIVAR AGORA
-      </button>
-    </div>
-  </div>
-
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-messaging-compat.js"></script>
-
-<script>
-const firebaseConfig = {
-apiKey: "{{ fb.apiKey }}",
-authDomain: "{{ fb.authDomain }}",
-projectId: "{{ fb.projectId }}",
-storageBucket: "{{ fb.storageBucket }}",
-messagingSenderId: "{{ fb.messagingSenderId }}",
-appId: "{{ fb.appId }}"
-    };
-
-    firebase.initializeApp(firebaseConfig);
-const messaging = firebase.messaging();
-
-if ('serviceWorker' in navigator) {
-navigator.serviceWorker.register("{{ url_for('static', filename='firebase-messaging-sw.js') }}")
-            .then(function (reg) {
-console.log('✅ Service Worker registrado com sucesso!');
-            })
-            .catch(function (err) {
-console.error('❌ Erro ao registrar Service Worker:', err);
-            });
-    }
-
-function toggleSininho() {
-const box = document.getElementById("notify-box");
-const status = localStorage.getItem('sinoAtivo');
-if (status === 'sim') {
-alert("🔔 As notificações reais já estão ativas!");
-        } else {
-if (box.style.display === "none" || box.style.display === "") {
-box.style.display = "block";
-            } else {
-box.style.display = "none";
-            }
-        }
-    }
-
-async function ativarNotificacaoReal() {
-try {
-const permission = await Notification.requestPermission();
-if (permission === "granted") {
-const registration = await navigator.serviceWorker.ready;
-const token = await messaging.getToken({
-vapidKey: "{{ fb.vapidKey }}",
-serviceWorkerRegistration: registration
-                });
-
-if (token) {
-const res = await fetch('/salvar-token', {
-method: 'POST',
-headers: { 'Content-Type': 'application/json' },
-body: JSON.stringify({ token: token })
-                    });
-
-if (res.ok) {
-localStorage.setItem('sinoAtivo', 'sim');
-aplicarEstiloAtivo();
-document.getElementById("notify-box").style.display = "none";
-alert("🚀 Notificações configuradas com sucesso!");
-                    } else {
-alert("Erro ao salvar token no servidor.");
-                    }
-                }
-            } else {
-alert("Você bloqueou as notificações. Ative-as nas configurações do navegador (ícone de cadeado).");
-            }
-        } catch (error) {
-console.error("Erro detalhado:", error);
-alert("Erro ao recuperar assinatura. Tente novamente.");
-        }
-    }
-
-function aplicarEstiloAtivo() {
-const sino = document.getElementById("notification-bell");
-if (sino) {
-sino.style.background = "#3CC9E4";
-sino.style.boxShadow = "0 0 20px #3CC9E4";
-        }
-    }
-
-document.addEventListener("DOMContentLoaded", function () {
-if (localStorage.getItem('sinoAtivo') === 'sim') {
-aplicarEstiloAtivo();
-        }
-    });
-</script>
-
-  <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
-  <script>
-new window.VLibras.Widget('https://vlibras.gov.br/app');
-</script>
-
-  <footer>
+  <footer class="mt-5">
      <p>&copy; 2026 KitPC - Todos os direitos reservados</p>
    <a href="{{ url_for('privacidade') }}">Privacidade</a>
         <a href="{{ url_for('termos') }}">Termos de Uso</a>
@@ -303,6 +208,10 @@ new window.VLibras.Widget('https://vlibras.gov.br/app');
         <a href="{{ url_for('contato') }}">Fale Conosco</a>
   </footer>
 
+  <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
+  <script>
+new window.VLibras.Widget('https://vlibras.gov.br/app');
+</script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
