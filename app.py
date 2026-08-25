@@ -220,6 +220,7 @@ def inscrever():
     return redirect(url_for('home'))
 
 @app.route("/salvar-token", methods=["POST"])
+@csrf.exempt
 def salvar_token():
     try:
         dados = request.get_json()
@@ -684,6 +685,7 @@ def distribuir_orcamento(total, quer_gpu):
     return {"cpu": total*0.40, "placa_mae": total*0.15, "ram": total*0.15, "gpu": 0, "ssd": total*0.15, "fonte": total*0.10, "gabinete": total*0.05}
 
 @app.route("/montar-setup", methods=["POST"])
+@csrf.exempt
 def montar_setup():
     try:
         dados = request.get_json(force=True)
@@ -788,6 +790,7 @@ class KitPC_PDF(FPDF):
         self.set_text_color(0, 0, 0)
 
 @app.route("/gerar-pdf", methods=["POST"])
+@csrf.exempt
 def gerar_pdf():
     try:
         dados = request.get_json()
@@ -895,6 +898,7 @@ def setup_db_kaio():
         return f"❌ Erro ao atualizar banco: {e}"
 
 @app.route("/consultoria-ia", methods=["POST"])
+@csrf.exempt
 def consultoria_ia():
     try:
         dados = request.get_json(force=True)
