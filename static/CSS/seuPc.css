@@ -325,6 +325,10 @@ p{
     filter: drop-shadow(0 0 8px #3CC9E4);
     transform: scale(1.1);
 }
+.question-ativa {
+    border-color: #3CC9E4 !important;
+    box-shadow: 0 0 15px rgba(60, 201, 228, 0.3);
+}
 
 /* Rodapé */
 footer {

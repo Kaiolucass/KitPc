@@ -1,6 +1,10 @@
 const respostas = {};
 let setupAtual = [];
 
+// Destaca visualmente o card da pergunta ao clicar
+function toggleQuestion(elemento) {
+    elemento.classList.toggle('question-ativa');
+}
 function setAnswer(campo, valor, event) {
     event.preventDefault();
     respostas[campo] = valor;
