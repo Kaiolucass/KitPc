@@ -149,11 +149,12 @@ style="background-color: #9216FD; color: white;">CRIAR CONTA</button>
     </div>
 
     {% for bloco in blocos %}
+    {% set indice_bloco = loop.index %}
     <div class="bloco-trilha mt-5">
-      <h3 class="bloco-titulo"><span class="badge-numero">{{ loop.index }}</span> {{ bloco.nome }}</h3>
+      <h3 class="bloco-titulo"><span class="badge-numero">{{ indice_bloco }}</span> {{ bloco.nome }}</h3>
       <div class="lista-passos">
         {% for licao in bloco.licoes %}
-        <a href="{{ url_for('trilha_licao', slug=licao.slug) }}" class="passo-item{{ loop.parent.index }}">
+        <a href="{{ url_for('trilha_licao', slug=licao.slug) }}" class="passo-item{{ indice_bloco }}">
           <div class="passo-status">
             {% if licao.concluida %}
             <i class="fas fa-check-circle text-success"></i>
@@ -161,7 +162,7 @@ style="background-color: #9216FD; color: white;">CRIAR CONTA</button>
             <i class="far fa-circle"></i>
             {% endif %}
           </div>
-          <div class="passo-info{{ loop.parent.index }}">
+          <div class="passo-info{{ indice_bloco }}">
             <h5>{{ licao.numero }}. {{ licao.titulo }}</h5>
             <small>{{ licao.resumo }}</small>
           </div>
