@@ -147,6 +147,12 @@ style="background-color: #9216FD; color: white;">CRIAR CONTA</button>
       <p class="text-secondary lead">{{ licao.resumo }}</p>
     </div>
 
+    {% if licao.video_url %}
+    <div class="ratio ratio-16x9 mb-4">
+      <iframe src="{{ licao.video_url }}" title="Vídeo: {{ licao.titulo }}" allowfullscreen></iframe>
+    </div>
+    {% endif %}
+
     <div class="licao-corpo p-4 rounded" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(60,201,228,0.2);">
       {% for paragrafo in licao.paragrafos %}
       <p class="text-light" style="line-height: 1.7;">{{ paragrafo|safe }}</p>
